@@ -2511,7 +2511,13 @@
     "field_period": "重設週期",
     "created_title": "金鑰已建立",
     "created_text": "把下面兩個值傳給要使用此金鑰的人或裝置，任何 OpenAI 相容應用都能使用。",
-    "created_lan_off": "其他裝置暫時無法連線到此代理。請在本頁點選「允許區域網路存取」，然後重新啟動代理。"
+    "created_lan_off": "其他裝置暫時無法連線到此代理。請在本頁點選「允許區域網路存取」，然後重新啟動代理。",
+    "lan_disable": "關閉區域網路存取",
+    "lan_disable_confirm_title": "關閉區域網路存取？",
+    "lan_disable_confirm_message": "重新啟動後代理只接受本機的連線。其他裝置將無法存取，直到你重新開啟。",
+    "lan_restart_needed": "已儲存。重新啟動服務後生效。",
+    "lan_restart_now": "立即重新啟動",
+    "lan_restarted": "服務已重新啟動，變更已生效。"
   },
   "desktop": {
     "start_service": "啟動服務",
@@ -2551,7 +2557,9 @@
         "title": "服務已停止",
         "text": "啟動 CLIProxyAPI 服務即可使用應用。關閉此視窗後服務仍會在背景執行。"
       }
-    }
+    },
+    "saved_to": "已儲存到 {{path}}",
+    "save_failed": "無法儲存檔案。"
   },
   "home": {
     "running": "執行中",
@@ -2606,7 +2614,11 @@
       "logs": "查看日誌",
       "logs_text": "服務日誌與請求紀錄。"
     },
-    "lan_footnote": "目前只有本機能存取代理。在「存取金鑰」中開啟區域網路存取即可分享。"
+    "lan_footnote": "目前只有本機能存取代理。在「存取金鑰」中開啟區域網路存取即可分享。",
+    "update": {
+      "title": "已安裝更新",
+      "text": "應用版本為 {{app}}，但服務仍在執行 {{service}}。重新啟動服務即可完成更新。"
+    }
   },
   "docs": {
     "copy": "複製",

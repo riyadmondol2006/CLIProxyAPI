@@ -19,6 +19,17 @@ export interface KeyLimitDraft {
   period: KeyLimitPeriod;
 }
 
+/** Whether a bind host accepts connections from other devices (mirrors the backend). */
+export const isLanHost = (host: string): boolean => {
+  const value = host
+    .trim()
+    .replace(/^\[|\]$/g, '')
+    .toLowerCase();
+  if (value === '' || value === '0.0.0.0' || value === '::') return true;
+  if (value === 'localhost' || value === '::1' || value.startsWith('127.')) return false;
+  return /^[0-9a-f:.]+$/.test(value);
+};
+
 /** Generates a client key with 160 bits of randomness. */
 export const generateApiKey = (
   fill: (bytes: Uint8Array<ArrayBuffer>) => void = (bytes) => {

@@ -6,6 +6,7 @@ import (
 	"context"
 	"embed"
 	"errors"
+	"fmt"
 	"io/fs"
 	"os"
 	"sync/atomic"
@@ -43,6 +44,26 @@ func main() {
 		Service: service,
 		Version: version,
 		Debug:   os.Getenv("CPA_DESKTOP_DEBUG") == "1",
+		SaveFile: func(name string, data []byte) (string, error) {
+			ctx := appCtx.Load()
+			if ctx == nil {
+				return "", errors.New("the window is not ready")
+			}
+			path, errDialog := runtime.SaveFileDialog(*ctx, runtime.SaveDialogOptions{
+				Title:                "Save file",
+				DefaultDirectory:     app.DownloadsDir(),
+				DefaultFilename:      name,
+				CanCreateDirectories: true,
+			})
+			if errDialog != nil || path == "" {
+				return "", errDialog
+			}
+			// The user picked this exact path in the dialog, so overwriting is intended.
+			if errWrite := os.WriteFile(path, data, 0o600); errWrite != nil {
+				return "", fmt.Errorf("save %s: %w", path, errWrite)
+			}
+			return path, nil
+		},
 		OpenURL: func(rawURL string) error {
 			ctx := appCtx.Load()
 			if ctx == nil {

@@ -139,6 +139,32 @@
   color: var(--error-color);
 }
 
+/* ---------- Update notice ---------- */
+
+.update {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px 20px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--primary-color) 40%, var(--border-color));
+  background: color-mix(in srgb, var(--primary-color) 8%, var(--bg-primary));
+
+  strong {
+    font-size: 14.5px;
+    color: var(--text-primary);
+  }
+
+  p {
+    margin: 4px 0 0;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+  }
+}
+
 /* ---------- Sections ---------- */
 
 .sectionHead {

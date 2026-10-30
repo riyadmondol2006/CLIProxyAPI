@@ -33,12 +33,14 @@ func (h *Handler) ResetAPIKeyLimitUsage(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "ok", "reset": reset})
 }
 
-// GetServerNetwork reports the listen address and the URLs other devices on the LAN can use.
+// GetServerNetwork reports the address the server is listening on, the URLs other devices on
+// the LAN can use, and whether a host or port change in the config is waiting for a restart.
 func (h *Handler) GetServerNetwork(c *gin.Context) {
 	cfg := h.configSnapshot()
-	host, port := "", 0
+	host, port := h.listenHost, h.listenPort
+	configuredHost, configuredPort := host, port
 	if cfg != nil {
-		host, port = strings.TrimSpace(cfg.Host), cfg.Port
+		configuredHost, configuredPort = strings.TrimSpace(cfg.Host), cfg.Port
 	}
 	scheme := "http"
 	if cfg != nil && cfg.TLS.Enable {
@@ -57,6 +59,10 @@ func (h *Handler) GetServerNetwork(c *gin.Context) {
 		"scheme":      scheme,
 		"lan-enabled": lanEnabled,
 		"lan-urls":    urls,
+		// The config's values, which apply after the next restart.
+		"configured-host":  configuredHost,
+		"configured-port":  configuredPort,
+		"restart-required": configuredHost != host || configuredPort != port,
 	})
 }
 

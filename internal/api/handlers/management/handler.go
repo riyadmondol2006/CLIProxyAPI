@@ -63,6 +63,10 @@ type Handler struct {
 	pluginReleases          pluginReleaseCache
 	siwcOAuthFactory        func(*config.Config) siwcOAuthService
 	siwcCommitMu            sync.Mutex
+	// listenHost and listenPort are the address the server bound at startup. Host and
+	// port changes in the config only take effect after a restart.
+	listenHost string
+	listenPort int
 }
 
 type configReloadSnapshot struct {
@@ -83,6 +87,9 @@ func NewHandler(cfg *config.Config, configFilePath string, manager *coreauth.Man
 		tokenStore:          sdkAuth.GetTokenStore(),
 		allowRemoteOverride: envSecret != "",
 		envSecret:           envSecret,
+	}
+	if cfg != nil {
+		h.listenHost, h.listenPort = strings.TrimSpace(cfg.Host), cfg.Port
 	}
 	h.startAttemptCleanup()
 	return h

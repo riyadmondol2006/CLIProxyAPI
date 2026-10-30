@@ -134,6 +134,8 @@ describe('access key API normalization', () => {
       scheme: 'http',
       lanEnabled: true,
       lanUrls: ['http://192.168.1.5:8317'],
+      configuredHost: '',
+      restartRequired: false,
     });
   });
 });

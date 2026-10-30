@@ -17,6 +17,7 @@ import { CopyButton } from '@/features/oauth/components/CopyButton';
 import { useSetupGuide } from '@/features/setup/useSetupGuide';
 import { buildEndpoints, maskApiKey } from '@/features/setup/snippets';
 import { useDesktopStatus } from '@/features/desktop/useDesktopStatus';
+import { needsServiceRestart } from '@/features/desktop/version';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { useAuthStore } from '@/stores';
 import { accessKeysApi, type ServerNetwork } from '@/services/api/accessKeys';
@@ -73,6 +74,8 @@ export function HomePage() {
   const clientKey = guide.clientKeys[0] ?? '';
   const accounts = (guide.authFileCount ?? 0) + (guide.providerKeyCount ?? 0);
   const running = desktop ? Boolean(desktopStatus.status?.reachable) : guide.connected;
+  const appVersion = desktopStatus.status?.appVersion ?? '';
+  const updatePending = desktop && running && needsServiceRestart(appVersion, serverVersion);
 
   const tiles: Tile[] = [
     {
@@ -223,6 +226,24 @@ export function HomePage() {
           </div>
         ) : null}
       </section>
+
+      {updatePending ? (
+        <section className={styles.update} role="status">
+          <div>
+            <strong>{t('home.update.title')}</strong>
+            <p>{t('home.update.text', { app: appVersion, service: serverVersion })}</p>
+          </div>
+          <Button
+            className={styles.iconButton}
+            onClick={() => void desktopStatus.run('restart')}
+            loading={pending === 'restart'}
+            disabled={pending !== null}
+          >
+            <IconRefreshCw size={15} />
+            {t('desktop.restart_service')}
+          </Button>
+        </section>
+      ) : null}
 
       {/* ---------- Connection ---------- */}
       <section className={styles.connect} aria-labelledby="home-connect">

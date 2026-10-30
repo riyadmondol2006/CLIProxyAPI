@@ -209,3 +209,59 @@ func TestUpstreamHostUsesLoopbackForWildcardBinds(t *testing.T) {
 		}
 	}
 }
+
+func TestSaveEndpointPassesSafeNameAndBody(t *testing.T) {
+	server, _ := newTestServer(t, nil)
+	var gotName string
+	var gotData []byte
+	server.SaveFile = func(name string, data []byte) (string, error) {
+		gotName, gotData = name, data
+		return "/home/u/Downloads/" + name, nil
+	}
+	req := httptest.NewRequest(http.MethodPost, "/app/save?name=../../etc/claude-auth.json", strings.NewReader(`{"k":1}`))
+	recorder := httptest.NewRecorder()
+	server.ServeHTTP(recorder, req)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("save: status %d %s", recorder.Code, recorder.Body.String())
+	}
+	if gotName != "claude-auth.json" || string(gotData) != `{"k":1}` {
+		t.Fatalf("unexpected save call: name=%q data=%q", gotName, gotData)
+	}
+	if !strings.Contains(recorder.Body.String(), `"cancelled":false`) {
+		t.Fatalf("unexpected response: %s", recorder.Body.String())
+	}
+
+	server.SaveFile = func(string, []byte) (string, error) { return "", nil }
+	recorder = httptest.NewRecorder()
+	server.ServeHTTP(recorder, httptest.NewRequest(http.MethodPost, "/app/save?name=x.log", strings.NewReader("x")))
+	if !strings.Contains(recorder.Body.String(), `"cancelled":true`) {
+		t.Fatalf("a cancelled dialog should report cancelled: %s", recorder.Body.String())
+	}
+}
+
+func TestWriteUniqueNeverOverwrites(t *testing.T) {
+	dir := t.TempDir()
+	first, errFirst := WriteUnique(dir, "app.log", []byte("one"))
+	second, errSecond := WriteUnique(dir, "app.log", []byte("two"))
+	if errFirst != nil || errSecond != nil {
+		t.Fatalf("write: %v %v", errFirst, errSecond)
+	}
+	if filepath.Base(first) != "app.log" || filepath.Base(second) != "app (1).log" {
+		t.Fatalf("unexpected names: %s, %s", first, second)
+	}
+	if data, _ := os.ReadFile(first); string(data) != "one" {
+		t.Fatal("first file was overwritten")
+	}
+	if info, _ := os.Stat(second); info.Mode().Perm() != 0o600 {
+		t.Fatalf("saved files must be private, got %o", info.Mode().Perm())
+	}
+}
+
+func TestSafeFileName(t *testing.T) {
+	cases := map[string]string{"../../x.json": "x.json", "a\\b\\c.txt": "c.txt", "": "download", "..": "download", "bad\x00name": "badname"}
+	for input, want := range cases {
+		if got := SafeFileName(input); got != want {
+			t.Errorf("SafeFileName(%q) = %q, want %q", input, got, want)
+		}
+	}
+}

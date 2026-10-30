@@ -18,10 +18,12 @@ import {
   type ServerNetwork,
 } from '@/services/api/accessKeys';
 import { getErrorMessage } from '@/utils/helpers';
+import { desktopApi, isDesktopApp } from '@/utils/desktop';
 import {
   buildRows,
   draftFromRow,
   generateApiKey,
+  isLanHost,
   parseTokenLimit,
   removeLimit,
   upsertLimit,
@@ -55,7 +57,7 @@ export function AccessKeysPage() {
   const [busy, setBusy] = useState(false);
   const [editor, setEditor] = useState<Editor | null>(null);
   const [created, setCreated] = useState<string | null>(null);
-  const [hostSaved, setHostSaved] = useState(false);
+  const [restarting, setRestarting] = useState(false);
 
   const load = useCallback(async () => {
     if (!connected) return;
@@ -206,10 +208,40 @@ export function AccessKeysPage() {
       cancelText: t('common.cancel'),
       variant: 'primary',
       onConfirm: async () => {
-        const ok = await mutate(() => accessKeysApi.setHost(''));
-        if (ok) setHostSaved(true);
+        await mutate(() => accessKeysApi.setHost(''));
       },
     });
+
+  const disableLan = () =>
+    showConfirmation({
+      title: t('access_keys.lan_disable_confirm_title'),
+      message: t('access_keys.lan_disable_confirm_message'),
+      confirmText: t('access_keys.lan_disable'),
+      cancelText: t('common.cancel'),
+      variant: 'danger',
+      onConfirm: async () => {
+        await mutate(() => accessKeysApi.setHost('127.0.0.1'));
+      },
+    });
+
+  /** Desktop app only: restart the service so a host change takes effect, then reload. */
+  const restartService = async () => {
+    setRestarting(true);
+    try {
+      await desktopApi.service('restart');
+      for (let attempt = 0; attempt < 30; attempt += 1) {
+        const status = await desktopApi.status().catch(() => null);
+        if (status?.reachable && status.tokenReady) break;
+        await new Promise((resolve) => window.setTimeout(resolve, 500));
+      }
+      await load();
+      showNotification(t('access_keys.lan_restarted'), 'success');
+    } catch (error) {
+      showNotification(getErrorMessage(error, t('access_keys.save_failed')), 'error');
+    } finally {
+      setRestarting(false);
+    }
+  };
 
   const periodLabel = (period: string) => t(`access_keys.periods.${period}`);
 
@@ -295,35 +327,54 @@ export function AccessKeysPage() {
             </span>
           ) : null}
         </div>
-        {network?.lanEnabled ? (
+        {network ? (
           <>
-            <p className={styles.cardText}>{t('access_keys.lan_on_text')}</p>
-            {network.lanUrls.length > 0 ? (
-              <div className={styles.urlList}>
-                {network.lanUrls.map((url) => (
-                  <div key={url} className={styles.urlRow}>
-                    <code>{`${url}/v1`}</code>
-                    <CopyButton value={`${url}/v1`} label={t('access_keys.copy_url')} />
+            {network.lanEnabled ? (
+              <>
+                <p className={styles.cardText}>{t('access_keys.lan_on_text')}</p>
+                {network.lanUrls.length > 0 ? (
+                  <div className={styles.urlList}>
+                    {network.lanUrls.map((url) => (
+                      <div key={url} className={styles.urlRow}>
+                        <code>{`${url}/v1`}</code>
+                        <CopyButton value={`${url}/v1`} label={t('access_keys.copy_url')} />
+                      </div>
+                    ))}
                   </div>
-                ))}
+                ) : (
+                  <p className={styles.cardText}>{t('access_keys.lan_no_address')}</p>
+                )}
+                <p className={styles.hint}>{t('access_keys.lan_firewall')}</p>
+              </>
+            ) : (
+              <p className={styles.cardText}>
+                {t('access_keys.lan_off_text', { host: network.host || '—' })}
+              </p>
+            )}
+            {network.restartRequired ? (
+              <div className={styles.notice}>
+                <span>
+                  {isDesktopApp()
+                    ? t('access_keys.lan_restart_needed')
+                    : t('access_keys.lan_restart')}
+                </span>
+                {isDesktopApp() ? (
+                  <Button size="sm" onClick={() => void restartService()} loading={restarting}>
+                    {t('access_keys.lan_restart_now')}
+                  </Button>
+                ) : null}
               </div>
             ) : (
-              <p className={styles.cardText}>{t('access_keys.lan_no_address')}</p>
-            )}
-            <p className={styles.hint}>{t('access_keys.lan_firewall')}</p>
-          </>
-        ) : network ? (
-          <>
-            <p className={styles.cardText}>
-              {t('access_keys.lan_off_text', { host: network.host || '—' })}
-            </p>
-            {hostSaved ? (
-              <p className={styles.notice}>{t('access_keys.lan_restart')}</p>
-            ) : (
               <div>
-                <Button variant="secondary" size="sm" onClick={allowLan} disabled={busy}>
-                  {t('access_keys.lan_enable')}
-                </Button>
+                {isLanHost(network.configuredHost) ? (
+                  <Button variant="secondary" size="sm" onClick={disableLan} disabled={busy}>
+                    {t('access_keys.lan_disable')}
+                  </Button>
+                ) : (
+                  <Button variant="secondary" size="sm" onClick={allowLan} disabled={busy}>
+                    {t('access_keys.lan_enable')}
+                  </Button>
+                )}
               </div>
             )}
           </>

@@ -12,6 +12,9 @@ import ru from '@/i18n/locales/ru.json';
 import ko from '@/i18n/locales/ko.json';
 import vi from '@/i18n/locales/vi.json';
 import { HomePage } from '@/features/home/HomePage';
+import { needsServiceRestart } from '@/features/desktop/version';
+import { isLanHost } from '@/features/accessKeys/logic';
+import { normalizeServerNetwork } from '@/services/api/accessKeys';
 import { normalizeApiBase } from '@/utils/connection';
 import { isDesktopApp, normalizeDesktopStatus, openAuthUrlInBrowser } from '@/utils/desktop';
 import {
@@ -54,6 +57,36 @@ describe('desktop integration helpers', () => {
     } finally {
       globals.window = previous;
     }
+  });
+
+  test('asks for a restart only when real versions differ', () => {
+    expect(needsServiceRestart('0.20261031.7', '0.20261030.3')).toBe(true);
+    expect(needsServiceRestart('v8.2.0', '8.2.0')).toBe(false);
+    expect(needsServiceRestart('dev', '0.20261030.3')).toBe(false);
+    expect(needsServiceRestart('0.20261030.3', null)).toBe(false);
+  });
+
+  test('recognizes bind hosts that accept LAN connections', () => {
+    for (const host of ['', '0.0.0.0', '::', '[::]', '192.168.1.5'])
+      expect(isLanHost(host)).toBe(true);
+    for (const host of ['127.0.0.1', 'localhost', '::1', '127.0.1.1'])
+      expect(isLanHost(host)).toBe(false);
+  });
+
+  test('reads the pending host change from the network response', () => {
+    const network = normalizeServerNetwork({
+      host: '127.0.0.1',
+      port: 8317,
+      'lan-enabled': false,
+      'lan-urls': [],
+      'configured-host': '',
+      'restart-required': true,
+    });
+    expect(network.lanEnabled).toBe(false);
+    expect(network.configuredHost).toBe('');
+    expect(network.restartRequired).toBe(true);
+    // Older backends without the new fields: no restart is assumed.
+    expect(normalizeServerNetwork({ host: '', 'lan-enabled': true }).restartRequired).toBe(false);
   });
 
   test('normalizes the app status response', () => {

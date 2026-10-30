@@ -2485,7 +2485,13 @@
     "field_period": "Resets",
     "created_title": "Key created",
     "created_text": "Send these two values to the person or device that will use the key. They work in any OpenAI-compatible app.",
-    "created_lan_off": "Other devices can't reach this proxy yet. Use Allow LAN access on this page, then restart the proxy."
+    "created_lan_off": "Other devices can't reach this proxy yet. Use Allow LAN access on this page, then restart the proxy.",
+    "lan_disable": "Turn off LAN access",
+    "lan_disable_confirm_title": "Turn off LAN access?",
+    "lan_disable_confirm_message": "After a restart the proxy only accepts connections from this computer. Other devices lose access until you turn it on again.",
+    "lan_restart_needed": "Saved. Restart the service to apply the change.",
+    "lan_restart_now": "Restart now",
+    "lan_restarted": "Service restarted. The change is active."
   },
   "desktop": {
     "start_service": "Start service",
@@ -2525,7 +2531,9 @@
         "title": "The service is stopped",
         "text": "Start the CLIProxyAPI service to use the app. It keeps running in the background when you close this window."
       }
-    }
+    },
+    "saved_to": "Saved to {{path}}",
+    "save_failed": "Couldn't save the file."
   },
   "home": {
     "running": "Running",
@@ -2580,7 +2588,11 @@
       "logs": "View logs",
       "logs_text": "Service log and request history."
     },
-    "lan_footnote": "Only this computer can reach the proxy. Allow LAN access under Access keys to share it."
+    "lan_footnote": "Only this computer can reach the proxy. Allow LAN access under Access keys to share it.",
+    "update": {
+      "title": "Update installed",
+      "text": "This app is version {{app}}, but the service is still running {{service}}. Restart the service to finish updating."
+    }
   },
   "docs": {
     "copy": "Copy",

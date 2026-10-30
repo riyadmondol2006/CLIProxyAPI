@@ -41,6 +41,7 @@ Stop the service first so the two don't fight over the port.
 
 ## Updating and removing
 
-Install a newer `.rpm` or `.deb` over the old one; the service restarts on the next login or
-when you press **Restart service**. Removing the package keeps your config and accounts in
-your home folder.
+Install a newer `.rpm` or `.deb` over the old one. The running service keeps using the old
+version until it restarts, so the app shows **Update installed** on **Home** with a
+**Restart service** button. Removing the package keeps your config and accounts in your home
+folder.

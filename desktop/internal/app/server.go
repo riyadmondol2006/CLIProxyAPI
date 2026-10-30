@@ -27,6 +27,9 @@ type Server struct {
 	Version string
 	// OpenURL opens a link in the user's browser.
 	OpenURL func(rawURL string) error
+	// SaveFile stores a file the UI downloads and returns where it went, or "" when the
+	// user cancels. WebKitGTK in Wails cannot handle browser downloads itself.
+	SaveFile func(name string, data []byte) (string, error)
 	// Debug logs every request the UI makes (enable with CPA_DESKTOP_DEBUG=1).
 	Debug bool
 }
@@ -52,6 +55,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.handleService(w, r)
 	case r.URL.Path == "/app/open":
 		s.handleOpen(w, r)
+	case r.URL.Path == "/app/save":
+		s.handleSave(w, r)
 	case strings.HasPrefix(r.URL.Path, "/app/"):
 		writeJSON(w, http.StatusNotFound, map[string]string{"error": "not found"})
 	default:
@@ -142,6 +147,32 @@ func (s *Server) handleOpen(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+}
+
+func (s *Server) handleSave(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "use POST"})
+		return
+	}
+	if s.SaveFile == nil {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "saving files is unavailable"})
+		return
+	}
+	data, errRead := io.ReadAll(io.LimitReader(r.Body, maxSaveBytes+1))
+	if errRead != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "could not read the file"})
+		return
+	}
+	if len(data) > maxSaveBytes {
+		writeJSON(w, http.StatusRequestEntityTooLarge, map[string]string{"error": "file is too large"})
+		return
+	}
+	path, errSave := s.SaveFile(SafeFileName(r.URL.Query().Get("name")), data)
+	if errSave != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": errSave.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"path": path, "cancelled": path == ""})
 }
 
 func (s *Server) forward(w http.ResponseWriter, r *http.Request) {

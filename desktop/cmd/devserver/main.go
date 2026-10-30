@@ -23,6 +23,7 @@ func main() {
 	dist := flag.String("dist", "frontend/dist", "built UI directory")
 	config := flag.String("config", "", "config path (default: the app's config path)")
 	token := flag.String("token-file", "", "local management token path (default: the app's token path)")
+	saveDir := flag.String("save-dir", app.DownloadsDir(), "where downloads from the UI are saved")
 	flag.Parse()
 
 	paths := app.DefaultPaths()
@@ -37,6 +38,8 @@ func main() {
 		Service: app.NewSystemdUser(),
 		Version: "dev",
 		OpenURL: func(rawURL string) error { return exec.Command("xdg-open", rawURL).Start() },
+		// No native dialog here: save straight into the save directory.
+		SaveFile: func(name string, data []byte) (string, error) { return app.WriteUnique(*saveDir, name, data) },
 	}
 
 	index, errIndex := os.ReadFile(filepath.Join(*dist, "index.html"))

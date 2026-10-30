@@ -79,6 +79,15 @@ export const desktopApi = {
     return normalizeDesktopStatus(await requestJSON('/app/status'));
   },
 
+  /** Asks the app to save a file; resolves to the saved path, or '' when cancelled. */
+  async save(filename: string, blob: Blob): Promise<string> {
+    const body = await requestJSON(`/app/save?name=${encodeURIComponent(filename)}`, {
+      method: 'POST',
+      body: blob,
+    });
+    return isRecord(body) && typeof body.path === 'string' ? body.path : '';
+  },
+
   async service(action: DesktopServiceAction): Promise<DesktopStatus> {
     return normalizeDesktopStatus(await requestJSON(`/app/service/${action}`, { method: 'POST' }));
   },

@@ -35,6 +35,9 @@ export interface ServerNetwork {
   scheme: string;
   lanEnabled: boolean;
   lanUrls: string[];
+  /** Host from the config; differs from `host` until the service restarts. */
+  configuredHost: string;
+  restartRequired: boolean;
 }
 
 const toNumber = (value: unknown): number => {
@@ -112,6 +115,8 @@ export const normalizeServerNetwork = (input: unknown): ServerNetwork => {
     lanUrls: Array.isArray(record['lan-urls'])
       ? record['lan-urls'].map((url) => String(url)).filter(Boolean)
       : [],
+    configuredHost: String(record['configured-host'] ?? record.host ?? ''),
+    restartRequired: record['restart-required'] === true,
   };
 };
 

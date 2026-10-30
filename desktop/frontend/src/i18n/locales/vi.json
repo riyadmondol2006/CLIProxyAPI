@@ -2491,7 +2491,13 @@
     "field_period": "Đặt lại",
     "created_title": "Đã tạo khóa",
     "created_text": "Gửi hai giá trị này cho người hoặc thiết bị sẽ dùng khóa. Chúng hoạt động với mọi ứng dụng tương thích OpenAI.",
-    "created_lan_off": "Thiết bị khác chưa thể truy cập proxy này. Nhấn Cho phép truy cập LAN trên trang này, rồi khởi động lại proxy."
+    "created_lan_off": "Thiết bị khác chưa thể truy cập proxy này. Nhấn Cho phép truy cập LAN trên trang này, rồi khởi động lại proxy.",
+    "lan_disable": "Tắt truy cập LAN",
+    "lan_disable_confirm_title": "Tắt truy cập LAN?",
+    "lan_disable_confirm_message": "Sau khi khởi động lại, proxy chỉ nhận kết nối từ máy này. Thiết bị khác sẽ mất quyền truy cập cho đến khi bạn bật lại.",
+    "lan_restart_needed": "Đã lưu. Khởi động lại dịch vụ để áp dụng thay đổi.",
+    "lan_restart_now": "Khởi động lại ngay",
+    "lan_restarted": "Đã khởi động lại dịch vụ. Thay đổi đã có hiệu lực."
   },
   "desktop": {
     "start_service": "Khởi động dịch vụ",
@@ -2531,7 +2537,9 @@
         "title": "Dịch vụ đang dừng",
         "text": "Khởi động dịch vụ CLIProxyAPI để dùng ứng dụng. Dịch vụ vẫn chạy nền khi bạn đóng cửa sổ này."
       }
-    }
+    },
+    "saved_to": "Đã lưu vào {{path}}",
+    "save_failed": "Không lưu được tệp."
   },
   "home": {
     "running": "Đang chạy",
@@ -2586,7 +2594,11 @@
       "logs": "Xem nhật ký",
       "logs_text": "Nhật ký dịch vụ và lịch sử yêu cầu."
     },
-    "lan_footnote": "Hiện chỉ máy này truy cập được proxy. Bật truy cập LAN trong Khóa truy cập để chia sẻ."
+    "lan_footnote": "Hiện chỉ máy này truy cập được proxy. Bật truy cập LAN trong Khóa truy cập để chia sẻ.",
+    "update": {
+      "title": "Đã cài bản cập nhật",
+      "text": "Ứng dụng là phiên bản {{app}}, nhưng dịch vụ vẫn đang chạy {{service}}. Khởi động lại dịch vụ để hoàn tất cập nhật."
+    }
   },
   "docs": {
     "copy": "Sao chép",

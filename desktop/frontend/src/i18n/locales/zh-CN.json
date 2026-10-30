@@ -2483,7 +2483,13 @@
     "field_period": "重置周期",
     "created_title": "密钥已创建",
     "created_text": "把下面两个值发给要使用该密钥的人或设备，任何 OpenAI 兼容应用都能使用。",
-    "created_lan_off": "其他设备暂时无法访问此代理。请在本页点击“允许局域网访问”，然后重启代理。"
+    "created_lan_off": "其他设备暂时无法访问此代理。请在本页点击“允许局域网访问”，然后重启代理。",
+    "lan_disable": "关闭局域网访问",
+    "lan_disable_confirm_title": "关闭局域网访问？",
+    "lan_disable_confirm_message": "重启后代理只接受本机的连接。其他设备将无法访问，直到你重新开启。",
+    "lan_restart_needed": "已保存。重启服务后生效。",
+    "lan_restart_now": "立即重启",
+    "lan_restarted": "服务已重启，更改已生效。"
   },
   "desktop": {
     "start_service": "启动服务",
@@ -2523,7 +2529,9 @@
         "title": "服务已停止",
         "text": "启动 CLIProxyAPI 服务即可使用应用。关闭此窗口后服务仍会在后台运行。"
       }
-    }
+    },
+    "saved_to": "已保存到 {{path}}",
+    "save_failed": "无法保存文件。"
   },
   "home": {
     "running": "运行中",
@@ -2578,7 +2586,11 @@
       "logs": "查看日志",
       "logs_text": "服务日志与请求记录。"
     },
-    "lan_footnote": "目前只有本机能访问代理。在“访问密钥”中开启局域网访问即可共享。"
+    "lan_footnote": "目前只有本机能访问代理。在“访问密钥”中开启局域网访问即可共享。",
+    "update": {
+      "title": "已安装更新",
+      "text": "应用版本为 {{app}}，但服务仍在运行 {{service}}。重启服务即可完成更新。"
+    }
   },
   "docs": {
     "copy": "复制",
