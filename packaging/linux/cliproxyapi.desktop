@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=CLIProxyAPI
+GenericName=AI Gateway
+Comment=Manage your local AI API gateway
+Exec=cliproxyapi-desktop
+Icon=cliproxyapi
+Terminal=false
+Categories=Development;
+Keywords=AI;API;Proxy;Gateway;Claude;Codex;Gemini;OpenAI;
+StartupWMClass=cliproxyapi
+StartupNotify=true

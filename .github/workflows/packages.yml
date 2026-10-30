@@ -1,0 +1,163 @@
+name: packages
+
+# Builds the Linux .deb and .rpm packages (proxy + desktop app + systemd user service)
+# on every push. Packages are attached to the workflow run; pushes to main also refresh
+# the "latest-build" pre-release, and v* tags attach the packages to that release.
+
+on:
+  push:
+    branches:
+      - '**'
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: packages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: build linux-${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-22.04
+          - arch: arm64
+            runner: ubuntu-22.04-arm
+    # Ubuntu 22.04 keeps the glibc baseline low enough for older distributions.
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: |
+            go.sum
+            desktop/go.sum
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.3'
+
+      - name: Install WebKitGTK build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends build-essential pkg-config libgtk-3-dev libwebkit2gtk-4.1-dev
+
+      - name: Compute version
+        id: version
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            version="${GITHUB_REF_NAME#v}"
+          else
+            version="0.$(date -u +%Y%m%d).${GITHUB_RUN_NUMBER}"
+          fi
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "Package version: ${version}"
+
+      - name: Refresh model catalogs
+        run: bash .github/scripts/refresh-model-catalogs.sh
+
+      - name: Test desktop backend
+        working-directory: desktop
+        run: go test ./internal/...
+
+      - name: Test and build the app UI
+        working-directory: desktop/frontend
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          bun install --frozen-lockfile
+          bun run test
+          bun run build
+
+      - name: Build proxy
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          mkdir -p dist
+          CGO_ENABLED=1 go build -trimpath \
+            -ldflags "-s -w -X main.Version=${VERSION} -X main.Commit=$(git rev-parse --short HEAD) -X main.BuildDate=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            -o dist/cli-proxy-api ./cmd/server
+
+      - name: Build desktop app
+        working-directory: desktop
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          CGO_ENABLED=1 go build -trimpath -tags desktop,production,webkit2_41 \
+            -ldflags "-s -w -X main.version=${VERSION}" \
+            -o ../dist/cliproxyapi-desktop .
+
+      - name: Build .deb and .rpm
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          NFPM_ARCH: ${{ matrix.arch }}
+        run: |
+          go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.43.0
+          for packager in deb rpm; do
+            "$(go env GOPATH)/bin/nfpm" pkg --packager "$packager" --config packaging/nfpm.yaml --target dist/
+          done
+          ls -la dist
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: cliproxyapi-linux-${{ matrix.arch }}
+          path: |
+            dist/*.deb
+            dist/*.rpm
+          if-no-files-found: error
+
+  publish:
+    name: publish packages
+    needs: build
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Download packages
+        uses: actions/download-artifact@v4
+        with:
+          path: packages
+          merge-multiple: true
+
+      - name: Refresh the latest-build pre-release
+        if: github.ref == 'refs/heads/main'
+        run: |
+          gh release delete latest-build --cleanup-tag --yes || true
+          gh release create latest-build packages/* \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --title "Latest build (main)" \
+            --notes "Linux packages built from ${GITHUB_SHA::7} on main. Install with \`sudo dnf install ./cliproxyapi-*.rpm\` or \`sudo apt install ./cliproxyapi_*.deb\`, then open CLIProxyAPI from your app menu."
+
+      - name: Attach packages to the tag release
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          # release.yaml creates the release for tags; wait for it before uploading.
+          for _ in $(seq 1 30); do
+            gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 && break
+            sleep 20
+          done
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --generate-notes
+          gh release upload "$GITHUB_REF_NAME" packages/* --clobber

@@ -1,0 +1,21 @@
+# CLIProxyAPI as a systemd user service. The desktop app (cliproxyapi-desktop) creates the
+# config on first launch and enables this unit; you can also manage it yourself:
+#   systemctl --user enable --now cliproxyapi
+#   journalctl --user -u cliproxyapi -f
+[Unit]
+Description=CLIProxyAPI AI gateway
+Documentation=https://github.com/riyadmondol2006/CLIProxyAPI
+# Wait for the config the desktop app writes on first launch instead of failing.
+ConditionPathExists=%E/cliproxyapi/config.yaml
+
+[Service]
+Type=simple
+WorkingDirectory=%E/cliproxyapi
+# --local-token-file lets the desktop app manage the proxy without a password; the token
+# is accepted only from this computer and is replaced on every start.
+ExecStart=/usr/bin/cli-proxy-api --config %E/cliproxyapi/config.yaml --local-token-file %t/cliproxyapi/management-token
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target

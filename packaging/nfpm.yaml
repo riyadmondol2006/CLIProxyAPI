@@ -1,0 +1,65 @@
+# Linux packages for CLIProxyAPI: the proxy, the desktop app, and a systemd user service.
+# Built by .github/workflows/packages.yml:  nfpm pkg --packager deb|rpm --config packaging/nfpm.yaml
+name: cliproxyapi
+arch: ${NFPM_ARCH}
+platform: linux
+version: ${VERSION}
+version_schema: none
+release: "1"
+section: net
+priority: optional
+maintainer: riyadmondol2006 <riyadmondol2006@users.noreply.github.com>
+description: |
+  Local AI API gateway with a desktop app.
+  Turns your Claude, Codex, Gemini, Kimi, xAI and other accounts and API keys into one
+  OpenAI/Anthropic/Gemini-compatible API. Includes the cli-proxy-api service, a systemd
+  user unit, and the CLIProxyAPI desktop app with built-in docs.
+vendor: riyadmondol2006
+homepage: https://github.com/riyadmondol2006/CLIProxyAPI
+license: MIT
+
+contents:
+  - src: dist/cli-proxy-api
+    dst: /usr/bin/cli-proxy-api
+    file_info: { mode: 0755 }
+  - src: dist/cliproxyapi-desktop
+    dst: /usr/bin/cliproxyapi-desktop
+    file_info: { mode: 0755 }
+  - src: packaging/linux/cliproxyapi.service
+    dst: /usr/lib/systemd/user/cliproxyapi.service
+    file_info: { mode: 0644 }
+  - src: packaging/linux/cliproxyapi.desktop
+    dst: /usr/share/applications/cliproxyapi.desktop
+    file_info: { mode: 0644 }
+  - src: packaging/linux/cliproxyapi.svg
+    dst: /usr/share/icons/hicolor/scalable/apps/cliproxyapi.svg
+    file_info: { mode: 0644 }
+  - src: packaging/linux/cliproxyapi.png
+    dst: /usr/share/icons/hicolor/256x256/apps/cliproxyapi.png
+    file_info: { mode: 0644 }
+  - src: packaging/linux/cliproxyapi-512.png
+    dst: /usr/share/icons/hicolor/512x512/apps/cliproxyapi.png
+    file_info: { mode: 0644 }
+  - src: config.example.yaml
+    dst: /usr/share/cliproxyapi/config.example.yaml
+    file_info: { mode: 0644 }
+  - src: LICENSE
+    dst: /usr/share/doc/cliproxyapi/LICENSE
+    file_info: { mode: 0644 }
+  - src: README.md
+    dst: /usr/share/doc/cliproxyapi/README.md
+    file_info: { mode: 0644 }
+
+scripts:
+  postinstall: packaging/linux/scripts/postinstall.sh
+  postremove: packaging/linux/scripts/postremove.sh
+
+overrides:
+  deb:
+    depends:
+      - libwebkit2gtk-4.1-0
+      - libgtk-3-0
+  rpm:
+    depends:
+      - webkit2gtk4.1
+      - gtk3
