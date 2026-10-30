@@ -2509,7 +2509,25 @@
     "lan_disable_confirm_message": "Sau khi khởi động lại, proxy chỉ nhận kết nối từ máy này. Thiết bị khác sẽ mất quyền truy cập cho đến khi bạn bật lại.",
     "lan_restart_needed": "Đã lưu. Khởi động lại dịch vụ để áp dụng thay đổi.",
     "lan_restart_now": "Khởi động lại ngay",
-    "lan_restarted": "Đã khởi động lại dịch vụ. Thay đổi đã có hiệu lực."
+    "lan_restarted": "Đã khởi động lại dịch vụ. Thay đổi đã có hiệu lực.",
+    "history": {
+      "title": "Lịch sử sử dụng",
+      "subtitle": "Token mỗi ngày trong {{days}} ngày gần nhất, theo ngày địa phương của proxy.",
+      "filter_label": "Xem mức dùng của",
+      "all_keys": "Tất cả khóa",
+      "empty": "Không có mức dùng nào trong {{days}} ngày gần nhất.",
+      "unavailable": "Không tải được lịch sử sử dụng. Hãy cập nhật proxy lên phiên bản mới nhất để xem.",
+      "chart_summary": "Token theo ngày trong {{days}} ngày: {{tokens}} token.",
+      "chart_keys": "Dùng các phím mũi tên để xem lần lượt từng ngày.",
+      "tokens": "Token",
+      "requests": "Yêu cầu",
+      "totals_label": "Tổng theo khóa",
+      "key": "Khóa",
+      "today": "Hôm nay",
+      "last_7_days": "7 ngày",
+      "last_30_days": "30 ngày",
+      "requests_short": "{{value}} yêu cầu"
+    }
   },
   "desktop": {
     "start_service": "Khởi động dịch vụ",
@@ -2543,7 +2561,7 @@
       },
       "failed": {
         "title": "Dịch vụ đã dừng do lỗi",
-        "text": "Xem nhật ký bằng lệnh bên dưới, rồi khởi động lại."
+        "text": "Xem nguyên nhân lỗi bên dưới, rồi khởi động lại."
       },
       "stopped": {
         "title": "Dịch vụ đang dừng",
@@ -2551,7 +2569,66 @@
       }
     },
     "saved_to": "Đã lưu vào {{path}}",
-    "save_failed": "Không lưu được tệp."
+    "save_failed": "Không lưu được tệp.",
+    "diagnostics": {
+      "title": "Chẩn đoán dịch vụ",
+      "loading": "Đang kiểm tra chuyện gì đã xảy ra…",
+      "load_failed": "Không tải được thông tin dịch vụ.",
+      "unavailable": "Hệ thống này không cung cấp thông tin dịch vụ.",
+      "refresh": "Làm mới",
+      "summary": {
+        "running": "Đang chạy",
+        "running_at": "Đang chạy từ {{time}}",
+        "exited": "Đã thoát với mã {{status}}",
+        "exited_at": "Đã thoát với mã {{status}} lúc {{time}}",
+        "exited_ok": "Đã thoát",
+        "exited_ok_at": "Đã thoát lúc {{time}}",
+        "killed": "Bị dừng bởi tín hiệu {{signal}}",
+        "killed_at": "Bị dừng bởi tín hiệu {{signal}} lúc {{time}}",
+        "dumped": "Bị sập với tín hiệu {{signal}}",
+        "dumped_at": "Bị sập với tín hiệu {{signal}} lúc {{time}}",
+        "not_run": "Chưa chạy kể từ khi bạn đăng nhập",
+        "restarts_one": "đã khởi động lại {{count}} lần",
+        "restarts_other": "đã khởi động lại {{count}} lần"
+      },
+      "hints": {
+        "port_in_use": {
+          "title": "Cổng {{port}} đang được dùng",
+          "fix": "Một chương trình khác đang dùng cổng này, có thể là một bản CLIProxyAPI được chạy bên ngoài ứng dụng. Hãy đóng chương trình đó hoặc đổi server.port trong tệp cấu hình, rồi khởi động lại dịch vụ."
+        },
+        "address_unavailable": {
+          "title": "Dịch vụ không thể lắng nghe trên {{address}}",
+          "fix": "Host trong cấu hình không phải là địa chỉ của máy này (địa chỉ mạng có thể đã thay đổi), hoặc cổng cần quyền quản trị. Hãy đặt server.host thành \"127.0.0.1\" (hoặc \"\" để truy cập qua mạng LAN) và dùng cổng trên 1024, ví dụ 8317."
+        },
+        "config_invalid": {
+          "title": "Tệp cấu hình có lỗi",
+          "fix": "Mở tệp cấu hình, sửa lỗi hiển thị bên dưới, rồi khởi động lại dịch vụ.",
+          "fix_line": "Mở tệp cấu hình, sửa dòng {{line}} (xem bên dưới), rồi khởi động lại dịch vụ."
+        },
+        "permission_denied": {
+          "title": "Không có quyền truy cập",
+          "fix": "Dịch vụ không mở được tệp hoặc thư mục cần thiết. Hãy đảm bảo nó thuộc về người dùng của bạn và đọc được (ví dụ dùng chown hoặc chmod), rồi khởi động lại dịch vụ."
+        },
+        "token_not_written": {
+          "title": "Dịch vụ không tạo được token truy cập cho ứng dụng",
+          "fix": "Token được ghi trong $XDG_RUNTIME_DIR/cliproxyapi. Hãy đảm bảo người dùng của bạn có quyền ghi vào thư mục đó, rồi khởi động lại dịch vụ."
+        },
+        "program_missing": {
+          "title": "Không khởi chạy được chương trình proxy",
+          "fix": "/usr/bin/cli-proxy-api bị thiếu hoặc không chạy được. Hãy cài lại gói cliproxyapi."
+        },
+        "crash_loop": {
+          "title": "systemd đã ngừng thử lại",
+          "fix": "Dịch vụ lỗi nhiều lần liên tiếp. Hãy khắc phục vấn đề ở trên, đợi vài giây, rồi khởi động lại."
+        }
+      },
+      "log_title": "Nhật ký dịch vụ",
+      "log_redacted": "Khóa và token đã được ẩn.",
+      "log_truncated": "Đang hiển thị các dòng mới nhất. Khóa và token đã được ẩn.",
+      "log_empty": "Nhật ký trống.",
+      "log_command": "Ứng dụng không đọc được nhật ký dịch vụ ở đây. Hãy chạy lệnh này trong terminal:",
+      "copy_log": "Sao chép nhật ký"
+    }
   },
   "home": {
     "running": "Đang chạy",

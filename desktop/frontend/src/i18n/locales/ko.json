@@ -2503,7 +2503,25 @@
     "lan_disable_confirm_message": "다시 시작하면 프록시는 이 컴퓨터의 연결만 받습니다. 다시 켤 때까지 다른 기기는 접근할 수 없습니다.",
     "lan_restart_needed": "저장했습니다. 변경 사항을 적용하려면 서비스를 다시 시작하세요.",
     "lan_restart_now": "지금 다시 시작",
-    "lan_restarted": "서비스를 다시 시작했습니다. 변경 사항이 적용되었습니다."
+    "lan_restarted": "서비스를 다시 시작했습니다. 변경 사항이 적용되었습니다.",
+    "history": {
+      "title": "사용 기록",
+      "subtitle": "최근 {{days}}일 동안의 일별 토큰 사용량입니다. 날짜는 프록시의 현지 시간 기준입니다.",
+      "filter_label": "사용량 보기",
+      "all_keys": "모든 키",
+      "empty": "최근 {{days}}일 동안 사용 기록이 없습니다.",
+      "unavailable": "사용 기록을 불러오지 못했습니다. 확인하려면 프록시를 최신 버전으로 업데이트하세요.",
+      "chart_summary": "{{days}}일간 일별 토큰: 토큰 {{tokens}}.",
+      "chart_keys": "화살표 키로 날짜를 하나씩 확인할 수 있습니다.",
+      "tokens": "토큰",
+      "requests": "요청",
+      "totals_label": "키별 합계",
+      "key": "키",
+      "today": "오늘",
+      "last_7_days": "7일",
+      "last_30_days": "30일",
+      "requests_short": "요청 {{value}}회"
+    }
   },
   "desktop": {
     "start_service": "서비스 시작",
@@ -2537,7 +2555,7 @@
       },
       "failed": {
         "title": "서비스가 오류로 중지됨",
-        "text": "아래 명령으로 로그를 확인한 뒤 다시 시작하세요."
+        "text": "아래에서 무엇이 잘못됐는지 확인한 뒤 다시 시작하세요."
       },
       "stopped": {
         "title": "서비스가 중지됨",
@@ -2545,7 +2563,66 @@
       }
     },
     "saved_to": "{{path}}에 저장했습니다",
-    "save_failed": "파일을 저장하지 못했습니다."
+    "save_failed": "파일을 저장하지 못했습니다.",
+    "diagnostics": {
+      "title": "서비스 진단",
+      "loading": "무슨 일이 있었는지 확인하는 중…",
+      "load_failed": "서비스 정보를 불러오지 못했습니다.",
+      "unavailable": "이 시스템에서는 서비스 정보를 확인할 수 없습니다.",
+      "refresh": "새로 고침",
+      "summary": {
+        "running": "실행 중",
+        "running_at": "{{time}}부터 실행 중",
+        "exited": "상태 {{status}}(으)로 종료됨",
+        "exited_at": "{{time}}에 상태 {{status}}(으)로 종료됨",
+        "exited_ok": "종료됨",
+        "exited_ok_at": "{{time}}에 종료됨",
+        "killed": "신호 {{signal}}(으)로 중지됨",
+        "killed_at": "{{time}}에 신호 {{signal}}(으)로 중지됨",
+        "dumped": "신호 {{signal}}(으)로 비정상 종료됨",
+        "dumped_at": "{{time}}에 신호 {{signal}}(으)로 비정상 종료됨",
+        "not_run": "로그인한 뒤 아직 실행되지 않음",
+        "restarts_one": "{{count}}번 다시 시작됨",
+        "restarts_other": "{{count}}번 다시 시작됨"
+      },
+      "hints": {
+        "port_in_use": {
+          "title": "포트 {{port}}이(가) 이미 사용 중입니다",
+          "fix": "다른 프로그램이 이 포트를 쓰고 있습니다. 앱 밖에서 실행한 CLIProxyAPI일 수 있습니다. 그 프로그램을 닫거나 설정 파일의 server.port를 바꾼 뒤 서비스를 다시 시작하세요."
+        },
+        "address_unavailable": {
+          "title": "서비스가 {{address}}에서 연결을 받을 수 없습니다",
+          "fix": "설정의 host가 이 컴퓨터의 주소가 아니거나(네트워크 주소가 바뀌었을 수 있음) 포트에 관리자 권한이 필요합니다. server.host를 \"127.0.0.1\"(LAN 접근은 \"\")로 설정하고 8317처럼 1024보다 큰 포트를 사용하세요."
+        },
+        "config_invalid": {
+          "title": "설정 파일에 오류가 있습니다",
+          "fix": "설정 파일을 열어 아래에 표시된 문제를 고친 뒤 서비스를 다시 시작하세요.",
+          "fix_line": "설정 파일을 열어 {{line}}번째 줄(아래 참고)을 고친 뒤 서비스를 다시 시작하세요."
+        },
+        "permission_denied": {
+          "title": "권한이 거부되었습니다",
+          "fix": "서비스가 필요한 파일이나 폴더를 열지 못했습니다. 내 사용자 소유이고 읽을 수 있는지 확인한 뒤(예: chown 또는 chmod) 서비스를 다시 시작하세요."
+        },
+        "token_not_written": {
+          "title": "서비스가 앱용 액세스 토큰을 만들지 못했습니다",
+          "fix": "토큰은 $XDG_RUNTIME_DIR/cliproxyapi 아래에 저장됩니다. 내 사용자가 이 폴더에 쓸 수 있는지 확인한 뒤 서비스를 다시 시작하세요."
+        },
+        "program_missing": {
+          "title": "프록시 프로그램을 시작하지 못했습니다",
+          "fix": "/usr/bin/cli-proxy-api 파일이 없거나 실행할 수 없습니다. cliproxyapi 패키지를 다시 설치하세요."
+        },
+        "crash_loop": {
+          "title": "systemd가 재시도를 멈췄습니다",
+          "fix": "서비스가 여러 번 연속으로 실패했습니다. 위의 문제를 해결하고 몇 초 기다린 뒤 다시 시작하세요."
+        }
+      },
+      "log_title": "서비스 로그",
+      "log_redacted": "키와 토큰은 가려져 있습니다.",
+      "log_truncated": "최근 줄만 표시합니다. 키와 토큰은 가려져 있습니다.",
+      "log_empty": "로그가 비어 있습니다.",
+      "log_command": "앱이 여기서 서비스 로그를 읽을 수 없습니다. 터미널에서 다음을 실행하세요:",
+      "copy_log": "로그 복사"
+    }
   },
   "home": {
     "running": "실행 중",

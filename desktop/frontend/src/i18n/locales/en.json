@@ -2503,7 +2503,25 @@
     "lan_disable_confirm_message": "After a restart the proxy only accepts connections from this computer. Other devices lose access until you turn it on again.",
     "lan_restart_needed": "Saved. Restart the service to apply the change.",
     "lan_restart_now": "Restart now",
-    "lan_restarted": "Service restarted. The change is active."
+    "lan_restarted": "Service restarted. The change is active.",
+    "history": {
+      "title": "Usage history",
+      "subtitle": "Tokens per day over the last {{days}} days, by the proxy's local date.",
+      "filter_label": "Show usage for",
+      "all_keys": "All keys",
+      "empty": "No usage in the last {{days}} days.",
+      "unavailable": "Couldn't load usage history. Update the proxy to the latest version to see it.",
+      "chart_summary": "Daily tokens over {{days}} days: {{tokens}} tokens.",
+      "chart_keys": "Use the arrow keys to step through the days.",
+      "tokens": "Tokens",
+      "requests": "Requests",
+      "totals_label": "Totals by key",
+      "key": "Key",
+      "today": "Today",
+      "last_7_days": "7 days",
+      "last_30_days": "30 days",
+      "requests_short": "{{value}} req."
+    }
   },
   "desktop": {
     "start_service": "Start service",
@@ -2537,7 +2555,7 @@
       },
       "failed": {
         "title": "The service stopped with an error",
-        "text": "Check its log with the command below, then start it again."
+        "text": "See what went wrong below, then start it again."
       },
       "stopped": {
         "title": "The service is stopped",
@@ -2545,7 +2563,66 @@
       }
     },
     "saved_to": "Saved to {{path}}",
-    "save_failed": "Couldn't save the file."
+    "save_failed": "Couldn't save the file.",
+    "diagnostics": {
+      "title": "Service diagnostics",
+      "loading": "Checking what happened…",
+      "load_failed": "Couldn't load the service details.",
+      "unavailable": "Service details aren't available on this system.",
+      "refresh": "Refresh",
+      "summary": {
+        "running": "Running",
+        "running_at": "Running since {{time}}",
+        "exited": "Exited with status {{status}}",
+        "exited_at": "Exited with status {{status}} at {{time}}",
+        "exited_ok": "Exited",
+        "exited_ok_at": "Exited at {{time}}",
+        "killed": "Stopped by signal {{signal}}",
+        "killed_at": "Stopped by signal {{signal}} at {{time}}",
+        "dumped": "Crashed with signal {{signal}}",
+        "dumped_at": "Crashed with signal {{signal}} at {{time}}",
+        "not_run": "Hasn't run since you logged in",
+        "restarts_one": "restarted {{count}} time",
+        "restarts_other": "restarted {{count}} times"
+      },
+      "hints": {
+        "port_in_use": {
+          "title": "Port {{port}} is already in use",
+          "fix": "Another program is using it, possibly a copy of CLIProxyAPI started outside the app. Close that program, or change server.port in the config file, then start the service again."
+        },
+        "address_unavailable": {
+          "title": "The service can't listen on {{address}}",
+          "fix": "The host in the config isn't an address of this computer (a network address may have changed), or the port needs administrator rights. Set server.host to \"127.0.0.1\" (or \"\" for LAN access) and use a port above 1024, such as 8317."
+        },
+        "config_invalid": {
+          "title": "The config file has an error",
+          "fix": "Open the config file, fix the problem shown below, then start the service again.",
+          "fix_line": "Open the config file, fix line {{line}} (see below), then start the service again."
+        },
+        "permission_denied": {
+          "title": "Permission denied",
+          "fix": "The service couldn't open a file or folder it needs. Make sure it belongs to your user and is readable (for example with chown or chmod), then start the service again."
+        },
+        "token_not_written": {
+          "title": "The service couldn't create the app's access token",
+          "fix": "The token is written under $XDG_RUNTIME_DIR/cliproxyapi. Make sure your user can write to that folder, then restart the service."
+        },
+        "program_missing": {
+          "title": "The proxy program couldn't be started",
+          "fix": "/usr/bin/cli-proxy-api is missing or not executable. Reinstall the cliproxyapi package."
+        },
+        "crash_loop": {
+          "title": "systemd stopped retrying",
+          "fix": "The service failed several times in a row. Fix the problem above, wait a few seconds, then start it again."
+        }
+      },
+      "log_title": "Service log",
+      "log_redacted": "Keys and tokens are hidden.",
+      "log_truncated": "Showing the latest lines. Keys and tokens are hidden.",
+      "log_empty": "The log is empty.",
+      "log_command": "The app can't read the service log here. Run this in a terminal:",
+      "copy_log": "Copy log"
+    }
   },
   "home": {
     "running": "Running",

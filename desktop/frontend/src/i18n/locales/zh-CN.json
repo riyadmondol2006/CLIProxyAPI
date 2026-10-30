@@ -2501,7 +2501,25 @@
     "lan_disable_confirm_message": "重启后代理只接受本机的连接。其他设备将无法访问，直到你重新开启。",
     "lan_restart_needed": "已保存。重启服务后生效。",
     "lan_restart_now": "立即重启",
-    "lan_restarted": "服务已重启，更改已生效。"
+    "lan_restarted": "服务已重启，更改已生效。",
+    "history": {
+      "title": "使用历史",
+      "subtitle": "最近 {{days}} 天每日的 Token 用量，按代理所在时区的日期统计。",
+      "filter_label": "查看用量",
+      "all_keys": "全部密钥",
+      "empty": "最近 {{days}} 天没有用量。",
+      "unavailable": "无法加载使用历史。请将代理更新到最新版本后查看。",
+      "chart_summary": "{{days}} 天内每日 Token：共 {{tokens}} Token。",
+      "chart_keys": "使用方向键逐日查看。",
+      "tokens": "Token",
+      "requests": "请求",
+      "totals_label": "按密钥汇总",
+      "key": "密钥",
+      "today": "今天",
+      "last_7_days": "7 天",
+      "last_30_days": "30 天",
+      "requests_short": "{{value}} 次请求"
+    }
   },
   "desktop": {
     "start_service": "启动服务",
@@ -2535,7 +2553,7 @@
       },
       "failed": {
         "title": "服务异常停止",
-        "text": "请用下面的命令查看日志，然后重新启动。"
+        "text": "请查看下面的出错原因，然后重新启动。"
       },
       "stopped": {
         "title": "服务已停止",
@@ -2543,7 +2561,65 @@
       }
     },
     "saved_to": "已保存到 {{path}}",
-    "save_failed": "无法保存文件。"
+    "save_failed": "无法保存文件。",
+    "diagnostics": {
+      "title": "服务诊断",
+      "loading": "正在检查发生了什么…",
+      "load_failed": "无法加载服务详情。",
+      "unavailable": "此系统无法提供服务详情。",
+      "refresh": "刷新",
+      "summary": {
+        "running": "正在运行",
+        "running_at": "自 {{time}} 起运行",
+        "exited": "已退出，状态码 {{status}}",
+        "exited_at": "于 {{time}} 退出，状态码 {{status}}",
+        "exited_ok": "已退出",
+        "exited_ok_at": "于 {{time}} 退出",
+        "killed": "被信号 {{signal}} 终止",
+        "killed_at": "于 {{time}} 被信号 {{signal}} 终止",
+        "dumped": "因信号 {{signal}} 崩溃",
+        "dumped_at": "于 {{time}} 因信号 {{signal}} 崩溃",
+        "not_run": "登录后尚未运行过",
+        "restarts": "已重启 {{count}} 次"
+      },
+      "hints": {
+        "port_in_use": {
+          "title": "端口 {{port}} 已被占用",
+          "fix": "另一个程序正在使用该端口，可能是在应用之外启动的 CLIProxyAPI。请关闭该程序，或在配置文件中修改 server.port，然后重新启动服务。"
+        },
+        "address_unavailable": {
+          "title": "服务无法在 {{address}} 上监听",
+          "fix": "配置中的 host 不是本机的地址（网络地址可能已变化），或该端口需要管理员权限。请将 server.host 设为 \"127.0.0.1\"（或设为 \"\" 以允许局域网访问），并使用 1024 以上的端口，例如 8317。"
+        },
+        "config_invalid": {
+          "title": "配置文件有错误",
+          "fix": "打开配置文件，修正下面显示的问题，然后重新启动服务。",
+          "fix_line": "打开配置文件，修正第 {{line}} 行（见下方），然后重新启动服务。"
+        },
+        "permission_denied": {
+          "title": "权限不足",
+          "fix": "服务无法打开所需的文件或文件夹。请确认它属于你的用户且可读（例如使用 chown 或 chmod），然后重新启动服务。"
+        },
+        "token_not_written": {
+          "title": "服务无法创建应用的访问令牌",
+          "fix": "令牌保存在 $XDG_RUNTIME_DIR/cliproxyapi 下。请确认你的用户可以写入该文件夹，然后重启服务。"
+        },
+        "program_missing": {
+          "title": "无法启动代理程序",
+          "fix": "/usr/bin/cli-proxy-api 缺失或不可执行。请重新安装 cliproxyapi 软件包。"
+        },
+        "crash_loop": {
+          "title": "systemd 已停止重试",
+          "fix": "服务连续多次失败。请先解决上面的问题，等待几秒，然后重新启动。"
+        }
+      },
+      "log_title": "服务日志",
+      "log_redacted": "密钥和令牌已隐藏。",
+      "log_truncated": "仅显示最新的日志行。密钥和令牌已隐藏。",
+      "log_empty": "日志为空。",
+      "log_command": "应用无法在这里读取服务日志。请在终端中运行：",
+      "copy_log": "复制日志"
+    }
   },
   "home": {
     "running": "运行中",

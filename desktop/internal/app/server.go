@@ -64,6 +64,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case r.URL.Path == "/app/status":
 		s.handleStatus(w, r)
+	case r.URL.Path == "/app/diagnostics":
+		s.handleDiagnostics(w, r)
 	case strings.HasPrefix(r.URL.Path, "/app/service/"):
 		s.handleService(w, r)
 	case r.URL.Path == "/app/open":
@@ -114,14 +116,21 @@ func (s *Server) status(ctx context.Context) Status {
 	if s.Service != nil {
 		status.Service = s.Service.Status(ctx)
 	}
-	dialer := net.Dialer{Timeout: time.Second}
-	if conn, errDial := dialer.DialContext(ctx, "tcp", upstreamHost(listen)); errDial == nil {
-		status.Reachable = true
-		if errClose := conn.Close(); errClose != nil {
-			log.WithError(errClose).Debug("close probe connection")
-		}
-	}
+	status.Reachable = reachable(ctx, listen)
 	return status
+}
+
+// reachable reports whether something accepts connections on the proxy's address.
+func reachable(ctx context.Context, listen Listen) bool {
+	dialer := net.Dialer{Timeout: time.Second}
+	conn, errDial := dialer.DialContext(ctx, "tcp", upstreamHost(listen))
+	if errDial != nil {
+		return false
+	}
+	if errClose := conn.Close(); errClose != nil {
+		log.WithError(errClose).Debug("close probe connection")
+	}
+	return true
 }
 
 func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
@@ -130,6 +139,43 @@ func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, s.status(r.Context()))
+}
+
+// diagnostics explains why the service is down. Without a Service that can diagnose
+// itself (the dev server without systemd, containers) it still reports the port probe.
+func (s *Server) diagnostics(ctx context.Context) Diagnostics {
+	listen := ReadListen(s.Paths.Config)
+	result := Diagnostics{
+		Listen:    listen,
+		Reachable: reachable(ctx, listen),
+		Log:       ServiceLog{Lines: []string{}},
+		Hints:     []Hint{},
+	}
+	diagnoser, ok := s.Service.(Diagnoser)
+	if !ok {
+		result.Error = "service diagnostics are unavailable"
+		return result
+	}
+	unit, serviceLog, errUnit := diagnoser.Diagnose(ctx)
+	result.Unit, result.Log = unit, serviceLog
+	if result.Log.Lines == nil {
+		result.Log.Lines = []string{}
+	}
+	if errUnit != nil {
+		result.Error = errUnit.Error()
+	} else {
+		result.Available = true
+	}
+	result.Hints = deriveHints(unit, result.Available, result.Log.Lines, listen, result.Reachable)
+	return result
+}
+
+func (s *Server) handleDiagnostics(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "use GET"})
+		return
+	}
+	writeJSON(w, http.StatusOK, s.diagnostics(r.Context()))
 }
 
 func (s *Server) handleService(w http.ResponseWriter, r *http.Request) {

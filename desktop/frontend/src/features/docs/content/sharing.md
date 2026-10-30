@@ -40,6 +40,8 @@ sudo ufw allow 8317/tcp
   finishes.
 - Counters are saved in `~/.config/cliproxyapi/key-usage.json` and survive restarts.
   **Reset usage** clears the current period for one key.
+- **Usage history** on the Access Keys page shows tokens per day for each key. Days are kept
+  for 90 days, and resetting a key's usage does not erase them.
 
 ## Safety
 

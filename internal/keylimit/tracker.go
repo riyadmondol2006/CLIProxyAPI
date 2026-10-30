@@ -27,13 +27,28 @@ const StoreFileName = "key-usage.json"
 
 const flushInterval = 15 * time.Second
 
-// Usage is the persisted counter for one client key in its current period.
+// HistoryRetentionDays is how many local days of per-key usage are kept, today included.
+const HistoryRetentionDays = 90
+
+// dayLayout formats the local date that keys the daily usage history.
+const dayLayout = "2006-01-02"
+
+// Usage is the persisted counter for one client key in its current period,
+// plus its daily history. Period rollover and Reset leave Days untouched.
 type Usage struct {
 	Period      string    `json:"period"`
 	PeriodStart time.Time `json:"period_start"`
 	Tokens      int64     `json:"tokens"`
 	Requests    int64     `json:"requests"`
 	LastUsed    time.Time `json:"last_used,omitempty"`
+	// Days maps a local date (2006-01-02) to the usage recorded on that day.
+	Days map[string]DayUsage `json:"days,omitempty"`
+}
+
+// DayUsage is the usage of one client key on one local day.
+type DayUsage struct {
+	Tokens   int64 `json:"tokens"`
+	Requests int64 `json:"requests"`
 }
 
 // Status is the management view of one configured client key.
@@ -49,6 +64,23 @@ type Status struct {
 	PeriodEnd   *time.Time `json:"period-end,omitempty"`
 	LastUsed    *time.Time `json:"last-used,omitempty"`
 	Exceeded    bool       `json:"exceeded"`
+}
+
+// History is the daily usage of every configured client key over the last N days.
+type History struct {
+	// Dates lists the local days covered, oldest first. Every series has one entry per date.
+	Dates []string     `json:"dates"`
+	Keys  []KeyHistory `json:"keys"`
+}
+
+// KeyHistory is one client key's daily series and its totals over the History dates.
+type KeyHistory struct {
+	APIKey        string  `json:"api-key"`
+	Name          string  `json:"name,omitempty"`
+	Tokens        []int64 `json:"tokens"`
+	Requests      []int64 `json:"requests"`
+	TotalTokens   int64   `json:"total-tokens"`
+	TotalRequests int64   `json:"total-requests"`
 }
 
 // Decision is the result of checking a key before a request is served.
@@ -282,17 +314,48 @@ func (t *Tracker) Record(apiKey string, tokens int64, success bool) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	usage := t.currentLocked(apiKey, true)
-	if tokens > 0 {
-		usage.Tokens += tokens
-	}
+	var requests int64
 	if success {
-		usage.Requests++
+		requests = 1
 	}
-	usage.LastUsed = t.nowFunc()
+	tokens = max(tokens, 0)
+	usage.Tokens += tokens
+	usage.Requests += requests
+
+	now := t.nowFunc()
+	today := now.Format(dayLayout)
+	if usage.Days == nil {
+		usage.Days = make(map[string]DayUsage)
+	}
+	day, seen := usage.Days[today]
+	day.Tokens += tokens
+	day.Requests += requests
+	usage.Days[today] = day
+	if !seen {
+		pruneDays(usage.Days, now)
+	}
+	usage.LastUsed = now
 	t.dirty = true
 }
 
-// Reset clears the current counters for apiKey.
+// localDay returns the local date offset days from now's date, formatted as dayLayout.
+func localDay(now time.Time, offset int) string {
+	y, m, d := now.Date()
+	return time.Date(y, m, d+offset, 0, 0, 0, 0, now.Location()).Format(dayLayout)
+}
+
+// pruneDays drops days older than the HistoryRetentionDays ending today.
+func pruneDays(days map[string]DayUsage, now time.Time) {
+	oldest := localDay(now, 1-HistoryRetentionDays)
+	for day := range days {
+		// Same-length ISO dates sort lexically, so string order is date order.
+		if day < oldest {
+			delete(days, day)
+		}
+	}
+}
+
+// Reset clears the current-period counters for apiKey. The daily history is kept.
 func (t *Tracker) Reset(apiKey string) bool {
 	apiKey = strings.TrimSpace(apiKey)
 	if t == nil || apiKey == "" {
@@ -300,22 +363,19 @@ func (t *Tracker) Reset(apiKey string) bool {
 	}
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	hash := hashKey(apiKey)
-	if _, ok := t.usage[hash]; !ok {
+	usage := t.currentLocked(apiKey, false)
+	if usage == nil {
 		return false
 	}
-	delete(t.usage, hash)
+	usage.Tokens = 0
+	usage.Requests = 0
 	t.dirty = true
 	return true
 }
 
-// Snapshot returns the status of every configured client key, in config order.
-func (t *Tracker) Snapshot() []Status {
-	if t == nil {
-		return nil
-	}
-	t.mu.Lock()
-	defer t.mu.Unlock()
+// reportedKeysLocked returns the configured keys in config order, then keys that only
+// have limits, sorted. The caller must hold t.mu.
+func (t *Tracker) reportedKeysLocked() []string {
 	keys := append([]string(nil), t.keys...)
 	known := make(map[string]bool, len(keys))
 	for _, key := range keys {
@@ -329,7 +389,55 @@ func (t *Tracker) Snapshot() []Status {
 		}
 	}
 	sort.Strings(extra)
-	keys = append(keys, extra...)
+	return append(keys, extra...)
+}
+
+// History returns zero-filled daily usage for the last days local days (oldest first,
+// today last) for the keys Snapshot reports, in the same order. days is clamped to
+// 1..HistoryRetentionDays.
+func (t *Tracker) History(days int) History {
+	days = min(max(days, 1), HistoryRetentionDays)
+	if t == nil {
+		return History{Dates: []string{}, Keys: []KeyHistory{}}
+	}
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	now := t.nowFunc()
+	dates := make([]string, days)
+	for i := range dates {
+		dates[i] = localDay(now, i-days+1)
+	}
+	keys := t.reportedKeysLocked()
+	out := History{Dates: dates, Keys: make([]KeyHistory, 0, len(keys))}
+	for _, key := range keys {
+		entry := KeyHistory{
+			APIKey:   key,
+			Name:     t.limits[key].Name,
+			Tokens:   make([]int64, days),
+			Requests: make([]int64, days),
+		}
+		if usage := t.usage[hashKey(key)]; usage != nil {
+			for i, date := range dates {
+				day := usage.Days[date]
+				entry.Tokens[i] = day.Tokens
+				entry.Requests[i] = day.Requests
+				entry.TotalTokens += day.Tokens
+				entry.TotalRequests += day.Requests
+			}
+		}
+		out.Keys = append(out.Keys, entry)
+	}
+	return out
+}
+
+// Snapshot returns the status of every configured client key, in config order.
+func (t *Tracker) Snapshot() []Status {
+	if t == nil {
+		return nil
+	}
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	keys := t.reportedKeysLocked()
 
 	now := t.nowFunc()
 	out := make([]Status, 0, len(keys))

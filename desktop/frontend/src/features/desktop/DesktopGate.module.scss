@@ -3,6 +3,8 @@
 .screen {
   min-height: 100vh;
   display: grid;
+  // A bounded column keeps long service log lines from widening the card.
+  grid-template-columns: minmax(0, 1fr);
   place-items: center;
   padding: 32px;
   background:
@@ -87,4 +89,9 @@
   font-size: 11.5px;
   color: var(--text-tertiary);
   overflow-wrap: anywhere;
+}
+
+// Room for the service log and hints when the service is down.
+.cardWide {
+  width: min(640px, 100%);
 }

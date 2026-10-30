@@ -3,10 +3,25 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useAuthStore } from '@/stores';
+import type { DesktopServiceAction, DesktopStatus } from '@/utils/desktop';
+import { DIAGNOSTIC_STATES } from './diagnosticsLogic';
+import { ServiceDiagnosticsView } from './ServiceDiagnostics';
 import { useDesktopStatus } from './useDesktopStatus';
+import { useServiceDiagnostics } from './useServiceDiagnostics';
 import styles from './DesktopGate.module.scss';
 
 const POLL_MS = 2000;
+
+/** Which explanation the gate shows for the current status. */
+function gateState(status: DesktopStatus | null): string {
+  const service = status?.service;
+  if (!status) return 'unknown';
+  if (!service?.available) return 'no_systemd';
+  if (!service.installed) return 'not_installed';
+  if (service.active === 'active') return status.tokenReady ? 'starting' : 'no_token';
+  if (service.active === 'activating') return 'starting';
+  return service.active === 'failed' ? 'failed' : 'stopped';
+}
 
 /**
  * Replaces the login page in the desktop app: it connects automatically, and while the
@@ -19,6 +34,16 @@ export function DesktopGate({ children }: { children: ReactElement }) {
   const [attempted, setAttempted] = useState(false);
   const connecting = useRef(false);
   const { status, error, pending, run } = useDesktopStatus(POLL_MS, !isAuthenticated);
+  const state = gateState(status);
+  const showDiagnostics = !isAuthenticated && attempted && DIAGNOSTIC_STATES.includes(state);
+  // Bumped after a start or restart so the diagnostics describe the new attempt.
+  const [actions, setActions] = useState(0);
+  const diagnostics = useServiceDiagnostics(showDiagnostics, `${state}:${actions}`);
+
+  const runAction = async (action: DesktopServiceAction) => {
+    await run(action);
+    setActions((count) => count + 1);
+  };
 
   const connect = async () => {
     if (connecting.current) return;
@@ -52,26 +77,9 @@ export function DesktopGate({ children }: { children: ReactElement }) {
     );
   }
 
-  const service = status?.service;
-  const state = !status
-    ? 'unknown'
-    : !service?.available
-      ? 'no_systemd'
-      : !service.installed
-        ? 'not_installed'
-        : service.active === 'active'
-          ? status.tokenReady
-            ? 'starting'
-            : 'no_token'
-          : service.active === 'activating'
-            ? 'starting'
-            : service.active === 'failed'
-              ? 'failed'
-              : 'stopped';
-
   return (
     <div className={styles.screen}>
-      <div className={styles.card}>
+      <div className={showDiagnostics ? `${styles.card} ${styles.cardWide}` : styles.card}>
         <div className={styles.mark} aria-hidden="true" />
         <h1 className={styles.title}>{t(`desktop.gate.${state}.title`)}</h1>
         <p className={styles.text}>{t(`desktop.gate.${state}.text`)}</p>
@@ -80,19 +88,16 @@ export function DesktopGate({ children }: { children: ReactElement }) {
             {`cli-proxy-api --config ${status?.configPath || '~/.config/cliproxyapi/config.yaml'} \\\n  --local-token-file $XDG_RUNTIME_DIR/cliproxyapi/management-token`}
           </pre>
         ) : null}
-        {state === 'failed' ? (
-          <pre className={styles.code}>journalctl --user -u cliproxyapi -n 50</pre>
-        ) : null}
         <div className={styles.actions}>
           {state === 'stopped' || state === 'failed' ? (
-            <Button onClick={() => void run('start')} loading={pending === 'start'}>
+            <Button onClick={() => void runAction('start')} loading={pending === 'start'}>
               {t('desktop.start_service')}
             </Button>
           ) : null}
           {state === 'no_token' || state === 'failed' ? (
             <Button
               variant="secondary"
-              onClick={() => void run('restart')}
+              onClick={() => void runAction('restart')}
               loading={pending === 'restart'}
             >
               {t('desktop.restart_service')}
@@ -103,6 +108,15 @@ export function DesktopGate({ children }: { children: ReactElement }) {
           </Button>
         </div>
         {error ? <p className={styles.error}>{error}</p> : null}
+        {showDiagnostics ? (
+          <ServiceDiagnosticsView
+            diagnostics={diagnostics.diagnostics}
+            loading={diagnostics.loading}
+            error={diagnostics.error}
+            now={diagnostics.loadedAt}
+            onRefresh={() => void diagnostics.refresh()}
+          />
+        ) : null}
         {status?.configPath ? (
           <p className={styles.meta}>{t('desktop.config_at', { path: status.configPath })}</p>
         ) : null}

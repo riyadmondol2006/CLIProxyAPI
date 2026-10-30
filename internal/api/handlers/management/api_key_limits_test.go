@@ -2,6 +2,7 @@ package management
 
 import (
 	"encoding/json"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -32,6 +33,35 @@ func TestLANAddressesUsesSpecificBindHost(t *testing.T) {
 		if address == "127.0.0.1" {
 			t.Fatal("loopback must not be listed as a LAN address")
 		}
+	}
+}
+
+func TestOrderLANAddressesSkipsVirtualBridgesAndPutsPrimaryFirst(t *testing.T) {
+	ipNet := func(cidr string) net.Addr {
+		ip, network, errParse := net.ParseCIDR(cidr)
+		if errParse != nil {
+			t.Fatalf("parse %s: %v", cidr, errParse)
+		}
+		network.IP = ip
+		return network
+	}
+	byInterface := map[string][]net.Addr{
+		"eth0":       {ipNet("192.168.0.30/24"), ipNet("fe80::1/64")},
+		"wlan0":      {ipNet("10.0.0.5/24")},
+		"vmnet1":     {ipNet("192.168.79.1/24")},
+		"vmnet8":     {ipNet("192.168.126.1/24")},
+		"virbr0":     {ipNet("192.168.122.1/24")},
+		"docker0":    {ipNet("172.17.0.1/16")},
+		"podman1":    {ipNet("10.89.0.1/24")},
+		"tailscale0": {ipNet("100.121.233.30/32")},
+	}
+	got := orderLANAddresses(byInterface, "192.168.0.30")
+	want := []string{"192.168.0.30", "10.0.0.5"}
+	if len(got) != len(want) || got[0] != want[0] || got[1] != want[1] {
+		t.Fatalf("orderLANAddresses() = %v, want %v", got, want)
+	}
+	if got = orderLANAddresses(byInterface, ""); len(got) != 2 || got[0] != "10.0.0.5" {
+		t.Fatalf("without a default route the order must be lexical, got %v", got)
 	}
 }
 

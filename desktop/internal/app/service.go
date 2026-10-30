@@ -43,12 +43,18 @@ type SystemdUser struct {
 // NewSystemdUser returns a controller that runs the real systemctl.
 func NewSystemdUser() *SystemdUser { return &SystemdUser{Run: execRunner} }
 
+// systemctlTimeout bounds every local systemctl or journalctl call.
 const systemctlTimeout = 20 * time.Second
 
-func (s *SystemdUser) systemctl(ctx context.Context, args ...string) ([]byte, error) {
+// command runs a local command with systemctlTimeout.
+func (s *SystemdUser) command(ctx context.Context, name string, args ...string) ([]byte, error) {
 	ctx, cancel := context.WithTimeout(ctx, systemctlTimeout)
 	defer cancel()
-	return s.Run(ctx, "systemctl", append([]string{"--user"}, args...)...)
+	return s.Run(ctx, name, args...)
+}
+
+func (s *SystemdUser) systemctl(ctx context.Context, args ...string) ([]byte, error) {
+	return s.command(ctx, "systemctl", append([]string{"--user"}, args...)...)
 }
 
 // Status implements Service.
@@ -58,6 +64,17 @@ func (s *SystemdUser) Status(ctx context.Context) ServiceStatus {
 	if errShow != nil {
 		return ServiceStatus{Error: strings.TrimSpace(string(out))}
 	}
+	props := parseProperties(out)
+	return ServiceStatus{
+		Available: true,
+		Installed: props["LoadState"] == "loaded",
+		Active:    props["ActiveState"],
+		Enabled:   props["UnitFileState"],
+	}
+}
+
+// parseProperties reads the Key=Value lines `systemctl show` prints.
+func parseProperties(out []byte) map[string]string {
 	props := map[string]string{}
 	scanner := bufio.NewScanner(bytes.NewReader(out))
 	for scanner.Scan() {
@@ -66,12 +83,7 @@ func (s *SystemdUser) Status(ctx context.Context) ServiceStatus {
 			props[key] = value
 		}
 	}
-	return ServiceStatus{
-		Available: true,
-		Installed: props["LoadState"] == "loaded",
-		Active:    props["ActiveState"],
-		Enabled:   props["UnitFileState"],
-	}
+	return props
 }
 
 // Do implements Service.

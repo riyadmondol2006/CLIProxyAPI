@@ -1,4 +1,9 @@
-import type { KeyLimit, KeyLimitPeriod, KeyUsage } from '@/services/api/accessKeys';
+import type {
+  KeyLimit,
+  KeyLimitPeriod,
+  KeyUsage,
+  KeyUsageHistory,
+} from '@/services/api/accessKeys';
 
 export interface AccessKeyRow {
   apiKey: string;
@@ -112,3 +117,48 @@ export const draftFromRow = (row?: AccessKeyRow): KeyLimitDraft => ({
   tokenLimit: row?.tokenLimit ? String(row.tokenLimit) : '',
   period: row?.period ?? 'daily',
 });
+
+/* ---------- Usage history ---------- */
+
+/** Filter value for the summed usage of every key; keys themselves are never empty. */
+export const HISTORY_ALL_KEYS = '';
+
+export interface HistoryPoint {
+  day: string;
+  tokens: number;
+  requests: number;
+}
+
+export interface UsageTotal {
+  tokens: number;
+  requests: number;
+}
+
+/** Keeps the history of configured keys only, matching the key cards on the page. */
+export const historyForKeys = (history: KeyUsageHistory, keys: string[]): KeyUsageHistory => {
+  const configured = new Set(keys);
+  return { ...history, keys: history.keys.filter((entry) => configured.has(entry.apiKey)) };
+};
+
+/** Daily points for one key, or summed over every key for HISTORY_ALL_KEYS. */
+export const historyPoints = (history: KeyUsageHistory, filter: string): HistoryPoint[] => {
+  const entries =
+    filter === HISTORY_ALL_KEYS
+      ? history.keys
+      : history.keys.filter((entry) => entry.apiKey === filter);
+  return history.dates.map((day, index) => ({
+    day,
+    tokens: entries.reduce((sum, entry) => sum + (entry.tokens[index] ?? 0), 0),
+    requests: entries.reduce((sum, entry) => sum + (entry.requests[index] ?? 0), 0),
+  }));
+};
+
+/** Sums the last `days` points of an oldest-first series (today is the last point). */
+export const sumLastDays = (points: HistoryPoint[], days: number): UsageTotal =>
+  points.slice(-days).reduce(
+    (sum, point) => ({
+      tokens: sum.tokens + point.tokens,
+      requests: sum.requests + point.requests,
+    }),
+    { tokens: 0, requests: 0 }
+  );

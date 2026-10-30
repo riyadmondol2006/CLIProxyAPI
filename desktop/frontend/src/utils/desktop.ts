@@ -42,6 +42,48 @@ export interface DesktopStatus {
 
 export type DesktopServiceAction = 'start' | 'stop' | 'restart';
 
+/** What systemd knows about the service's last run. */
+export interface DesktopUnitState {
+  activeState: string;
+  subState: string;
+  result: string;
+  /** How the main process ended: 'exited', 'killed', 'dumped', or '' when it hasn't run. */
+  exitCode: string;
+  /** Exit status for 'exited'; the signal number for 'killed' and 'dumped'. */
+  exitStatus: number;
+  restarts: number;
+  /** RFC 3339, or '' when unknown. */
+  changedAt: string;
+}
+
+export interface DesktopDiagnosticHint {
+  /** port_in_use, address_unavailable, config_invalid, permission_denied, ... */
+  code: string;
+  /** The matching message, address, or path (already redacted by the app). */
+  detail: string;
+  /** Config file line the error points at; 0 when unknown. */
+  configLine: number;
+}
+
+/** Why the proxy service is down, from GET /app/diagnostics. */
+export interface DesktopDiagnostics {
+  /** False when systemd can't be asked (no systemd, containers, the dev server). */
+  available: boolean;
+  error: string;
+  unit: DesktopUnitState;
+  log: {
+    available: boolean;
+    error: string;
+    /** Redacted journal lines, oldest first. */
+    lines: string[];
+    truncated: boolean;
+  };
+  hints: DesktopDiagnosticHint[];
+  host: string;
+  port: number;
+  reachable: boolean;
+}
+
 export interface DesktopUpdatePackage {
   name: string;
   format: string;
@@ -138,6 +180,50 @@ export const normalizeDesktopStatus = (input: unknown): DesktopStatus => {
   };
 };
 
+const readCount = (value: unknown): number => {
+  const count = Number(value);
+  return Number.isFinite(count) && count > 0 ? Math.floor(count) : 0;
+};
+
+export const normalizeDiagnostics = (input: unknown): DesktopDiagnostics => {
+  const record = isRecord(input) ? input : {};
+  const unit = isRecord(record.unit) ? record.unit : {};
+  const log = isRecord(record.log) ? record.log : {};
+  const listen = isRecord(record.listen) ? record.listen : {};
+  const hints = Array.isArray(record.hints) ? record.hints : [];
+  return {
+    available: record.available === true,
+    error: readString(record.error),
+    unit: {
+      activeState: readString(unit['active-state']),
+      subState: readString(unit['sub-state']),
+      result: readString(unit.result),
+      exitCode: readString(unit['exit-code']),
+      exitStatus: readCount(unit['exit-status']),
+      restarts: readCount(unit.restarts),
+      changedAt: readString(unit['changed-at']),
+    },
+    log: {
+      available: log.available === true,
+      error: readString(log.error),
+      // Lines keep their leading spaces: continuation lines are indented.
+      lines: Array.isArray(log.lines)
+        ? log.lines.filter((line): line is string => typeof line === 'string')
+        : [],
+      truncated: log.truncated === true,
+    },
+    hints: hints.filter(isRecord).flatMap((hint) => {
+      const code = readString(hint.code);
+      return code
+        ? [{ code, detail: readString(hint.detail), configLine: readCount(hint['config-line']) }]
+        : [];
+    }),
+    host: readString(listen.host),
+    port: readCount(listen.port),
+    reachable: record.reachable === true,
+  };
+};
+
 async function requestJSON(path: string, init?: RequestInit): Promise<unknown> {
   const response = await fetch(path, init);
   const body: unknown = await response.json().catch(() => null);
@@ -184,6 +270,11 @@ export const desktopApi = {
 
   async service(action: DesktopServiceAction): Promise<DesktopStatus> {
     return normalizeDesktopStatus(await requestJSON(`/app/service/${action}`, { method: 'POST' }));
+  },
+
+  /** Explains why the service is down: unit state, likely causes, and the redacted log tail. */
+  async diagnostics(): Promise<DesktopDiagnostics> {
+    return normalizeDiagnostics(await requestJSON('/app/diagnostics'));
   },
 
   /** Asks the app for the latest release; `force` skips the app's one-hour cache. */

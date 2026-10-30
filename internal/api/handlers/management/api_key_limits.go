@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/router-for-me/CLIProxyAPI/v8/internal/keylimit"
+	log "github.com/sirupsen/logrus"
 )
 
 // GetAPIKeyLimitUsage returns current-period usage and limits for every client API key.
@@ -78,29 +79,90 @@ func hostListensOnLAN(host string) bool {
 	return ip != nil && !ip.IsLoopback()
 }
 
-// lanAddresses lists private IPv4 addresses reachable from the local network.
-// A specific bind host is returned as-is.
+// virtualInterfacePrefixes name the bridges of local VMs and containers. Their addresses
+// are host-only, so other devices on the network cannot use them.
+var virtualInterfacePrefixes = []string{
+	"br-", "cni", "docker", "flannel", "lxcbr", "lxdbr", "podman", "vboxnet", "veth", "virbr", "vmnet",
+}
+
+func isVirtualInterface(name string) bool {
+	name = strings.ToLower(name)
+	for _, prefix := range virtualInterfacePrefixes {
+		if strings.HasPrefix(name, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
+// lanAddresses lists private IPv4 addresses reachable from the local network, the one on the
+// default route first. A specific bind host is returned as-is.
 func lanAddresses(host string) []string {
 	trimmed := strings.Trim(host, "[]")
 	if ip := net.ParseIP(trimmed); ip != nil && !ip.IsUnspecified() {
 		return []string{trimmed}
 	}
-	interfaceAddrs, errAddrs := net.InterfaceAddrs()
-	if errAddrs != nil {
+	interfaces, errInterfaces := net.Interfaces()
+	if errInterfaces != nil {
 		return nil
 	}
-	var out []string
-	for _, addr := range interfaceAddrs {
-		ipNet, ok := addr.(*net.IPNet)
-		if !ok {
+	byInterface := make(map[string][]net.Addr, len(interfaces))
+	for _, iface := range interfaces {
+		if iface.Flags&net.FlagUp == 0 || iface.Flags&net.FlagLoopback != 0 {
 			continue
 		}
-		ip := ipNet.IP.To4()
-		if ip == nil || ip.IsLoopback() || !ip.IsPrivate() {
+		addrs, errAddrs := iface.Addrs()
+		if errAddrs != nil {
 			continue
 		}
-		out = append(out, ip.String())
+		byInterface[iface.Name] = addrs
 	}
-	sort.Strings(out)
+	return orderLANAddresses(byInterface, defaultRouteIPv4())
+}
+
+// orderLANAddresses keeps the private IPv4 addresses of non-virtual interfaces, sorted with
+// primary first.
+func orderLANAddresses(byInterface map[string][]net.Addr, primary string) []string {
+	var out []string
+	for name, addrs := range byInterface {
+		if isVirtualInterface(name) {
+			continue
+		}
+		for _, addr := range addrs {
+			ipNet, ok := addr.(*net.IPNet)
+			if !ok {
+				continue
+			}
+			ip := ipNet.IP.To4()
+			if ip == nil || ip.IsLoopback() || !ip.IsPrivate() {
+				continue
+			}
+			out = append(out, ip.String())
+		}
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if (out[i] == primary) != (out[j] == primary) {
+			return out[i] == primary
+		}
+		return out[i] < out[j]
+	})
 	return out
+}
+
+// defaultRouteIPv4 returns this machine's source address for the default route, or "".
+// Connecting a UDP socket only selects a route; no packet is sent.
+func defaultRouteIPv4() string {
+	conn, errDial := net.Dial("udp4", "192.0.2.1:9")
+	if errDial != nil {
+		return ""
+	}
+	defer func() {
+		if errClose := conn.Close(); errClose != nil {
+			log.WithError(errClose).Debug("close route probe")
+		}
+	}()
+	if addr, ok := conn.LocalAddr().(*net.UDPAddr); ok {
+		return addr.IP.String()
+	}
+	return ""
 }

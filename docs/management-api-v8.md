@@ -92,7 +92,8 @@ retain the corresponding business operation's fields.
 | `/server/latest-version` | GET | Get latest release information. |
 | `/server/network` | GET | Get the listen host and port, whether other LAN devices can connect, and their base URLs. |
 | `/access/key-usage` | GET | Get current-period token usage and limits for every client API key. |
-| `/access/key-usage/reset` | POST | Clear the current-period counters for `{"api-key": "..."}`. |
+| `/access/key-usage/reset` | POST | Clear the current-period counters for `{"api-key": "..."}`. Daily history is kept. |
+| `/access/key-usage/history?days=30` | GET | Get daily tokens and requests per client API key for the last `days` local days (1–90, default 30), oldest first. |
 | `/requests/api-call` | POST | Make an authenticated upstream call. |
 | `/routing/cooldown/reset` | POST | Clear credential cooldown. |
 | `/routing/model-definitions/<channel>` | GET | Get model definitions. |

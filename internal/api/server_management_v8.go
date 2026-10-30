@@ -30,6 +30,7 @@ func (s *Server) registerManagementV8Routes() {
 	v8.GET("/server/latest-version", s.mgmt.GetLatestVersion)
 	v8.GET("/server/network", s.mgmt.GetServerNetwork)
 	v8.GET("/access/key-usage", s.mgmt.GetAPIKeyLimitUsage)
+	v8.GET("/access/key-usage/history", s.mgmt.GetAPIKeyUsageHistory)
 	v8.POST("/access/key-usage/reset", s.mgmt.ResetAPIKeyLimitUsage)
 	v8.POST("/requests/api-call", s.mgmt.APICall)
 	v8.POST("/routing/cooldown/reset", s.mgmt.ResetQuota)

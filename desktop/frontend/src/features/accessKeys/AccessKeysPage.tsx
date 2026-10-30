@@ -7,6 +7,7 @@ import { Select } from '@/components/ui/Select';
 import { IconPlus, IconRefreshCw } from '@/components/ui/icons';
 import { CopyButton } from '@/features/oauth/components/CopyButton';
 import { maskApiKey } from '@/features/setup/snippets';
+import { resolveProxyAddresses } from '@/features/setup/useProxyAddresses';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { useAuthStore, useConfigStore, useNotificationStore } from '@/stores';
 import { apiKeysApi } from '@/services/api/apiKeys';
@@ -15,6 +16,7 @@ import {
   KEY_LIMIT_PERIODS,
   type KeyLimit,
   type KeyUsage,
+  type KeyUsageHistory,
   type ServerNetwork,
 } from '@/services/api/accessKeys';
 import { getErrorMessage } from '@/utils/helpers';
@@ -23,6 +25,7 @@ import {
   buildRows,
   draftFromRow,
   generateApiKey,
+  historyForKeys,
   isLanHost,
   parseTokenLimit,
   removeLimit,
@@ -31,6 +34,7 @@ import {
   type AccessKeyRow,
   type KeyLimitDraft,
 } from './logic';
+import { UsageHistorySection } from './UsageHistorySection';
 import styles from './AccessKeysPage.module.scss';
 
 type Editor =
@@ -52,6 +56,7 @@ export function AccessKeysPage() {
   const [limits, setLimits] = useState<KeyLimit[]>([]);
   const [usage, setUsage] = useState<KeyUsage[]>([]);
   const [network, setNetwork] = useState<ServerNetwork | null>(null);
+  const [history, setHistory] = useState<KeyUsageHistory | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -63,16 +68,18 @@ export function AccessKeysPage() {
     if (!connected) return;
     setLoadError('');
     try {
-      const [nextKeys, nextLimits, nextUsage, nextNetwork] = await Promise.all([
+      const [nextKeys, nextLimits, nextUsage, nextNetwork, nextHistory] = await Promise.all([
         apiKeysApi.list(),
         accessKeysApi.listLimits(),
         accessKeysApi.listUsage().catch(() => [] as KeyUsage[]),
         accessKeysApi.network().catch(() => null),
+        accessKeysApi.usageHistory().catch(() => null),
       ]);
       setKeys(nextKeys);
       setLimits(nextLimits);
       setUsage(nextUsage);
       setNetwork(nextNetwork);
+      setHistory(nextHistory);
     } catch (error) {
       setLoadError(getErrorMessage(error, t('access_keys.load_failed')));
     } finally {
@@ -86,13 +93,21 @@ export function AccessKeysPage() {
   useHeaderRefresh(load, connected);
 
   const rows = useMemo(() => buildRows(keys, limits, usage), [keys, limits, usage]);
+  const keyHistory = useMemo(
+    () => (history ? historyForKeys(history, keys) : null),
+    [history, keys]
+  );
+  const keyLabel = (apiKey: string) =>
+    rows.find((row) => row.apiKey === apiKey)?.name || maskApiKey(apiKey);
   const limitedCount = rows.filter((row) => row.tokenLimit).length;
   const numberFormat = useMemo(() => new Intl.NumberFormat(i18n.language), [i18n.language]);
   const dateFormat = useMemo(
     () => new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium', timeStyle: 'short' }),
     [i18n.language]
   );
-  const shareUrl = network?.lanUrls[0] ?? apiBase;
+  // The window's own origin (wails://wails in the app) is not an address other apps can use.
+  const addresses = resolveProxyAddresses(apiBase, network, isDesktopApp());
+  const shareUrl = addresses.lan[0] ?? addresses.local;
 
   /** Runs a config mutation, then reloads the page state and the shared config cache. */
   const mutate = async (action: () => Promise<unknown>, success?: string) => {
@@ -127,19 +142,18 @@ export function AccessKeysPage() {
         showNotification(t('access_keys.duplicate_key'), 'error');
         return;
       }
-      const ok = await mutate(async () => {
-        await apiKeysApi.replace([...keys, apiKey]);
-        if (editor.draft.name.trim() || tokenLimit) {
-          await accessKeysApi.replaceLimits(
-            upsertLimit(limits, {
-              apiKey,
-              name: editor.draft.name,
-              tokenLimit,
-              period: editor.draft.period,
-            })
-          );
-        }
-      });
+      // One write, so the key can never be saved without its budget.
+      const ok = await mutate(() =>
+        accessKeysApi.replaceKeysAndLimits(
+          [...keys, apiKey],
+          upsertLimit(limits, {
+            apiKey,
+            name: editor.draft.name,
+            tokenLimit,
+            period: editor.draft.period,
+          })
+        )
+      );
       if (ok) {
         setEditor(null);
         setCreated(apiKey);
@@ -191,12 +205,15 @@ export function AccessKeysPage() {
       cancelText: t('common.cancel'),
       variant: 'danger',
       onConfirm: async () => {
-        await mutate(async () => {
-          await apiKeysApi.replace(keys.filter((key) => key !== row.apiKey));
-          if (limits.some((limit) => limit.apiKey === row.apiKey)) {
-            await accessKeysApi.replaceLimits(removeLimit(limits, row.apiKey));
-          }
-        }, t('access_keys.deleted_notice'));
+        // One write, so a deleted key never leaves its limit behind.
+        await mutate(
+          () =>
+            accessKeysApi.replaceKeysAndLimits(
+              keys.filter((key) => key !== row.apiKey),
+              removeLimit(limits, row.apiKey)
+            ),
+          t('access_keys.deleted_notice')
+        );
       },
     });
 
@@ -457,6 +474,11 @@ export function AccessKeysPage() {
       </section>
 
       <p className={styles.hint}>{t('access_keys.limit_note')}</p>
+
+      {/* ---------- Usage history ---------- */}
+      {loading || rows.length > 0 ? (
+        <UsageHistorySection history={keyHistory} loading={loading} labelFor={keyLabel} />
+      ) : null}
 
       {/* ---------- Create / edit ---------- */}
       <Modal

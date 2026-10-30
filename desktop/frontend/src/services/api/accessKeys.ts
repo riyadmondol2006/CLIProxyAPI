@@ -6,8 +6,12 @@ import { apiClient } from './client';
 import { getConfigValue } from './configValue';
 import { isRecord } from '@/utils/helpers';
 
+const ACCESS_PATH = '/config/access';
 const LIMITS_PATH = '/config/access/key-limits';
 const HOST_PATH = '/config/server/host';
+
+/** Days of usage history the Access Keys page shows (the backend keeps up to 90). */
+export const KEY_USAGE_HISTORY_DAYS = 30;
 
 export const KEY_LIMIT_PERIODS = ['daily', 'weekly', 'monthly', 'total'] as const;
 export type KeyLimitPeriod = (typeof KEY_LIMIT_PERIODS)[number];
@@ -27,6 +31,22 @@ export interface KeyUsage {
   requests: number;
   periodEnd?: string;
   lastUsed?: string;
+}
+
+/** One key's daily series; `tokens` and `requests` have one entry per history date. */
+export interface KeyUsageHistoryEntry {
+  apiKey: string;
+  name?: string;
+  tokens: number[];
+  requests: number[];
+  totalTokens: number;
+  totalRequests: number;
+}
+
+export interface KeyUsageHistory {
+  /** Server-local days (YYYY-MM-DD), oldest first. */
+  dates: string[];
+  keys: KeyUsageHistoryEntry[];
 }
 
 export interface ServerNetwork {
@@ -105,6 +125,39 @@ export const normalizeKeyUsage = (input: unknown): KeyUsage[] => {
   return out;
 };
 
+/** Reads a series, padding or truncating it to `length` so it always lines up with the dates. */
+const toSeries = (value: unknown, length: number): number[] => {
+  const list = Array.isArray(value) ? value : [];
+  return Array.from({ length }, (_, index) => toNumber(list[index]));
+};
+
+export const normalizeKeyUsageHistory = (input: unknown): KeyUsageHistory => {
+  const record = isRecord(input) ? input : {};
+  const dates = Array.isArray(record.dates) ? record.dates.map((date) => String(date)) : [];
+  const list = Array.isArray(record.keys) ? record.keys : [];
+  const keys: KeyUsageHistoryEntry[] = [];
+  list.forEach((item) => {
+    if (!isRecord(item)) return;
+    const apiKey = String(item['api-key'] ?? '').trim();
+    if (!apiKey) return;
+    keys.push({
+      apiKey,
+      name: optionalString(item.name),
+      tokens: toSeries(item.tokens, dates.length),
+      requests: toSeries(item.requests, dates.length),
+      totalTokens: toNumber(item['total-tokens']),
+      totalRequests: toNumber(item['total-requests']),
+    });
+  });
+  return { dates, keys };
+};
+
+/** The single PATCH body that writes both client-key lists of the access section at once. */
+export const buildAccessPatch = (keys: string[], limits: KeyLimit[]) => ({
+  'api-keys': keys,
+  'key-limits': serializeKeyLimits(limits),
+});
+
 export const normalizeServerNetwork = (input: unknown): ServerNetwork => {
   const record = isRecord(input) ? input : {};
   return {
@@ -127,11 +180,25 @@ export const accessKeysApi = {
 
   replaceLimits: (limits: KeyLimit[]) => apiClient.put(LIMITS_PATH, serializeKeyLimits(limits)),
 
+  /**
+   * Replaces api-keys and key-limits in one write, so a new key never runs without its
+   * budget and a deleted key never leaves its limit behind. PATCH merges the access map
+   * and replaces both lists whole.
+   */
+  replaceKeysAndLimits: (keys: string[], limits: KeyLimit[]) =>
+    apiClient.patch(ACCESS_PATH, buildAccessPatch(keys, limits)),
+
   async listUsage(): Promise<KeyUsage[]> {
     return normalizeKeyUsage(await apiClient.get('/access/key-usage'));
   },
 
   resetUsage: (apiKey: string) => apiClient.post('/access/key-usage/reset', { 'api-key': apiKey }),
+
+  async usageHistory(days: number = KEY_USAGE_HISTORY_DAYS): Promise<KeyUsageHistory> {
+    return normalizeKeyUsageHistory(
+      await apiClient.get('/access/key-usage/history', { params: { days } })
+    );
+  },
 
   async network(): Promise<ServerNetwork> {
     return normalizeServerNetwork(await apiClient.get('/server/network'));

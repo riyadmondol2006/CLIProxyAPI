@@ -2529,7 +2529,25 @@
     "lan_disable_confirm_message": "重新啟動後代理只接受本機的連線。其他裝置將無法存取，直到你重新開啟。",
     "lan_restart_needed": "已儲存。重新啟動服務後生效。",
     "lan_restart_now": "立即重新啟動",
-    "lan_restarted": "服務已重新啟動，變更已生效。"
+    "lan_restarted": "服務已重新啟動，變更已生效。",
+    "history": {
+      "title": "使用紀錄",
+      "subtitle": "最近 {{days}} 天每日的 Token 用量，依代理所在時區的日期統計。",
+      "filter_label": "檢視用量",
+      "all_keys": "全部金鑰",
+      "empty": "最近 {{days}} 天沒有用量。",
+      "unavailable": "無法載入使用紀錄。請將代理更新至最新版本後查看。",
+      "chart_summary": "{{days}} 天內每日 Token：共 {{tokens}} Token。",
+      "chart_keys": "使用方向鍵逐日查看。",
+      "tokens": "Token",
+      "requests": "請求",
+      "totals_label": "依金鑰彙總",
+      "key": "金鑰",
+      "today": "今天",
+      "last_7_days": "7 天",
+      "last_30_days": "30 天",
+      "requests_short": "{{value}} 次請求"
+    }
   },
   "desktop": {
     "start_service": "啟動服務",
@@ -2563,7 +2581,7 @@
       },
       "failed": {
         "title": "服務異常停止",
-        "text": "請用下面的指令查看日誌，然後重新啟動。"
+        "text": "請查看下方的出錯原因，然後重新啟動。"
       },
       "stopped": {
         "title": "服務已停止",
@@ -2571,7 +2589,65 @@
       }
     },
     "saved_to": "已儲存到 {{path}}",
-    "save_failed": "無法儲存檔案。"
+    "save_failed": "無法儲存檔案。",
+    "diagnostics": {
+      "title": "服務診斷",
+      "loading": "正在檢查發生了什麼…",
+      "load_failed": "無法載入服務詳細資料。",
+      "unavailable": "此系統無法提供服務詳細資料。",
+      "refresh": "重新整理",
+      "summary": {
+        "running": "正在執行",
+        "running_at": "自 {{time}} 起執行",
+        "exited": "已結束，狀態碼 {{status}}",
+        "exited_at": "於 {{time}} 結束，狀態碼 {{status}}",
+        "exited_ok": "已結束",
+        "exited_ok_at": "於 {{time}} 結束",
+        "killed": "被訊號 {{signal}} 終止",
+        "killed_at": "於 {{time}} 被訊號 {{signal}} 終止",
+        "dumped": "因訊號 {{signal}} 當機",
+        "dumped_at": "於 {{time}} 因訊號 {{signal}} 當機",
+        "not_run": "登入後尚未執行過",
+        "restarts": "已重新啟動 {{count}} 次"
+      },
+      "hints": {
+        "port_in_use": {
+          "title": "連接埠 {{port}} 已被占用",
+          "fix": "另一個程式正在使用此連接埠，可能是在應用之外啟動的 CLIProxyAPI。請關閉該程式，或在設定檔中修改 server.port，然後重新啟動服務。"
+        },
+        "address_unavailable": {
+          "title": "服務無法在 {{address}} 上監聽",
+          "fix": "設定中的 host 不是本機的位址（網路位址可能已變更），或此連接埠需要管理員權限。請將 server.host 設為 \"127.0.0.1\"（或設為 \"\" 以允許區域網路存取），並使用 1024 以上的連接埠，例如 8317。"
+        },
+        "config_invalid": {
+          "title": "設定檔有錯誤",
+          "fix": "開啟設定檔，修正下方顯示的問題，然後重新啟動服務。",
+          "fix_line": "開啟設定檔，修正第 {{line}} 行（見下方），然後重新啟動服務。"
+        },
+        "permission_denied": {
+          "title": "權限不足",
+          "fix": "服務無法開啟所需的檔案或資料夾。請確認它屬於你的使用者且可讀取（例如使用 chown 或 chmod），然後重新啟動服務。"
+        },
+        "token_not_written": {
+          "title": "服務無法建立應用的存取權杖",
+          "fix": "權杖儲存在 $XDG_RUNTIME_DIR/cliproxyapi 下。請確認你的使用者可以寫入該資料夾，然後重新啟動服務。"
+        },
+        "program_missing": {
+          "title": "無法啟動代理程式",
+          "fix": "/usr/bin/cli-proxy-api 遺失或無法執行。請重新安裝 cliproxyapi 套件。"
+        },
+        "crash_loop": {
+          "title": "systemd 已停止重試",
+          "fix": "服務連續多次失敗。請先解決上方的問題，等待幾秒，然後重新啟動。"
+        }
+      },
+      "log_title": "服務日誌",
+      "log_redacted": "金鑰和權杖已隱藏。",
+      "log_truncated": "僅顯示最新的日誌行。金鑰和權杖已隱藏。",
+      "log_empty": "日誌是空的。",
+      "log_command": "應用無法在這裡讀取服務日誌。請在終端機中執行：",
+      "copy_log": "複製日誌"
+    }
   },
   "home": {
     "running": "執行中",
