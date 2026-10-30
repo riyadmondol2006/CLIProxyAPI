@@ -5,8 +5,8 @@ import type { AnimationPlaybackControlsWithThen } from 'motion-dom';
 import {
   PAGE_TRANSITION_LAYER_CONTEXT_VALUES,
   PageTransitionLayerContext,
-  type LayerStatus,
 } from './PageTransitionLayer';
+import { withCurrentLocation, type Layer } from './pageTransitionLayers';
 import './PageTransition.scss';
 
 interface PageTransitionProps {
@@ -55,12 +55,6 @@ const clearLayerStyles = (element: HTMLElement | null) => {
   element.style.removeProperty('box-shadow');
 };
 
-type Layer = {
-  key: string;
-  location: Location;
-  status: LayerStatus;
-};
-
 type TransitionDirection = 'forward' | 'backward';
 
 type TransitionVariant = 'vertical' | 'ios';
@@ -91,8 +85,11 @@ export function PageTransition({
   ]);
   const currentLayer =
     layers.find((layer) => layer.status === 'current') ?? layers[layers.length - 1];
-  const currentLayerKey = currentLayer?.key ?? location.key;
-  const currentLayerPathname = currentLayer?.location.pathname;
+  // A layer's key is its mount identity; the history entry it shows is its location's key, which
+  // moves on when only the query or hash changes.
+  const currentLayerLocation = currentLayer?.location;
+  const currentLayerHistoryKey = currentLayerLocation?.key ?? location.key;
+  const currentLayerPathname = currentLayerLocation?.pathname;
 
   const resolveScrollContainer = useCallback(() => {
     if (scrollContainerRef?.current) return scrollContainerRef.current;
@@ -102,12 +99,17 @@ export function PageTransition({
 
   useLayoutEffect(() => {
     if (isAnimating) return;
-    if (location.key === currentLayerKey) return;
-    if (currentLayerPathname === location.pathname) return;
+    if (location === currentLayerLocation) return;
+    if (currentLayerPathname === location.pathname) {
+      // Same page with a new query or hash (filters kept in the URL): hand the page the new
+      // location without a transition. The layer keeps its key, so the page stays mounted.
+      setLayers((prev) => withCurrentLocation(prev, location));
+      return;
+    }
     const scrollContainer = resolveScrollContainer();
     const exitScrollOffset = scrollContainer?.scrollTop ?? 0;
     exitScrollOffsetRef.current = exitScrollOffset;
-    scrollPositionsRef.current.set(currentLayerKey, exitScrollOffset);
+    scrollPositionsRef.current.set(currentLayerHistoryKey, exitScrollOffset);
 
     enterScrollOffsetRef.current = scrollPositionsRef.current.get(location.key) ?? 0;
     const resolveOrderIndex = (pathname?: string) => {
@@ -130,7 +132,7 @@ export function PageTransition({
 
     // When using iOS-style stacking, history POP within the same "section" can have equal route order.
     // In that case, prefer treating navigation to an existing layer as a backward (pop) transition.
-    if (nextVariant === 'ios' && layers.some((layer) => layer.key === location.key)) {
+    if (nextVariant === 'ios' && layers.some((layer) => layer.location.key === location.key)) {
       nextDirection = 'backward';
     }
 
@@ -177,7 +179,7 @@ export function PageTransition({
           return [...previousStack, exitingLayer, nextCurrent];
         }
 
-        const targetIndex = prev.findIndex((layer) => layer.key === location.key);
+        const targetIndex = prev.findIndex((layer) => layer.location.key === location.key);
         if (targetIndex !== -1) {
           const targetStack: Layer[] = prev.slice(0, targetIndex + 1).map((layer, idx): Layer => {
             const isTarget = idx === targetIndex;
@@ -213,7 +215,8 @@ export function PageTransition({
   }, [
     isAnimating,
     location,
-    currentLayerKey,
+    currentLayerLocation,
+    currentLayerHistoryKey,
     currentLayerPathname,
     getRouteOrder,
     getTransitionVariant,
