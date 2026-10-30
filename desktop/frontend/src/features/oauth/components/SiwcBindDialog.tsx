@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { openAuthUrlInBrowser } from '@/utils/desktop';
 import { useTranslation } from 'react-i18next';
 import { Modal } from '@/components/ui/Modal';
 import { IconExternalLink, IconLoader2 } from '@/components/ui/icons';
@@ -125,6 +126,7 @@ export function SiwcBindDialog({ open, onClose, onViewAuthFiles }: SiwcBindDialo
         }
         setSession(result);
         setPhase('wait');
+        openAuthUrlInBrowser(url.toString());
         const expiresAt = Date.now() + result.expires_in * 1000;
         attempt.poll<{ status: 'wait' | 'ok' | 'error' | 'expired' }>(
           () =>

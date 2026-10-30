@@ -97,6 +97,22 @@ export async function openExternal(url: string): Promise<void> {
   });
 }
 
+/**
+ * Opens a sign-in link in the browser as soon as it arrives. Only the desktop app does
+ * this: a browser tab would block a pop-up that isn't triggered by a click, so the web
+ * panel keeps the "open" button. The dialog still shows the link for copying.
+ */
+export function openAuthUrlInBrowser(url: string | undefined): void {
+  if (!url || !isDesktopApp()) return;
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return;
+    void openExternal(parsed.toString()).catch(() => undefined);
+  } catch {
+    // Not a URL: leave it to the dialog's open button.
+  }
+}
+
 const isExternalHref = (href: string): boolean => {
   try {
     const url = new URL(href, window.location.href);

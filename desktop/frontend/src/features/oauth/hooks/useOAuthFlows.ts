@@ -7,6 +7,7 @@ import { notifyAuthFilesChanged } from '@/features/authFiles/authFilesEvents';
 import { createOAuthAttempts, type OAuthAttempt } from '../oauthAttempts';
 import { validateDevinCallback } from '../devinOAuth';
 import { resolveCallbackUrl } from '../callbackUrl';
+import { openAuthUrlInBrowser } from '@/utils/desktop';
 import {
   buildPluginOAuthProviderCards,
   type OAuthProviderCard,
@@ -285,6 +286,7 @@ export function useOAuthFlows({ providerCards, isFocused }: UseOAuthFlowsOptions
         status: 'waiting',
         polling: true,
       });
+      openAuthUrlInBrowser(res.url);
       startPolling(provider, res.state, attempt);
     } catch (err: unknown) {
       if (!attempt.isCurrent()) return;

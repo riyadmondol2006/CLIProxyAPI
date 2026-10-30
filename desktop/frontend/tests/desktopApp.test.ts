@@ -13,7 +13,7 @@ import ko from '@/i18n/locales/ko.json';
 import vi from '@/i18n/locales/vi.json';
 import { HomePage } from '@/features/home/HomePage';
 import { normalizeApiBase } from '@/utils/connection';
-import { isDesktopApp, normalizeDesktopStatus } from '@/utils/desktop';
+import { isDesktopApp, normalizeDesktopStatus, openAuthUrlInBrowser } from '@/utils/desktop';
 import {
   decorateDocHtml,
   docHeadings,
@@ -32,6 +32,28 @@ describe('desktop integration helpers', () => {
 
   test('is not in desktop mode outside the app window', () => {
     expect(isDesktopApp()).toBe(false);
+  });
+
+  test('opens sign-in links in the browser only inside the app', () => {
+    const opened: string[] = [];
+    const globals = globalThis as unknown as { window?: unknown };
+    const previous = globals.window;
+    try {
+      globals.window = { runtime: { BrowserOpenURL: (url: string) => opened.push(url) } };
+      openAuthUrlInBrowser('https://claude.ai/oauth/authorize?x=1');
+      expect(opened).toEqual([]);
+
+      globals.window = {
+        __CPA_DESKTOP__: true,
+        runtime: { BrowserOpenURL: (url: string) => opened.push(url) },
+      };
+      openAuthUrlInBrowser('https://claude.ai/oauth/authorize?x=1');
+      openAuthUrlInBrowser('javascript:alert(1)');
+      openAuthUrlInBrowser(undefined);
+      expect(opened).toEqual(['https://claude.ai/oauth/authorize?x=1']);
+    } finally {
+      globals.window = previous;
+    }
   });
 
   test('normalizes the app status response', () => {
