@@ -23,6 +23,7 @@ import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { useAuthStore } from '@/stores';
 import { accessKeysApi, type ServerNetwork } from '@/services/api/accessKeys';
 import { isDesktopApp } from '@/utils/desktop';
+import { UpdatesSection } from './UpdatesSection';
 import styles from './HomePage.module.scss';
 
 const DESKTOP_POLL_MS = 5000;
@@ -313,6 +314,9 @@ export function HomePage() {
           </div>
         </section>
       ) : null}
+
+      {/* ---------- Updates (desktop app) ---------- */}
+      {desktop ? <UpdatesSection appVersion={appVersion} /> : null}
 
       {/* ---------- Overview tiles ---------- */}
       <section className={styles.tiles} aria-label={t('home.overview')}>

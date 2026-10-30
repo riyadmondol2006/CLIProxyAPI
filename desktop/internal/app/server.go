@@ -32,10 +32,17 @@ type Server struct {
 	SaveFile func(name string, data []byte) (string, error)
 	// ClaudeUsage serves /app/claude-usage/* (the Claude Code usage dashboard).
 	ClaudeUsage http.Handler
-	// Executable is the app binary the autostart entry launches; empty disables that option.
+	// Executable is the app binary the autostart entry launches and a relaunch after an
+	// update starts; empty disables both.
 	Executable string
+	// UpdateFeed is the URL of the release feed (latest.json) checked for updates.
+	UpdateFeed string
+	// Quit closes the app so a relaunch can start the updated binary; nil disables relaunching.
+	Quit func()
 	// Debug logs every request the UI makes (enable with CPA_DESKTOP_DEBUG=1).
 	Debug bool
+
+	updates updateState
 }
 
 // Status is returned by GET /app/status.
@@ -65,6 +72,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.handleSave(w, r)
 	case r.URL.Path == "/app/startup":
 		s.handleStartup(w, r)
+	case r.URL.Path == "/app/update":
+		s.handleUpdate(w, r)
+	case r.URL.Path == "/app/update/install":
+		s.handleUpdateInstall(w, r)
+	case r.URL.Path == "/app/update/relaunch":
+		s.handleUpdateRelaunch(w, r)
 	case strings.HasPrefix(r.URL.Path, "/app/claude-usage/"):
 		if s.ClaudeUsage == nil {
 			writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "Claude usage is unavailable"})

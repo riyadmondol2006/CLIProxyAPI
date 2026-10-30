@@ -38,3 +38,12 @@ go run ./cmd/devserver -dist frontend/dist   # then open http://127.0.0.1:34115
 
 `.github/workflows/packages.yml` builds the proxy, this app, and `.deb`/`.rpm` packages with
 nfpm (`packaging/nfpm.yaml`) on every push.
+
+## Updates
+
+Each published release also carries `latest.json`, a feed with the version, recent commit
+subjects, and each package's size and SHA-256. The app checks the feed set at build time with
+`-ldflags "-X main.updateFeed=..."` (`CPA_UPDATE_FEED` overrides it; the dev server takes
+`-update-feed` and `-version`). `internal/app/update.go` serves `GET /app/update`, installs
+the matching package with `pkexec` after checking its SHA-256 (`POST /app/update/install`),
+then restarts the proxy service; `POST /app/update/relaunch` restarts the app.

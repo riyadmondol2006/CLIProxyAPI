@@ -3,6 +3,7 @@ name: packages
 # Builds the Linux .deb and .rpm packages (proxy + desktop app + systemd user service)
 # on every push. Packages are attached to the workflow run; pushes to main also refresh
 # the "latest-build" pre-release, and v* tags attach the packages to that release.
+# Both releases also get latest.json, the update feed the desktop app checks.
 
 on:
   push:
@@ -101,9 +102,10 @@ jobs:
         working-directory: desktop
         env:
           VERSION: ${{ steps.version.outputs.version }}
+          UPDATE_FEED: https://github.com/${{ github.repository }}/releases/download/latest-build/latest.json
         run: |
           CGO_ENABLED=1 go build -trimpath -tags desktop,production,webkit2_41 \
-            -ldflags "-s -w -X main.version=${VERSION}" \
+            -ldflags "-s -w -X main.version=${VERSION} -X main.updateFeed=${UPDATE_FEED}" \
             -o ../dist/cliproxyapi-desktop .
 
       - name: Build .deb and .rpm
@@ -134,18 +136,85 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GH_REPO: ${{ github.repository }}
+      # The release the packages go to: latest-build for main, the tag itself for v* tags.
+      RELEASE_TAG: ${{ github.ref_type == 'tag' && github.ref_name || 'latest-build' }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          # Recent commit subjects become the notes in the update feed.
+          fetch-depth: 30
+
       - name: Download packages
         uses: actions/download-artifact@v8
         with:
           path: packages
           merge-multiple: true
 
+      # latest.json is the update feed the desktop app checks (desktop/internal/app/update.go).
+      # This step fails, and no release is created or changed, unless every package is present.
+      - name: Generate the update feed
+        run: |
+          python3 - <<'PY'
+          import datetime, hashlib, json, os, pathlib, re, subprocess, sys
+
+          repo = os.environ["GITHUB_REPOSITORY"]
+          tag = os.environ["RELEASE_TAG"]
+          sha = os.environ["GITHUB_SHA"]
+          download = f"https://github.com/{repo}/releases/download/{tag}/"
+          # nfpm file names: cliproxyapi-<version>-<release>.<arch>.rpm, cliproxyapi_<version>-<release>_<arch>.deb
+          patterns = {
+              "rpm": re.compile(r"^cliproxyapi-(?P<version>.+)-(?P<release>[^-]+)\.(?P<arch>x86_64|aarch64)\.rpm$"),
+              "deb": re.compile(r"^cliproxyapi_(?P<version>.+)-(?P<release>[^-]+)_(?P<arch>amd64|arm64)\.deb$"),
+          }
+          arches = {"x86_64": "amd64", "aarch64": "arm64", "amd64": "amd64", "arm64": "arm64"}
+
+          assets, versions = [], set()
+          for path in sorted(pathlib.Path("packages").iterdir()):
+              fmt = path.suffix.lstrip(".")
+              if fmt not in patterns:
+                  continue
+              match = patterns[fmt].match(path.name)
+              if not match:
+                  sys.exit(f"unexpected package name: {path.name}")
+              # rpm versions cannot contain "-", so a prerelease tag may show up there as "~" or "_".
+              versions.add(re.sub(r"[~_]", "-", match["version"]))
+              assets.append({
+                  "name": path.name,
+                  "format": fmt,
+                  "arch": arches[match["arch"]],
+                  "size": path.stat().st_size,
+                  "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                  "url": download + path.name,
+              })
+
+          expected = {(fmt, arch) for fmt in ("rpm", "deb") for arch in ("amd64", "arm64")}
+          found = [(asset["format"], asset["arch"]) for asset in assets]
+          if sorted(found) != sorted(expected):
+              sys.exit(f"expected one package per format and arch, found {sorted(a['name'] for a in assets)}")
+          if len(versions) != 1:
+              sys.exit(f"the packages disagree on the version: {sorted(versions)}")
+
+          notes = subprocess.run(["git", "log", "-n", "15", "--format=%s", sha],
+                                 check=True, capture_output=True, text=True).stdout.splitlines()
+          feed = {
+              "version": versions.pop(),
+              "commit": sha,
+              "published": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+              "release-url": f"https://github.com/{repo}/releases/tag/{tag}",
+              "notes": notes,
+              "assets": assets,
+          }
+          out = pathlib.Path(os.environ["RUNNER_TEMP"], "latest.json")
+          out.write_text(json.dumps(feed, indent=2) + "\n")
+          print(out.read_text())
+          PY
+
       - name: Refresh the latest-build pre-release
         if: github.ref == 'refs/heads/main'
         run: |
           gh release delete latest-build --cleanup-tag --yes || true
-          gh release create latest-build packages/* \
+          gh release create latest-build packages/* "$RUNNER_TEMP/latest.json" \
             --prerelease \
             --target "$GITHUB_SHA" \
             --title "Latest build (main)" \
@@ -160,4 +229,4 @@ jobs:
             sleep 20
           done
           gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --generate-notes
-          gh release upload "$GITHUB_REF_NAME" packages/* --clobber
+          gh release upload "$GITHUB_REF_NAME" packages/* "$RUNNER_TEMP/latest.json" --clobber

@@ -30,6 +30,8 @@ func main() {
 	token := flag.String("token-file", "", "local management token path (default: the app's token path)")
 	saveDir := flag.String("save-dir", app.DownloadsDir(), "where downloads from the UI are saved")
 	claudeDir := flag.String("claude-dir", "", "comma-separated transcript directories (default: Claude Code's projects directories)")
+	updateFeed := flag.String("update-feed", app.ResolveUpdateFeed(app.DefaultUpdateFeed), "update feed URL (latest.json); "+app.UpdateFeedEnv+" sets the default")
+	version := flag.String("version", "dev", `app version to report; "dev" never offers updates, so pass an older version to test them`)
 	flag.Parse()
 
 	paths := app.DefaultPaths()
@@ -42,12 +44,14 @@ func main() {
 	backend := &app.Server{
 		Paths:   paths,
 		Service: app.NewSystemdUser(),
-		Version: "dev",
+		Version: *version,
 		// The real app binary, so the autostart entry can be tested from a browser.
 		Executable: "cliproxyapi-desktop",
+		UpdateFeed: *updateFeed,
 		OpenURL:    func(rawURL string) error { return exec.Command("xdg-open", rawURL).Start() },
 		// No native dialog here: save straight into the save directory.
 		SaveFile: func(name string, data []byte) (string, error) { return app.WriteUnique(*saveDir, name, data) },
+		// Quit stays nil: the dev server does not quit, so relaunching answers 503.
 	}
 
 	index, errIndex := os.ReadFile(filepath.Join(*dist, "index.html"))

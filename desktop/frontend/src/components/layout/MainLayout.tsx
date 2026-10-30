@@ -38,6 +38,7 @@ import {
 } from '@/components/ui/icons';
 import appIcon from '@/assets/appIcon.svg';
 import { ServiceStatusPill } from '@/features/desktop/ServiceStatusPill';
+import { UpdatePopup } from '@/features/desktop/UpdatePopup';
 import { isDesktopApp } from '@/utils/desktop';
 import {
   useAuthStore,
@@ -1249,6 +1250,7 @@ export function MainLayout() {
           </main>
         </div>
       </div>
+      {isDesktopApp() ? <UpdatePopup /> : null}
     </div>
   );
 }

@@ -32,6 +32,10 @@ var icon []byte
 // version is set at build time with -ldflags "-X main.version=...".
 var version = "dev"
 
+// updateFeed is the release feed (latest.json) checked for updates. It is set at build time
+// with -ldflags "-X main.updateFeed=..."; the CPA_UPDATE_FEED environment variable overrides it.
+var updateFeed = app.DefaultUpdateFeed
+
 func main() {
 	paths := app.DefaultPaths()
 	firstRun := false
@@ -62,7 +66,13 @@ func main() {
 		Service:    service,
 		Version:    version,
 		Executable: executable,
+		UpdateFeed: app.ResolveUpdateFeed(updateFeed),
 		Debug:      os.Getenv("CPA_DESKTOP_DEBUG") == "1",
+		Quit: func() {
+			if ctx := appCtx.Load(); ctx != nil {
+				runtime.Quit(*ctx)
+			}
+		},
 		SaveFile: func(name string, data []byte) (string, error) {
 			ctx := appCtx.Load()
 			if ctx == nil {

@@ -206,7 +206,7 @@ export function ApiReferencePage() {
           <h2 id="api-endpoints" className={styles.sectionTitle}>
             {t('api_docs.endpoints_title')}
           </h2>
-          <label className={styles.search}>
+          <label className={styles.searchBox}>
             <IconSearch size={15} aria-hidden="true" />
             <input
               type="search"

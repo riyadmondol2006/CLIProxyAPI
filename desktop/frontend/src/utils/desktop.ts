@@ -42,8 +42,79 @@ export interface DesktopStatus {
 
 export type DesktopServiceAction = 'start' | 'stop' | 'restart';
 
+export interface DesktopUpdatePackage {
+  name: string;
+  format: string;
+  arch: string;
+  /** Bytes; 0 when unknown. */
+  size: number;
+}
+
+export interface DesktopUpdateInfo {
+  current: string;
+  latest: string;
+  available: boolean;
+  devBuild: boolean;
+  /** RFC 3339, or '' when never checked. */
+  checkedAt: string;
+  /** Set when the check failed (for example offline); the other fields may be stale. */
+  error: string;
+  notes: string[];
+  releaseUrl: string;
+  /** RFC 3339, or ''. */
+  published: string;
+  package: DesktopUpdatePackage | null;
+  canInstall: boolean;
+  installHint: string;
+}
+
+export type DesktopInstallResult =
+  { status: 'installed'; version: string } | { status: 'cancelled' };
+
+/** An app backend request that got an error response; `status` is the HTTP status. */
+export class DesktopRequestError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'DesktopRequestError';
+    this.status = status;
+  }
+}
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
+
+const readString = (value: unknown): string => (typeof value === 'string' ? value.trim() : '');
+
+export const normalizeUpdateInfo = (input: unknown): DesktopUpdateInfo => {
+  const record = isRecord(input) ? input : {};
+  const pkg = isRecord(record.package) ? record.package : null;
+  const size = pkg ? Number(pkg.size) : 0;
+  return {
+    current: readString(record.current),
+    latest: readString(record.latest),
+    available: record.available === true,
+    devBuild: record['dev-build'] === true,
+    checkedAt: readString(record['checked-at']),
+    error: readString(record.error),
+    notes: Array.isArray(record.notes)
+      ? record.notes.map(readString).filter((note) => note !== '')
+      : [],
+    releaseUrl: readString(record['release-url']),
+    published: readString(record.published),
+    package: pkg
+      ? {
+          name: readString(pkg.name),
+          format: readString(pkg.format),
+          arch: readString(pkg.arch),
+          size: Number.isFinite(size) && size > 0 ? size : 0,
+        }
+      : null,
+    canInstall: record['can-install'] === true,
+    installHint: readString(record['install-hint']),
+  };
+};
 
 export const normalizeDesktopStatus = (input: unknown): DesktopStatus => {
   const record = isRecord(input) ? input : {};
@@ -72,7 +143,10 @@ async function requestJSON(path: string, init?: RequestInit): Promise<unknown> {
   const body: unknown = await response.json().catch(() => null);
   if (!response.ok) {
     const message = isRecord(body) && typeof body.error === 'string' ? body.error : '';
-    throw new Error(message || `Request failed (${response.status})`);
+    throw new DesktopRequestError(
+      message || `Request failed (${response.status})`,
+      response.status
+    );
   }
   return body;
 }
@@ -110,6 +184,31 @@ export const desktopApi = {
 
   async service(action: DesktopServiceAction): Promise<DesktopStatus> {
     return normalizeDesktopStatus(await requestJSON(`/app/service/${action}`, { method: 'POST' }));
+  },
+
+  /** Asks the app for the latest release; `force` skips the app's one-hour cache. */
+  async checkUpdate(force = false): Promise<DesktopUpdateInfo> {
+    return normalizeUpdateInfo(await requestJSON(force ? '/app/update?force=1' : '/app/update'));
+  },
+
+  /**
+   * Downloads, verifies, and installs the update. The system shows its own password
+   * prompt, so this can take minutes. Cancelling that prompt resolves to `cancelled`;
+   * other failures throw a DesktopRequestError.
+   */
+  async installUpdate(): Promise<DesktopInstallResult> {
+    try {
+      const body = await requestJSON('/app/update/install', { method: 'POST' });
+      return { status: 'installed', version: isRecord(body) ? readString(body.version) : '' };
+    } catch (err) {
+      if (err instanceof DesktopRequestError && err.status === 403) return { status: 'cancelled' };
+      throw err;
+    }
+  },
+
+  /** Quits the app and opens it again; resolves once the app has accepted. */
+  async relaunch(): Promise<void> {
+    await requestJSON('/app/update/relaunch', { method: 'POST' });
   },
 };
 

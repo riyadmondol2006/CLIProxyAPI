@@ -285,6 +285,42 @@
   }
 }
 
+/* ---------- Updates (shares the Startup row look) ---------- */
+
+.updateStatus {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+
+  &[data-tone='ok'] {
+    color: var(--viz-success);
+  }
+
+  &[data-tone='available'] {
+    color: var(--primary-color);
+  }
+
+  &[data-tone='error'] {
+    color: var(--error-color);
+  }
+}
+
+/* Long statuses or labels push the buttons to their own line instead of squeezing the text. */
+.updateRow {
+  flex-wrap: wrap;
+
+  > .startupText {
+    flex: 1 1 240px;
+  }
+}
+
+.updateActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 /* ---------- Tiles ---------- */
 
 .tiles {
