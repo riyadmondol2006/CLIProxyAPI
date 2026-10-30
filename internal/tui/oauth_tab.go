@@ -100,7 +100,7 @@ func newOAuthTabModel(client *Client) oauthTabModel {
 	ti := textinput.New()
 	ti.Placeholder = "http://localhost:.../auth/callback?code=...&state=..."
 	ti.CharLimit = 2048
-	ti.Prompt = "  回调 URL: "
+	ti.Prompt = T("oauth_callback_url") + " "
 	return oauthTabModel{
 		client:        client,
 		callbackInput: ti,

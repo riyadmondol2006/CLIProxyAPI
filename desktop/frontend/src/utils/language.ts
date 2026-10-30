@@ -1,5 +1,6 @@
 import type { Language } from '@/types';
 import { STORAGE_KEY_LANGUAGE, SUPPORTED_LANGUAGES } from '@/utils/constants';
+import { isDesktopApp } from '@/utils/desktop';
 
 const TRADITIONAL_CHINESE_PREFIXES = ['zh-tw', 'zh-hk', 'zh-mo', 'zh-hant'] as const;
 
@@ -38,9 +39,9 @@ const getStoredLanguage = (): Language | null => {
 
 const getBrowserLanguage = (): Language => {
   if (typeof navigator === 'undefined') {
-    return 'zh-CN';
+    return 'en';
   }
-  const raw = navigator.languages?.[0] || navigator.language || 'zh-CN';
+  const raw = navigator.languages?.[0] || navigator.language || 'en';
   const lower = raw.toLowerCase();
   if (TRADITIONAL_CHINESE_PREFIXES.some((prefix) => lower.startsWith(prefix))) return 'zh-TW';
   if (lower.startsWith('zh')) return 'zh-CN';
@@ -50,4 +51,9 @@ const getBrowserLanguage = (): Language => {
   return 'en';
 };
 
-export const getInitialLanguage = (): Language => getStoredLanguage() ?? getBrowserLanguage();
+/**
+ * The language the user picked in the language menu, otherwise English. The desktop app
+ * always starts in English; the browser panel follows the browser language.
+ */
+export const getInitialLanguage = (): Language =>
+  getStoredLanguage() ?? (isDesktopApp() ? 'en' : getBrowserLanguage());

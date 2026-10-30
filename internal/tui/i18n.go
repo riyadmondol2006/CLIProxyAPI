@@ -1,7 +1,7 @@
 package tui
 
 // i18n provides a simple internationalization system for the TUI.
-// Supported locales: "zh" (Chinese, default), "en" (English).
+// Supported locales: "en" (English, default), "zh" (Chinese).
 
 var currentLocale = "en"
 
