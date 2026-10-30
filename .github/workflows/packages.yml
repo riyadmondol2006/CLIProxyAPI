@@ -1,9 +1,10 @@
 name: packages
 
 # Builds the Linux .deb and .rpm packages (proxy + desktop app + systemd user service)
-# on every push. Packages are attached to the workflow run; pushes to main also refresh
-# the "latest-build" pre-release, and v* tags attach the packages to that release.
-# Both releases also get latest.json, the update feed the desktop app checks.
+# on every push. Packages are attached to the workflow run; each push to main also publishes
+# them as a new release, v<version>, and v* tags attach the packages to that release.
+# latest.json, the update feed the desktop app checks, goes with the packages and into the
+# "latest-build" pre-release, the feed URL that installed apps read.
 
 on:
   push:
@@ -136,8 +137,9 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GH_REPO: ${{ github.repository }}
-      # The release the packages go to: latest-build for main, the tag itself for v* tags.
-      RELEASE_TAG: ${{ github.ref_type == 'tag' && github.ref_name || 'latest-build' }}
+      # The release the packages go to: the tag itself for v* tags; empty for main, which
+      # gets a new v<version> release.
+      RELEASE_TAG: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -154,14 +156,13 @@ jobs:
       # latest.json is the update feed the desktop app checks (desktop/internal/app/update.go).
       # This step fails, and no release is created or changed, unless every package is present.
       - name: Generate the update feed
+        id: feed
         run: |
           python3 - <<'PY'
           import datetime, hashlib, json, os, pathlib, re, subprocess, sys
 
           repo = os.environ["GITHUB_REPOSITORY"]
-          tag = os.environ["RELEASE_TAG"]
           sha = os.environ["GITHUB_SHA"]
-          download = f"https://github.com/{repo}/releases/download/{tag}/"
           # nfpm file names: cliproxyapi-<version>-<release>.<arch>.rpm, cliproxyapi_<version>-<release>_<arch>.deb
           patterns = {
               "rpm": re.compile(r"^cliproxyapi-(?P<version>.+)-(?P<release>[^-]+)\.(?P<arch>x86_64|aarch64)\.rpm$"),
@@ -185,7 +186,6 @@ jobs:
                   "arch": arches[match["arch"]],
                   "size": path.stat().st_size,
                   "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
-                  "url": download + path.name,
               })
 
           expected = {(fmt, arch) for fmt in ("rpm", "deb") for arch in ("amd64", "arm64")}
@@ -194,11 +194,16 @@ jobs:
               sys.exit(f"expected one package per format and arch, found {sorted(a['name'] for a in assets)}")
           if len(versions) != 1:
               sys.exit(f"the packages disagree on the version: {sorted(versions)}")
+          version = versions.pop()
+          tag = os.environ["RELEASE_TAG"] or f"v{version}"
+          download = f"https://github.com/{repo}/releases/download/{tag}/"
+          for asset in assets:
+              asset["url"] = download + asset["name"]
 
           notes = subprocess.run(["git", "log", "-n", "15", "--format=%s", sha],
                                  check=True, capture_output=True, text=True).stdout.splitlines()
           feed = {
-              "version": versions.pop(),
+              "version": version,
               "commit": sha,
               "published": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
               "release-url": f"https://github.com/{repo}/releases/tag/{tag}",
@@ -208,17 +213,64 @@ jobs:
           out = pathlib.Path(os.environ["RUNNER_TEMP"], "latest.json")
           out.write_text(json.dumps(feed, indent=2) + "\n")
           print(out.read_text())
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              output.write(f"version={version}\ntag={tag}\n")
           PY
 
-      - name: Refresh the latest-build pre-release
+      # Tags made with GITHUB_TOKEN start no workflows, so this tag doesn't rebuild anything.
+      - name: Publish the release
+        if: github.ref == 'refs/heads/main'
+        env:
+          VERSION: ${{ steps.feed.outputs.version }}
+          TAG: ${{ steps.feed.outputs.tag }}
+        run: |
+          # What's new: the commits since the previous release, or the recent ones for the first.
+          previous=$(gh release list --exclude-pre-releases --exclude-drafts --limit 1 --json tagName --jq '.[0].tagName // ""')
+          changes=""
+          if [[ -n "$previous" && "$previous" != "$TAG" ]]; then
+            changes=$(gh api "repos/$GH_REPO/compare/$previous...$GITHUB_SHA" \
+              --jq '.commits[] | "- " + (.commit.message | split("\n")[0])' || true)
+          fi
+          [[ -n "$changes" ]] || changes=$(git log -n 15 --format='- %s' "$GITHUB_SHA")
+          cat > "$RUNNER_TEMP/notes.md" <<EOF
+          ## What's new
+
+          ${changes}
+
+          ## Install
+
+          Already installed? The app offers this update by itself.
+
+          Otherwise download the file for your computer, then open CLIProxyAPI from your app menu:
+
+          | Computer | Fedora, RHEL (.rpm) | Ubuntu, Debian (.deb) |
+          | --- | --- | --- |
+          | Most PCs and laptops (Intel or AMD, x86_64) | \`cliproxyapi-${VERSION}-1.x86_64.rpm\` | \`cliproxyapi_${VERSION}-1_amd64.deb\` |
+          | ARM (aarch64), e.g. Raspberry Pi | \`cliproxyapi-${VERSION}-1.aarch64.rpm\` | \`cliproxyapi_${VERSION}-1_arm64.deb\` |
+
+          Install with \`sudo dnf install ./cliproxyapi-*.rpm\` or \`sudo apt install ./cliproxyapi_*.deb\`. Not sure which you have? Run \`uname -m\`.
+          EOF
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            # A re-run of the same build: replace the files.
+            gh release upload "$TAG" packages/* "$RUNNER_TEMP/latest.json" --clobber
+          else
+            gh release create "$TAG" packages/* "$RUNNER_TEMP/latest.json" \
+              --target "$GITHUB_SHA" \
+              --title "CLIProxyAPI $VERSION" \
+              --notes-file "$RUNNER_TEMP/notes.md" \
+              --latest
+          fi
+
+      # Installed apps read the feed at latest-build/latest.json; it points at the release above.
+      - name: Refresh the update feed
         if: github.ref == 'refs/heads/main'
         run: |
           gh release delete latest-build --cleanup-tag --yes || true
-          gh release create latest-build packages/* "$RUNNER_TEMP/latest.json" \
+          gh release create latest-build "$RUNNER_TEMP/latest.json" \
             --prerelease \
             --target "$GITHUB_SHA" \
-            --title "Latest build (main)" \
-            --notes "Linux packages built from ${GITHUB_SHA::7} on main. Install with \`sudo dnf install ./cliproxyapi-*.rpm\` or \`sudo apt install ./cliproxyapi_*.deb\`, then open CLIProxyAPI from your app menu."
+            --title "Update feed" \
+            --notes "The desktop app reads latest.json here to find updates. Download the packages from the latest release: https://github.com/${GH_REPO}/releases/latest"
 
       - name: Attach packages to the tag release
         if: startsWith(github.ref, 'refs/tags/v')
