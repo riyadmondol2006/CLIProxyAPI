@@ -15,6 +15,7 @@ import (
 	"github.com/router-for-me/CLIProxyAPI/v8/internal/config"
 	"github.com/router-for-me/CLIProxyAPI/v8/internal/home"
 	"github.com/router-for-me/CLIProxyAPI/v8/internal/httpwire"
+	"github.com/router-for-me/CLIProxyAPI/v8/internal/keylimit"
 	"github.com/router-for-me/CLIProxyAPI/v8/internal/logging"
 	"github.com/router-for-me/CLIProxyAPI/v8/internal/safemode"
 	sdkaccess "github.com/router-for-me/CLIProxyAPI/v8/sdk/access"
@@ -522,6 +523,9 @@ func accessAuthMiddleware(manager *sdkaccess.Manager, realtimeError bool) gin.Ha
 				reqCtx = coreusage.WithAccessProvider(reqCtx, result.Provider)
 				reqCtx = coreusage.WithIsNativeKey(reqCtx, coreusage.IsNativeAccessProvider(result.Provider))
 				c.Request = c.Request.WithContext(reqCtx)
+				if !enforceAPIKeyLimit(c, result.Principal, result.Provider) {
+					return
+				}
 			}
 			middleware.CaptureAuthenticatedRequestBody(c)
 			if c.IsAborted() {
@@ -558,6 +562,26 @@ func accessAuthMiddleware(manager *sdkaccess.Manager, realtimeError bool) gin.Ha
 	}
 }
 
+// enforceAPIKeyLimit rejects requests from config-defined client keys that are disabled or over
+// their token budget. It returns false after aborting the request.
+func enforceAPIKeyLimit(c *gin.Context, principal, provider string) bool {
+	if !coreusage.IsNativeAccessProvider(provider) {
+		return true
+	}
+	decision := keylimit.Default().Check(principal)
+	if decision.Allowed {
+		return true
+	}
+	closeUnconsumedRequestOnAbort(c)
+	c.AbortWithStatusJSON(decision.Status, gin.H{"error": gin.H{
+		"message": decision.Message,
+		"type":    decision.Type,
+		"param":   nil,
+		"code":    decision.Code,
+	}})
+	return false
+}
+
 func realtimeAuthMiddleware(manager *sdkaccess.Manager, handler *codexlive.Handler) gin.HandlerFunc {
 	fallback := realtimeStandardAuthMiddleware(manager)
 	return func(c *gin.Context) {
@@ -592,6 +616,9 @@ func realtimeAuthMiddleware(manager *sdkaccess.Manager, handler *codexlive.Handl
 		c.Request = c.Request.WithContext(reqCtx)
 		c.Set(codexlive.ClientSecretSessionContextKey, authorization.Session)
 		c.Set(codexlive.ClientSecretPrincipalContextKey, authorization.Principal)
+		if !enforceAPIKeyLimit(c, principal, provider) {
+			return
+		}
 		middleware.CaptureAuthenticatedRequestBody(c)
 		if c.IsAborted() {
 			return

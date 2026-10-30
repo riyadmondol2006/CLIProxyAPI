@@ -1066,3 +1066,39 @@ func (m OpenAICompatibilityModel) GetIsCompat() bool               { return m.Is
 func (m OpenAICompatibilityModel) GetUseMaxCompletionTokens() bool { return m.UseMaxCompletionTokens }
 
 func (m OpenAICompatibilityModel) GetThinking() *registry.ThinkingSupport { return m.Thinking }
+
+// APIKeyLimit periods.
+const (
+	APIKeyLimitPeriodDaily   = "daily"
+	APIKeyLimitPeriodWeekly  = "weekly"
+	APIKeyLimitPeriodMonthly = "monthly"
+	APIKeyLimitPeriodTotal   = "total"
+)
+
+// APIKeyLimit describes optional restrictions for one client API key from access.api-keys.
+type APIKeyLimit struct {
+	// APIKey is the client key these settings apply to.
+	APIKey string `yaml:"api-key" json:"api-key"`
+	// Name is an optional label, such as the person or machine using the key.
+	Name string `yaml:"name,omitempty" json:"name,omitempty"`
+	// TokenLimit caps total tokens per period. Zero or negative means unlimited.
+	TokenLimit int64 `yaml:"token-limit,omitempty" json:"token-limit,omitempty"`
+	// Period is daily, weekly, monthly, or total. Empty defaults to monthly.
+	Period string `yaml:"period,omitempty" json:"period,omitempty"`
+	// Disabled rejects every request made with this key.
+	Disabled bool `yaml:"disabled,omitempty" json:"disabled,omitempty"`
+}
+
+// NormalizedPeriod returns the effective period for the limit.
+func (l APIKeyLimit) NormalizedPeriod() string {
+	switch strings.ToLower(strings.TrimSpace(l.Period)) {
+	case APIKeyLimitPeriodDaily:
+		return APIKeyLimitPeriodDaily
+	case APIKeyLimitPeriodWeekly:
+		return APIKeyLimitPeriodWeekly
+	case APIKeyLimitPeriodTotal:
+		return APIKeyLimitPeriodTotal
+	default:
+		return APIKeyLimitPeriodMonthly
+	}
+}

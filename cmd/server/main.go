@@ -5,6 +5,8 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"flag"
 	"fmt"
@@ -133,6 +135,7 @@ func main() {
 	var standalone bool
 	var managementBaseURL string
 	var localModel bool
+	var localTokenFile string
 
 	// Define command-line flags for different operation modes.
 	flag.BoolVar(&codexLogin, "codex-login", false, "Login to Codex using OAuth")
@@ -163,6 +166,7 @@ func main() {
 	flag.BoolVar(&standalone, "standalone", false, "In TUI mode, start an embedded local server")
 	flag.StringVar(&managementBaseURL, "management-base-url", "", "Base URL of remote management API for TUI client mode (e.g. https://proxy.example.com)")
 	flag.BoolVar(&localModel, "local-model", false, "Use embedded model catalogs unless models.catalog, models.codex-catalog, or models.devin-catalog explicitly overrides the source")
+	flag.StringVar(&localTokenFile, "local-token-file", "", "Write a random management token, accepted only from localhost, to this file at startup (used by the desktop app)")
 
 	flag.CommandLine.Usage = func() {
 		out := flag.CommandLine.Output()
@@ -832,9 +836,38 @@ func main() {
 			managementasset.StartAutoUpdater(context.Background(), configFilePath)
 			misc.StartAntigravityVersionUpdater(context.Background())
 			registry.SetLocalModelCatalogs(localModel)
+			if localTokenFile != "" {
+				token, errToken := writeLocalManagementToken(localTokenFile)
+				if errToken != nil {
+					log.Errorf("failed to write local management token: %v", errToken)
+					return
+				}
+				serverOptions = append(serverOptions, api.WithLocalManagementPassword(token))
+			}
 			cmd.StartServiceWithPluginHost(cfg, configFilePath, password, pluginHost, serverOptions...)
 		}
 	}
+}
+
+// writeLocalManagementToken creates a random token, stores it in path with owner-only
+// permissions, and returns it. The server accepts the token only from localhost.
+func writeLocalManagementToken(path string) (string, error) {
+	buf := make([]byte, 32)
+	if _, errRead := rand.Read(buf); errRead != nil {
+		return "", fmt.Errorf("generate token: %w", errRead)
+	}
+	token := hex.EncodeToString(buf)
+	if errMkdir := os.MkdirAll(filepath.Dir(path), 0o700); errMkdir != nil {
+		return "", fmt.Errorf("create token directory: %w", errMkdir)
+	}
+	tmp := path + ".tmp"
+	if errWrite := os.WriteFile(tmp, []byte(token+"\n"), 0o600); errWrite != nil {
+		return "", fmt.Errorf("write token: %w", errWrite)
+	}
+	if errRename := os.Rename(tmp, path); errRename != nil {
+		return "", fmt.Errorf("replace token: %w", errRename)
+	}
+	return token, nil
 }
 
 // resolveManagementBaseURL determines the management API base URL for TUI client mode.

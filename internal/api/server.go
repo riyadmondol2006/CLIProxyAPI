@@ -23,6 +23,7 @@ import (
 	codexlive "github.com/router-for-me/CLIProxyAPI/v8/internal/client/codex/live"
 	"github.com/router-for-me/CLIProxyAPI/v8/internal/config"
 	"github.com/router-for-me/CLIProxyAPI/v8/internal/githubauth"
+	"github.com/router-for-me/CLIProxyAPI/v8/internal/keylimit"
 	"github.com/router-for-me/CLIProxyAPI/v8/internal/logging"
 	"github.com/router-for-me/CLIProxyAPI/v8/internal/managementasset"
 	"github.com/router-for-me/CLIProxyAPI/v8/internal/pluginhost"
@@ -259,6 +260,11 @@ func NewServer(cfg *config.Config, authManager *auth.Manager, accessManager *sdk
 	s.refreshPluginManagementRoutes()
 	engine.NoRoute(s.pluginManagementNoRoute)
 
+	keyTracker := keylimit.Default()
+	keyTracker.SetStorePath(keylimit.StorePath(configFilePath))
+	keyTracker.Configure(cfg.APIKeys, cfg.APIKeyLimits)
+	keyTracker.Start(context.Background())
+
 	if optionState.keepAliveEnabled {
 		s.enableKeepAlive(optionState.keepAliveTimeout, optionState.keepAliveOnTimeout)
 	}
@@ -418,6 +424,10 @@ func (s *Server) Start() error {
 //   - error: An error if the server fails to stop
 func (s *Server) Stop(ctx context.Context) error {
 	log.Debug("Stopping API server...")
+
+	if errFlush := keylimit.Default().Flush(); errFlush != nil {
+		log.WithError(errFlush).Warn("failed to save API key usage")
+	}
 
 	if s.keepAliveEnabled {
 		select {

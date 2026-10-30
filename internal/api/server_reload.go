@@ -10,6 +10,7 @@ import (
 	"github.com/router-for-me/CLIProxyAPI/v8/internal/cache"
 	"github.com/router-for-me/CLIProxyAPI/v8/internal/config"
 	"github.com/router-for-me/CLIProxyAPI/v8/internal/githubauth"
+	"github.com/router-for-me/CLIProxyAPI/v8/internal/keylimit"
 	"github.com/router-for-me/CLIProxyAPI/v8/internal/logging"
 	"github.com/router-for-me/CLIProxyAPI/v8/internal/managementasset"
 	"github.com/router-for-me/CLIProxyAPI/v8/internal/redisqueue"
@@ -93,6 +94,8 @@ func (s *Server) UpdateClientsContext(ctx context.Context, cfg *config.Config) b
 		}
 	}
 
+	keylimit.Default().Configure(cfg.APIKeys, cfg.APIKeyLimits)
+
 	if oldCfg == nil || oldCfg.UsageStatisticsEnabled != cfg.UsageStatisticsEnabled {
 		redisqueue.SetUsageStatisticsEnabled(cfg.UsageStatisticsEnabled)
 	}
@@ -139,10 +142,10 @@ func (s *Server) UpdateClientsContext(ctx context.Context, cfg *config.Config) b
 		prevSecretEmpty = oldCfg.RemoteManagement.SecretKey == ""
 	}
 	newSecretEmpty := cfg.RemoteManagement.SecretKey == ""
-	if s.envManagementSecret {
+	if s.envManagementSecret || s.localPassword != "" {
 		s.registerManagementRoutes()
 		if s.managementRoutesEnabled.CompareAndSwap(false, true) {
-			log.Info("management routes enabled via MANAGEMENT_PASSWORD")
+			log.Info("management routes enabled via runtime management password")
 		} else {
 			s.managementRoutesEnabled.Store(true)
 		}

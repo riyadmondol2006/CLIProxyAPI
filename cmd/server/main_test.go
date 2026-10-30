@@ -300,3 +300,32 @@ func TestPersistSeededConfigRefusesConfigThatKeepsPlaintextSecret(t *testing.T) 
 		})
 	}
 }
+
+func TestWriteLocalManagementTokenCreatesPrivateFile(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "runtime", "management-token")
+	token, errWrite := writeLocalManagementToken(path)
+	if errWrite != nil {
+		t.Fatalf("write token: %v", errWrite)
+	}
+	if len(token) != 64 {
+		t.Fatalf("expected 64 hex characters, got %d", len(token))
+	}
+	info, errStat := os.Stat(path)
+	if errStat != nil {
+		t.Fatalf("stat token: %v", errStat)
+	}
+	if perm := info.Mode().Perm(); perm != 0o600 {
+		t.Fatalf("token file permissions = %o, want 600", perm)
+	}
+	data, errRead := os.ReadFile(path)
+	if errRead != nil {
+		t.Fatalf("read token: %v", errRead)
+	}
+	if strings.TrimSpace(string(data)) != token {
+		t.Fatal("token file does not contain the returned token")
+	}
+	second, errSecond := writeLocalManagementToken(path)
+	if errSecond != nil || second == token {
+		t.Fatalf("expected a new token on each start, got %q (err %v)", second, errSecond)
+	}
+}

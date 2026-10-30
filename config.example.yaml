@@ -123,6 +123,17 @@ access:
     - "your-api-key-2"
     - "your-api-key-3"
 
+  # Optional labels and token budgets per client key, e.g. for keys shared with friends or other PCs.
+  # Usage is counted per key from upstream token usage and saved to key-usage.json next to this file.
+  # A key at its limit gets HTTP 429 until the period resets; a disabled key gets HTTP 403.
+  # The check runs before each request, so the request that crosses the limit still completes.
+  # key-limits:
+  #   - api-key: "your-api-key-2"
+  #     name: "Laptop"           # optional label
+  #     token-limit: 500000      # total tokens per period; 0 or omitted = unlimited
+  #     period: "daily"          # daily, weekly, monthly (default), or total
+  #     disabled: false          # true rejects every request with this key
+
 # Optional credential concurrency and observation contracts.
 
 # credentials:

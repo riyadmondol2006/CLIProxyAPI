@@ -51,6 +51,9 @@ type Config struct {
 	// RemoteManagement nests management-related options under 'remote-management'.
 	RemoteManagement RemoteManagement `yaml:"remote-management" json:"-"`
 
+	// APIKeyLimits sets optional per-client-key token budgets and labels (YAML: access.key-limits).
+	APIKeyLimits []APIKeyLimit `yaml:"api-key-limits,omitempty" json:"api-key-limits,omitempty"`
+
 	// Plugins configures dynamic plugin discovery and per-plugin settings.
 	Plugins PluginsConfig `yaml:"plugins" json:"plugins"`
 
