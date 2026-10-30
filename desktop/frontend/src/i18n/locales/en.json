@@ -111,7 +111,8 @@
     "system_info": "About",
     "home": "Home",
     "docs": "Docs",
-    "claude_usage": "Claude usage"
+    "claude_usage": "Claude usage",
+    "api_docs": "API reference"
   },
   "nav_groups": {
     "operate": "Operate",
@@ -139,7 +140,8 @@
     "system_info": "Runtime & diagnostics",
     "home": "Status and quick actions",
     "docs": "Guides and reference",
-    "claude_usage": "Local Claude Code tokens and cost"
+    "claude_usage": "Local Claude Code tokens and cost",
+    "api_docs": "Endpoints, URLs, and examples"
   },
   "dashboard": {
     "hero_verdict_good": "All systems steady",
@@ -2409,7 +2411,15 @@
         "q": "Keep a custom panel from being replaced",
         "a": "The proxy updates management.html from GitHub automatically. Set management.disable-auto-update-panel: true to keep your own build."
       }
-    }
+    },
+    "this_computer": "This computer",
+    "local_network": "Local network",
+    "endpoint_anthropic_gemini": "Anthropic & Gemini",
+    "other_address": "Other address",
+    "lan_off_hint": "Other devices can't connect yet.",
+    "lan_restart_hint": "LAN access is saved but needs a service restart.",
+    "lan_open_access_keys": "Open Access keys",
+    "examples_use": "Examples use"
   },
   "access_keys": {
     "title": "Access keys",
@@ -2737,5 +2747,45 @@
       "page": "Page {{page}} of {{pages}}",
       "empty": "Nothing to show."
     }
+  },
+  "api_docs": {
+    "title": "API reference",
+    "meta": "Endpoints: {{count}}",
+    "lede": "Every endpoint apps can call on this proxy, with the exact URLs for this computer and your local network. Examples are filled in with your key and a model you have.",
+    "bases_title": "Base URLs",
+    "this_computer": "This computer",
+    "local_network": "Local network",
+    "bases_hint": "OpenAI SDKs and apps use the base URL with /v1. Anthropic and Gemini SDKs use it without /v1.",
+    "lan_off": "Other devices can't connect yet.",
+    "lan_restart": "LAN access is saved but needs a service restart.",
+    "open_access_keys": "Open Access keys",
+    "examples_use": "Examples use",
+    "example_model": "Example model",
+    "copy_url": "Copy URL",
+    "auth_title": "Authentication",
+    "auth_text": "Send one of your client API keys with every request, in any of these forms. The same key works on every endpoint.",
+    "your_key": "Your key",
+    "no_key": "No client API key yet.",
+    "show_key": "Show key",
+    "hide_key": "Hide key",
+    "copy_key": "Copy key",
+    "routing_title": "Choosing a model",
+    "endpoints_title": "Endpoints",
+    "search": "Filter endpoints",
+    "no_match": "No endpoints match.",
+    "auth": "Auth",
+    "auth_none": "None",
+    "auth_key": "Client API key",
+    "auth_realtime": "Client API key or an ek_ client secret",
+    "format": "Format",
+    "streaming": "Streaming",
+    "providers": "Served by",
+    "also": "Also at",
+    "example": "Example",
+    "copy_example": "Copy",
+    "errors_title": "Errors",
+    "status": "Status",
+    "when": "When",
+    "body": "Response body"
   }
 }

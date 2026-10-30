@@ -111,7 +111,8 @@
     "system_info": "关于",
     "home": "首页",
     "docs": "文档",
-    "claude_usage": "Claude 用量"
+    "claude_usage": "Claude 用量",
+    "api_docs": "API 参考"
   },
   "nav_groups": {
     "operate": "运行",
@@ -139,7 +140,8 @@
     "system_info": "运行与诊断信息",
     "home": "状态与快捷操作",
     "docs": "指南与参考",
-    "claude_usage": "本机 Claude Code Token 与费用"
+    "claude_usage": "本机 Claude Code Token 与费用",
+    "api_docs": "端点、地址与示例"
   },
   "dashboard": {
     "hero_verdict_good": "运行平稳",
@@ -2407,7 +2409,15 @@
         "q": "防止自定义面板被覆盖",
         "a": "代理会自动从 GitHub 更新 management.html。设置 management.disable-auto-update-panel: true 即可保留你自己的构建。"
       }
-    }
+    },
+    "this_computer": "本机",
+    "local_network": "局域网",
+    "endpoint_anthropic_gemini": "Anthropic 与 Gemini",
+    "other_address": "其他地址",
+    "lan_off_hint": "其他设备暂时无法连接。",
+    "lan_restart_hint": "已保存局域网访问，需要重启服务。",
+    "lan_open_access_keys": "打开访问密钥",
+    "examples_use": "示例使用"
   },
   "access_keys": {
     "title": "访问密钥",
@@ -2735,5 +2745,45 @@
       "page": "第 {{page}} / {{pages}} 页",
       "empty": "暂无内容。"
     }
+  },
+  "api_docs": {
+    "title": "API 参考",
+    "meta": "端点：{{count}}",
+    "lede": "应用可调用本代理的全部端点，并附带本机与局域网的准确地址。示例已填入你的密钥和可用模型。",
+    "bases_title": "Base URL",
+    "this_computer": "本机",
+    "local_network": "局域网",
+    "bases_hint": "OpenAI SDK 与应用使用带 /v1 的地址；Anthropic 与 Gemini SDK 使用不带 /v1 的地址。",
+    "lan_off": "其他设备暂时无法连接。",
+    "lan_restart": "已保存局域网访问，需要重启服务。",
+    "open_access_keys": "打开访问密钥",
+    "examples_use": "示例使用",
+    "example_model": "示例模型",
+    "copy_url": "复制 URL",
+    "auth_title": "认证",
+    "auth_text": "每个请求都要附带一个客户端 API 密钥，可用以下任一形式。同一个密钥适用于所有端点。",
+    "your_key": "你的密钥",
+    "no_key": "还没有客户端 API 密钥。",
+    "show_key": "显示密钥",
+    "hide_key": "隐藏密钥",
+    "copy_key": "复制密钥",
+    "routing_title": "选择模型",
+    "endpoints_title": "端点",
+    "search": "筛选端点",
+    "no_match": "没有匹配的端点。",
+    "auth": "认证",
+    "auth_none": "无",
+    "auth_key": "客户端 API 密钥",
+    "auth_realtime": "客户端 API 密钥或 ek_ 客户端密钥",
+    "format": "格式",
+    "streaming": "流式",
+    "providers": "提供方",
+    "also": "别名",
+    "example": "示例",
+    "copy_example": "复制",
+    "errors_title": "错误",
+    "status": "状态码",
+    "when": "情形",
+    "body": "响应体"
   }
 }

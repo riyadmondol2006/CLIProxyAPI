@@ -111,7 +111,8 @@
     "system_info": "Giới thiệu",
     "home": "Trang chủ",
     "docs": "Tài liệu",
-    "claude_usage": "Mức dùng Claude"
+    "claude_usage": "Mức dùng Claude",
+    "api_docs": "Tham chiếu API"
   },
   "nav_groups": {
     "operate": "Vận hành",
@@ -139,7 +140,8 @@
     "system_info": "Runtime & chẩn đoán",
     "home": "Trạng thái và thao tác nhanh",
     "docs": "Hướng dẫn và tham khảo",
-    "claude_usage": "Token và chi phí Claude Code trên máy"
+    "claude_usage": "Token và chi phí Claude Code trên máy",
+    "api_docs": "Endpoint, địa chỉ và ví dụ"
   },
   "dashboard": {
     "hero_verdict_good": "Mọi hệ thống ổn định",
@@ -2415,7 +2417,15 @@
         "q": "Giữ bảng điều khiển tùy chỉnh không bị ghi đè",
         "a": "Proxy tự động cập nhật management.html từ GitHub. Đặt management.disable-auto-update-panel: true để giữ bản build của riêng bạn."
       }
-    }
+    },
+    "this_computer": "Máy này",
+    "local_network": "Mạng nội bộ",
+    "endpoint_anthropic_gemini": "Anthropic và Gemini",
+    "other_address": "Địa chỉ khác",
+    "lan_off_hint": "Thiết bị khác chưa thể kết nối.",
+    "lan_restart_hint": "Đã lưu truy cập LAN nhưng cần khởi động lại dịch vụ.",
+    "lan_open_access_keys": "Mở Khóa truy cập",
+    "examples_use": "Ví dụ dùng"
   },
   "access_keys": {
     "title": "Khóa truy cập",
@@ -2743,5 +2753,45 @@
       "page": "Trang {{page}}/{{pages}}",
       "empty": "Không có gì để hiển thị."
     }
+  },
+  "api_docs": {
+    "title": "Tham chiếu API",
+    "meta": "Số endpoint: {{count}}",
+    "lede": "Mọi endpoint mà ứng dụng có thể gọi qua proxy này, kèm địa chỉ chính xác cho máy này và mạng nội bộ. Ví dụ đã điền sẵn khóa và một mô hình bạn có.",
+    "bases_title": "Base URL",
+    "this_computer": "Máy này",
+    "local_network": "Mạng nội bộ",
+    "bases_hint": "SDK và ứng dụng OpenAI dùng base URL có /v1. SDK Anthropic và Gemini dùng không có /v1.",
+    "lan_off": "Thiết bị khác chưa thể kết nối.",
+    "lan_restart": "Đã lưu truy cập LAN nhưng cần khởi động lại dịch vụ.",
+    "open_access_keys": "Mở Khóa truy cập",
+    "examples_use": "Ví dụ dùng",
+    "example_model": "Mô hình trong ví dụ",
+    "copy_url": "Sao chép URL",
+    "auth_title": "Xác thực",
+    "auth_text": "Gửi một API key máy khách trong mỗi yêu cầu, theo bất kỳ dạng nào dưới đây. Cùng một khóa dùng được cho mọi endpoint.",
+    "your_key": "Khóa của bạn",
+    "no_key": "Chưa có API key máy khách.",
+    "show_key": "Hiện khóa",
+    "hide_key": "Ẩn khóa",
+    "copy_key": "Sao chép khóa",
+    "routing_title": "Chọn mô hình",
+    "endpoints_title": "Endpoint",
+    "search": "Lọc endpoint",
+    "no_match": "Không có endpoint phù hợp.",
+    "auth": "Xác thực",
+    "auth_none": "Không",
+    "auth_key": "API key máy khách",
+    "auth_realtime": "API key máy khách hoặc client secret ek_",
+    "format": "Định dạng",
+    "streaming": "Truyền luồng",
+    "providers": "Phục vụ bởi",
+    "also": "Cũng tại",
+    "example": "Ví dụ",
+    "copy_example": "Sao chép",
+    "errors_title": "Lỗi",
+    "status": "Mã",
+    "when": "Khi nào",
+    "body": "Nội dung phản hồi"
   }
 }

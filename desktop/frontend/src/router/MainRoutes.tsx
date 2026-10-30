@@ -5,6 +5,7 @@ import { SetupGuidePage } from '@/features/setup/SetupGuidePage';
 import { AccessKeysPage } from '@/features/accessKeys/AccessKeysPage';
 import { HomePage } from '@/features/home/HomePage';
 import { DocsPage } from '@/features/docs/DocsPage';
+import { ApiReferencePage } from '@/features/apiDocs/ApiReferencePage';
 import { ClaudeUsagePage } from '@/features/claudeUsage/ClaudeUsagePage';
 import { AuthFilesPage } from '@/features/authFiles/AuthFilesPage';
 import { AuthFilesOAuthExcludedEditPage } from '@/pages/AuthFilesOAuthExcludedEditPage';
@@ -28,6 +29,7 @@ const createMainRoutes = (supportsPlugin: boolean) => [
     path: '/claude-usage',
     element: isDesktopApp() ? <ClaudeUsagePage /> : <Navigate to="/" replace />,
   },
+  { path: '/api-docs', element: <ApiReferencePage /> },
   { path: '/docs', element: <DocsPage /> },
   { path: '/docs/:docId', element: <DocsPage /> },
   { path: '/settings', element: <Navigate to="/config" replace /> },

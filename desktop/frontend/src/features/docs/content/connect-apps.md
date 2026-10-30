@@ -1,7 +1,13 @@
 # Connecting apps
 
 Every app needs two things: a **base URL** and a **client API key**. **Connect apps**
-shows both with copy buttons and fills them into the examples below.
+shows both with copy buttons and fills them into the examples below. **API reference** lists
+every endpoint with ready-to-run examples.
+
+Apps on this computer use `http://127.0.0.1:8317`. Other devices on your network use this
+computer's LAN address instead, for example `http://192.168.1.20:8317`, once LAN access is on
+(see **Sharing**). Both addresses are shown, with copy buttons, on **Connect apps** and
+**API reference**. The examples below use `127.0.0.1`.
 
 | API style | Base URL | Example endpoints |
 | --- | --- | --- |

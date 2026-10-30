@@ -111,7 +111,8 @@
     "system_info": "정보",
     "home": "홈",
     "docs": "문서",
-    "claude_usage": "Claude 사용량"
+    "claude_usage": "Claude 사용량",
+    "api_docs": "API 참고"
   },
   "nav_groups": {
     "operate": "운영",
@@ -139,7 +140,8 @@
     "system_info": "런타임 및 진단",
     "home": "상태와 빠른 작업",
     "docs": "가이드와 참고 자료",
-    "claude_usage": "이 컴퓨터의 Claude Code 토큰과 비용"
+    "claude_usage": "이 컴퓨터의 Claude Code 토큰과 비용",
+    "api_docs": "엔드포인트, 주소, 예제"
   },
   "dashboard": {
     "hero_verdict_good": "모든 시스템 정상",
@@ -2409,7 +2411,15 @@
         "q": "사용자 지정 패널이 교체되지 않게 하기",
         "a": "프록시는 GitHub에서 management.html을 자동으로 업데이트합니다. 직접 빌드한 패널을 유지하려면 management.disable-auto-update-panel: true로 설정하세요."
       }
-    }
+    },
+    "this_computer": "이 컴퓨터",
+    "local_network": "로컬 네트워크",
+    "endpoint_anthropic_gemini": "Anthropic 및 Gemini",
+    "other_address": "다른 주소",
+    "lan_off_hint": "아직 다른 기기에서 연결할 수 없습니다.",
+    "lan_restart_hint": "LAN 접근이 저장되었지만 서비스를 다시 시작해야 합니다.",
+    "lan_open_access_keys": "액세스 키 열기",
+    "examples_use": "예제 주소"
   },
   "access_keys": {
     "title": "액세스 키",
@@ -2737,5 +2747,45 @@
       "page": "{{page}}/{{pages}} 페이지",
       "empty": "표시할 내용이 없습니다."
     }
+  },
+  "api_docs": {
+    "title": "API 참고",
+    "meta": "엔드포인트: {{count}}개",
+    "lede": "앱이 이 프록시로 호출할 수 있는 모든 엔드포인트와, 이 컴퓨터 및 로컬 네트워크용 정확한 주소입니다. 예제에는 내 키와 사용 가능한 모델이 채워져 있습니다.",
+    "bases_title": "Base URL",
+    "this_computer": "이 컴퓨터",
+    "local_network": "로컬 네트워크",
+    "bases_hint": "OpenAI SDK와 앱은 /v1이 붙은 base URL을, Anthropic과 Gemini SDK는 /v1 없이 사용합니다.",
+    "lan_off": "아직 다른 기기에서 연결할 수 없습니다.",
+    "lan_restart": "LAN 접근이 저장되었지만 서비스를 다시 시작해야 합니다.",
+    "open_access_keys": "액세스 키 열기",
+    "examples_use": "예제 주소",
+    "example_model": "예제 모델",
+    "copy_url": "URL 복사",
+    "auth_title": "인증",
+    "auth_text": "모든 요청에 클라이언트 API 키 하나를 아래 형식 중 하나로 보내세요. 같은 키가 모든 엔드포인트에서 작동합니다.",
+    "your_key": "내 키",
+    "no_key": "아직 클라이언트 API 키가 없습니다.",
+    "show_key": "키 표시",
+    "hide_key": "키 숨기기",
+    "copy_key": "키 복사",
+    "routing_title": "모델 선택",
+    "endpoints_title": "엔드포인트",
+    "search": "엔드포인트 필터",
+    "no_match": "일치하는 엔드포인트가 없습니다.",
+    "auth": "인증",
+    "auth_none": "없음",
+    "auth_key": "클라이언트 API 키",
+    "auth_realtime": "클라이언트 API 키 또는 ek_ 클라이언트 시크릿",
+    "format": "형식",
+    "streaming": "스트리밍",
+    "providers": "제공",
+    "also": "다른 경로",
+    "example": "예제",
+    "copy_example": "복사",
+    "errors_title": "오류",
+    "status": "상태",
+    "when": "상황",
+    "body": "응답 본문"
   }
 }

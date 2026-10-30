@@ -111,7 +111,8 @@
     "system_info": "關於",
     "home": "首頁",
     "docs": "文件",
-    "claude_usage": "Claude 用量"
+    "claude_usage": "Claude 用量",
+    "api_docs": "API 參考"
   },
   "nav_groups": {
     "operate": "運行",
@@ -139,7 +140,8 @@
     "system_info": "運行與診斷資訊",
     "home": "狀態與快捷操作",
     "docs": "指南與參考",
-    "claude_usage": "本機 Claude Code Token 與費用"
+    "claude_usage": "本機 Claude Code Token 與費用",
+    "api_docs": "端點、位址與範例"
   },
   "dashboard": {
     "hero_verdict_good": "運行平穩",
@@ -2435,7 +2437,15 @@
         "q": "防止自訂面板被覆蓋",
         "a": "代理會自動從 GitHub 更新 management.html。設定 management.disable-auto-update-panel: true 即可保留你自己的建置。"
       }
-    }
+    },
+    "this_computer": "本機",
+    "local_network": "區域網路",
+    "endpoint_anthropic_gemini": "Anthropic 與 Gemini",
+    "other_address": "其他位址",
+    "lan_off_hint": "其他裝置暫時無法連線。",
+    "lan_restart_hint": "已儲存區域網路存取，需要重新啟動服務。",
+    "lan_open_access_keys": "開啟存取金鑰",
+    "examples_use": "範例使用"
   },
   "access_keys": {
     "title": "存取金鑰",
@@ -2763,5 +2773,45 @@
       "page": "第 {{page}} / {{pages}} 頁",
       "empty": "沒有內容。"
     }
+  },
+  "api_docs": {
+    "title": "API 參考",
+    "meta": "端點：{{count}}",
+    "lede": "應用可呼叫本代理的所有端點，並附上本機與區域網路的準確位址。範例已填入你的金鑰和可用模型。",
+    "bases_title": "Base URL",
+    "this_computer": "本機",
+    "local_network": "區域網路",
+    "bases_hint": "OpenAI SDK 與應用使用帶 /v1 的位址；Anthropic 與 Gemini SDK 使用不帶 /v1 的位址。",
+    "lan_off": "其他裝置暫時無法連線。",
+    "lan_restart": "已儲存區域網路存取，需要重新啟動服務。",
+    "open_access_keys": "開啟存取金鑰",
+    "examples_use": "範例使用",
+    "example_model": "範例模型",
+    "copy_url": "複製 URL",
+    "auth_title": "驗證",
+    "auth_text": "每個請求都要附上一個用戶端 API 金鑰，可用以下任一形式。同一個金鑰適用於所有端點。",
+    "your_key": "你的金鑰",
+    "no_key": "還沒有用戶端 API 金鑰。",
+    "show_key": "顯示金鑰",
+    "hide_key": "隱藏金鑰",
+    "copy_key": "複製金鑰",
+    "routing_title": "選擇模型",
+    "endpoints_title": "端點",
+    "search": "篩選端點",
+    "no_match": "沒有符合的端點。",
+    "auth": "驗證",
+    "auth_none": "無",
+    "auth_key": "用戶端 API 金鑰",
+    "auth_realtime": "用戶端 API 金鑰或 ek_ 用戶端密鑰",
+    "format": "格式",
+    "streaming": "串流",
+    "providers": "提供方",
+    "also": "別名",
+    "example": "範例",
+    "copy_example": "複製",
+    "errors_title": "錯誤",
+    "status": "狀態碼",
+    "when": "情形",
+    "body": "回應內容"
   }
 }

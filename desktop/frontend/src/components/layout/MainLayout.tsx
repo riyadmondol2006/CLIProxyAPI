@@ -30,6 +30,7 @@ import {
   IconActivity,
   IconChartColumn,
   IconBookOpen,
+  IconCode,
   IconSidebarQuota,
   IconSidebarStore,
   IconSidebarSystem,
@@ -63,6 +64,7 @@ const sidebarIcons: Record<string, ReactNode> = {
   dashboard: <IconActivity size={18} />,
   claudeUsage: <IconChartColumn size={18} />,
   docs: <IconBookOpen size={18} />,
+  apiDocs: <IconCode size={18} />,
   quickStart: <IconSidebarQuickStart size={18} />,
   accessKeys: <IconKey size={18} />,
   aiProviders: <IconSidebarProviders size={18} />,
@@ -621,6 +623,12 @@ export function MainLayout() {
             ]
           : []),
         quickStartNavItem,
+        {
+          path: '/api-docs',
+          labelKey: 'nav.api_docs',
+          metaKey: 'nav_meta.api_docs',
+          icon: sidebarIcons.apiDocs,
+        },
         { path: '/docs', labelKey: 'nav.docs', metaKey: 'nav_meta.docs', icon: sidebarIcons.docs },
       ],
     },

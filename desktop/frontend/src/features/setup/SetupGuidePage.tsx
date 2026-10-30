@@ -1,4 +1,12 @@
-import { useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import {
+  useCallback,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+} from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { IconCheck, IconEye, IconEyeOff } from '@/components/ui/icons';
@@ -7,6 +15,7 @@ import { CopyButton } from '@/features/oauth/components/CopyButton';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { useRevealGroup } from '@/hooks/motion';
 import { useSetupGuide } from './useSetupGuide';
+import { useProxyAddresses } from './useProxyAddresses';
 import {
   buildEndpoints,
   buildLoginCommand,
@@ -76,7 +85,13 @@ function CopyRow({ label, value, display }: { label: string; value: string; disp
 export function SetupGuidePage() {
   const { t } = useTranslation();
   const guide = useSetupGuide();
-  useHeaderRefresh(guide.refresh, guide.connected);
+  const addresses = useProxyAddresses();
+  const refreshGuide = guide.refresh;
+  const refreshAddresses = addresses.refresh;
+  const refreshAll = useCallback(async () => {
+    await Promise.allSettled([refreshGuide(), refreshAddresses()]);
+  }, [refreshGuide, refreshAddresses]);
+  useHeaderRefresh(refreshAll, guide.connected);
 
   const revealRef = useRevealGroup<HTMLDivElement>();
   const tabsId = useId();
@@ -87,13 +102,19 @@ export function SetupGuidePage() {
   const [revealKey, setRevealKey] = useState(false);
   const [model, setModel] = useState('');
 
-  const endpoints = useMemo(() => buildEndpoints(guide.apiBase), [guide.apiBase]);
+  const [useLan, setUseLan] = useState(false);
+  const exampleBase = useLan && addresses.lan[0] ? addresses.lan[0] : addresses.local;
+  const localEndpoints = useMemo(() => buildEndpoints(addresses.local), [addresses.local]);
+  const lanEndpoints = useMemo(
+    () => (addresses.lan[0] ? buildEndpoints(addresses.lan[0]) : null),
+    [addresses.lan]
+  );
   const selectedKey = guide.clientKeys[keyIndex] ?? guide.clientKeys[0] ?? '';
   const modelNames = useMemo(() => guide.models.map((item) => item.name), [guide.models]);
   const selectedModel = modelNames.includes(model) ? model : (modelNames[0] ?? '');
 
   const snippetFor = (apiKey: string) =>
-    buildSnippet(client, { baseUrl: guide.apiBase, apiKey, model: selectedModel });
+    buildSnippet(client, { baseUrl: exampleBase, apiKey, model: selectedModel });
   const snippet = snippetFor(selectedKey);
   const displayedSnippet =
     revealKey || !selectedKey ? snippet : snippetFor(maskApiKey(selectedKey));
@@ -253,10 +274,37 @@ export function SetupGuidePage() {
         <div className={styles.card} data-reveal>
           <p className={styles.cardLede}>{t('setup_guide.connect_lede')}</p>
 
+          <h3 className={styles.addressHeading}>{t('setup_guide.this_computer')}</h3>
           <div className={styles.copyRows}>
-            <CopyRow label={t('setup_guide.endpoint_openai')} value={endpoints.openai} />
-            <CopyRow label={t('setup_guide.endpoint_anthropic')} value={endpoints.anthropic} />
-            <CopyRow label={t('setup_guide.endpoint_gemini')} value={endpoints.gemini} />
+            <CopyRow label={t('setup_guide.endpoint_openai')} value={localEndpoints.openai} />
+            <CopyRow
+              label={t('setup_guide.endpoint_anthropic_gemini')}
+              value={localEndpoints.anthropic}
+            />
+          </div>
+
+          <h3 className={styles.addressHeading}>{t('setup_guide.local_network')}</h3>
+          {lanEndpoints ? (
+            <div className={styles.copyRows}>
+              <CopyRow label={t('setup_guide.endpoint_openai')} value={lanEndpoints.openai} />
+              <CopyRow
+                label={t('setup_guide.endpoint_anthropic_gemini')}
+                value={lanEndpoints.anthropic}
+              />
+              {addresses.lan.slice(1).map((base) => (
+                <CopyRow key={base} label={t('setup_guide.other_address')} value={`${base}/v1`} />
+              ))}
+            </div>
+          ) : (
+            <p className={styles.addressNote}>
+              {addresses.restartRequired
+                ? t('setup_guide.lan_restart_hint')
+                : t('setup_guide.lan_off_hint')}{' '}
+              <Link to="/access-keys">{t('setup_guide.lan_open_access_keys')}</Link>
+            </p>
+          )}
+
+          <div className={styles.copyRows}>
             {selectedKey ? (
               <CopyRow
                 label={t('setup_guide.api_key')}
@@ -272,6 +320,26 @@ export function SetupGuidePage() {
           </div>
 
           <div className={styles.controls}>
+            <div className={styles.control}>
+              <span>{t('setup_guide.examples_use')}</span>
+              <div
+                className={styles.baseSwitch}
+                role="group"
+                aria-label={t('setup_guide.examples_use')}
+              >
+                <button type="button" aria-pressed={!useLan} onClick={() => setUseLan(false)}>
+                  {t('setup_guide.this_computer')}
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={useLan && Boolean(lanEndpoints)}
+                  disabled={!lanEndpoints}
+                  onClick={() => setUseLan(true)}
+                >
+                  {t('setup_guide.local_network')}
+                </button>
+              </div>
+            </div>
             {guide.clientKeys.length > 1 ? (
               <label className={styles.control}>
                 <span>{t('setup_guide.key_select')}</span>
