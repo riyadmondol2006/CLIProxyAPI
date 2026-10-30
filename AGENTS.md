@@ -39,6 +39,8 @@ go build -o test-output ./cmd/server && rm test-output # Verify compile (REQUIRE
 - `internal/home/` — CLIProxyAPIHome control plane integration (bootstrap, RESP communication, dispatch coordination)
 - `internal/tui/` — Bubbletea terminal UI (`--tui`, `--standalone`)
 - `sdk/cliproxy/` — Embeddable SDK entry (service/builder/watchers/pipeline)
+- `desktop/` — Wails desktop app (separate Go module) and its React UI in `desktop/frontend/`; `packaging/` + `.github/workflows/packages.yml` build the .deb/.rpm
+- `internal/keylimit/` — Per-client-key token usage, limits (`access.key-limits`), and persistence
 - `test/` — Cross-module integration tests
 
 ## Code Conventions

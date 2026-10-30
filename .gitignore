@@ -67,3 +67,8 @@ docker-compose.override.yml
 
 # Local LLM Wiki vault
 .llm-wiki
+
+# Desktop app and Linux package build outputs
+/dist/
+desktop/build/bin/
+desktop/frontend/node_modules/

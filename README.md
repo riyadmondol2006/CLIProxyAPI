@@ -143,6 +143,23 @@ PackyCode provides special discounts for our software users: register using <a h
 
 CLIProxyAPI Guides: [https://help.router-for.me/](https://help.router-for.me/)
 
+## Linux desktop app and packages
+
+Every push builds `.deb` and `.rpm` packages (amd64 and arm64) with the proxy, a systemd user
+service, and the CLIProxyAPI desktop app. Download them from the workflow run, the
+`latest-build` pre-release (main), or a tagged release, then install:
+
+```bash
+sudo dnf install ./cliproxyapi-*.rpm      # Fedora, RHEL
+sudo apt install ./cliproxyapi_*.deb      # Ubuntu, Debian
+```
+
+Open **CLIProxyAPI** from the app menu. On first launch it creates
+`~/.config/cliproxyapi/config.yaml` and starts the `cliproxyapi` user service, which keeps
+running after you close the window. The app needs no login, includes the full docs, and
+manages accounts, providers, access keys with token limits, and LAN sharing. See
+[`desktop/README.md`](desktop/README.md).
+
 ## Management API
 
 see [MANAGEMENT_API.md](https://help.router-for.me/management/api)
