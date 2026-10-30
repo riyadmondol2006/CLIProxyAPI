@@ -3,9 +3,12 @@ import { createRoot } from 'react-dom/client';
 import '@/styles/global.scss';
 import { INLINE_LOGO_JPEG } from '@/assets/logoInline';
 import App from './App.tsx';
+import { useThemeStore } from '@/stores/useThemeStore';
 import { installExternalLinkHandler, isDesktopApp } from '@/utils/desktop';
 
 document.title = 'CLIProxyAPI';
+// Apply the saved theme before the first paint so the window doesn't flash another theme.
+useThemeStore.getState().setTheme(useThemeStore.getState().theme);
 if (isDesktopApp()) {
   installExternalLinkHandler();
   document.documentElement.classList.add('desktop-app');

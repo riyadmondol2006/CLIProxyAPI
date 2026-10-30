@@ -2,55 +2,54 @@
  * Theme tokens
  */
 
-// Light theme (default)
+// Alucard: Dracula's official light theme
 :root {
-  // Cool neutral surfaces with an indigo accent.
-  --bg-secondary: #f6f7f9;
-  --bg-primary: #ffffff;
-  --bg-tertiary: #eef0f4;
-  --bg-hover: #e7eaf0;
-  --bg-quinary: #fafbfc;
+  --bg-secondary: #fffbeb;
+  --bg-primary: #fffdf6;
+  --bg-tertiary: #f3eed6;
+  --bg-hover: #ebe5c9;
+  --bg-quinary: #fffcf0;
   --bg-error-light: rgba(198, 87, 70, 0.1);
-  --floating-surface: #ffffff;
-  --floating-shadow: 0 16px 40px rgba(15, 23, 42, 0.14);
+  --floating-surface: #fffdf6;
+  --floating-shadow: 0 16px 40px rgba(31, 31, 31, 0.14);
 
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-tertiary: #7c8799;
-  --text-quaternary: #a3adbd;
+  --text-primary: #1f1f1f;
+  --text-secondary: #4c4766;
+  --text-tertiary: #635d97;
+  --text-quaternary: #9e99c2;
   --text-muted: var(--text-tertiary);
 
-  --border-color: #e3e7ee;
+  --border-color: #e6e0c6;
   --border-secondary: var(--border-color);
-  --border-primary: #d4dae4;
-  --border-hover: #c3cad6;
+  --border-primary: #d8d2b6;
+  --border-hover: #cfcfde;
 
-  --primary-color: #4f46e5;
-  --primary-hover: #4338ca;
-  --primary-active: #3730a3;
+  --primary-color: #644ac9;
+  --primary-hover: #5539b8;
+  --primary-active: #472ea0;
   --primary-contrast: #ffffff;
 
-  --success-color: #10b981;
-  --quota-medium-color: #e0aa14;
-  --warning-color: #dc4a3d;
-  --error-color: #dc4a3d;
+  --success-color: #14710a;
+  --quota-medium-color: #846e15;
+  --warning-color: #cb3a2a;
+  --error-color: #cb3a2a;
   --danger-color: var(--error-color);
   --info-color: var(--primary-color);
 
-  --warning-bg: rgba(198, 87, 70, 0.12);
-  --warning-border: rgba(198, 87, 70, 0.35);
+  --warning-bg: rgba(203, 58, 42, 0.1);
+  --warning-border: rgba(203, 58, 42, 0.35);
   --warning-text: var(--warning-color);
 
-  --success-badge-bg: #d1fae5;
-  --success-badge-text: #065f46;
-  --success-badge-border: #6ee7b7;
+  --success-badge-bg: rgba(20, 113, 10, 0.12);
+  --success-badge-text: #14710a;
+  --success-badge-border: rgba(20, 113, 10, 0.35);
 
-  --failure-badge-bg: rgba(198, 87, 70, 0.14);
-  --failure-badge-text: #8a3a30;
-  --failure-badge-border: rgba(198, 87, 70, 0.35);
+  --failure-badge-bg: rgba(203, 58, 42, 0.12);
+  --failure-badge-text: #cb3a2a;
+  --failure-badge-border: rgba(203, 58, 42, 0.35);
 
-  --count-badge-bg: rgba(79, 70, 229, 0.12);
-  --count-badge-text: var(--primary-active);
+  --count-badge-bg: rgba(100, 74, 201, 0.12);
+  --count-badge-text: #644ac9;
 
   --shadow: 0 1px 2px rgb(15 23 42 / 0.06), 0 1px 3px rgb(15 23 42 / 0.04);
   --shadow-lg: 0 12px 28px -6px rgb(15 23 42 / 0.16);
@@ -61,8 +60,8 @@
   --primary-8: color-mix(in srgb, var(--primary-color) 8%, transparent);
   --primary-10: color-mix(in srgb, var(--primary-color) 10%, transparent);
   --primary-30: color-mix(in srgb, var(--primary-color) 30%, transparent);
-  --amber-color: #d97706;
-  --amber-text: #92400e;
+  --amber-color: #a34d14;
+  --amber-text: #a34d14;
   --amber-10: color-mix(in srgb, var(--amber-color) 10%, transparent);
   --amber-30: color-mix(in srgb, var(--amber-color) 30%, transparent);
   --destructive-color: var(--error-color);
@@ -82,8 +81,8 @@
 
   // Chart colors share the semantic colors; dark mode picks its own steps (see [data-theme='dark']).
   // Rule: emerald only ever means live traffic.
-  --viz-success: #10b981;
-  --viz-failure: #c65746;
+  --viz-success: #14710a;
+  --viz-failure: #cb3a2a;
 
   // Motion vocabulary: built-in ease is too weak, so interactions use a strong ease-out.
   // Press 160ms, hover 200ms; UI motion stays under 300ms.
@@ -91,60 +90,68 @@
   --dur-press: 160ms;
   --dur-hover: 200ms;
 
-  // Brand accent (matches the app icon).
-  --brand-from: #2dd4bf;
-  --brand-to: #6366f1;
   --brand-gradient: linear-gradient(135deg, var(--brand-from), var(--brand-to));
+
+  // Dracula accents, used by charts and highlights.
+  --accent-cyan: #036a96;
+  --accent-green: #14710a;
+  --accent-orange: #a34d14;
+  --accent-pink: #a3144d;
+  --accent-purple: #644ac9;
+  --accent-red: #cb3a2a;
+  --accent-yellow: #846e15;
+  --brand-from: #a3144d;
+  --brand-to: #644ac9;
 }
 
-// Pure white theme
+// Pure white with Alucard accents
 [data-theme='white'] {
   --bg-secondary: #ffffff;
   --bg-primary: #ffffff;
-  --bg-tertiary: #f3f5f8;
-  --bg-hover: #e7eaf0;
-  --bg-quinary: #fafbfc;
+  --bg-tertiary: #f4f3f8;
+  --bg-hover: #ecebf3;
+  --bg-quinary: #ffffff;
   --bg-error-light: rgba(198, 87, 70, 0.08);
   --floating-surface: #ffffff;
-  --floating-shadow: 0 16px 40px rgba(15, 23, 42, 0.14);
+  --floating-shadow: 0 16px 40px rgba(31, 31, 31, 0.14);
 
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-tertiary: #7c8799;
-  --text-quaternary: #a3adbd;
+  --text-primary: #1f1f1f;
+  --text-secondary: #4c4766;
+  --text-tertiary: #635d97;
+  --text-quaternary: #9e99c2;
   --text-muted: var(--text-tertiary);
 
-  --border-color: #e3e7ee;
+  --border-color: #e6e5ee;
   --border-secondary: var(--border-color);
-  --border-primary: #d4dae4;
-  --border-hover: #c3cad6;
+  --border-primary: #d7d6e3;
+  --border-hover: #cfcfde;
 
-  --primary-color: #4f46e5;
-  --primary-hover: #4338ca;
-  --primary-active: #3730a3;
+  --primary-color: #644ac9;
+  --primary-hover: #5539b8;
+  --primary-active: #472ea0;
   --primary-contrast: #ffffff;
 
-  --success-color: #10b981;
-  --quota-medium-color: #e0aa14;
-  --warning-color: #dc4a3d;
-  --error-color: #dc4a3d;
+  --success-color: #14710a;
+  --quota-medium-color: #846e15;
+  --warning-color: #cb3a2a;
+  --error-color: #cb3a2a;
   --danger-color: var(--error-color);
   --info-color: var(--primary-color);
 
-  --warning-bg: rgba(198, 87, 70, 0.12);
-  --warning-border: rgba(198, 87, 70, 0.35);
+  --warning-bg: rgba(203, 58, 42, 0.1);
+  --warning-border: rgba(203, 58, 42, 0.35);
   --warning-text: var(--warning-color);
 
-  --success-badge-bg: #d1fae5;
-  --success-badge-text: #065f46;
-  --success-badge-border: #6ee7b7;
+  --success-badge-bg: rgba(20, 113, 10, 0.12);
+  --success-badge-text: #14710a;
+  --success-badge-border: rgba(20, 113, 10, 0.35);
 
-  --failure-badge-bg: rgba(198, 87, 70, 0.14);
-  --failure-badge-text: #8a3a30;
-  --failure-badge-border: rgba(198, 87, 70, 0.35);
+  --failure-badge-bg: rgba(203, 58, 42, 0.12);
+  --failure-badge-text: #cb3a2a;
+  --failure-badge-border: rgba(203, 58, 42, 0.35);
 
-  --count-badge-bg: rgba(79, 70, 229, 0.12);
-  --count-badge-text: var(--primary-active);
+  --count-badge-bg: rgba(100, 74, 201, 0.12);
+  --count-badge-text: #644ac9;
 
   --shadow: 0 1px 2px rgb(15 23 42 / 0.06), 0 1px 3px rgb(15 23 42 / 0.04);
   --shadow-lg: 0 12px 28px -6px rgb(15 23 42 / 0.16);
@@ -155,8 +162,8 @@
   --primary-8: color-mix(in srgb, var(--primary-color) 8%, transparent);
   --primary-10: color-mix(in srgb, var(--primary-color) 10%, transparent);
   --primary-30: color-mix(in srgb, var(--primary-color) 30%, transparent);
-  --amber-color: #d97706;
-  --amber-text: #92400e;
+  --amber-color: #a34d14;
+  --amber-text: #a34d14;
   --amber-10: color-mix(in srgb, var(--amber-color) 10%, transparent);
   --amber-30: color-mix(in srgb, var(--amber-color) 30%, transparent);
   --destructive-color: var(--error-color);
@@ -167,55 +174,54 @@
   --accent-bg: var(--bg-tertiary);
 }
 
-// Dark theme
+// Dracula (https://draculatheme.com)
 [data-theme='dark'] {
-  // Cool slate surfaces with raised contrast between layers.
-  --bg-secondary: #0e0f13;
-  --bg-primary: #15171d;
-  --bg-tertiary: #1d2028;
-  --bg-hover: #242833;
-  --bg-quinary: #121419;
+  --bg-secondary: #21222c;
+  --bg-primary: #282a36;
+  --bg-tertiary: #343746;
+  --bg-hover: #44475a;
+  --bg-quinary: #252630;
   --bg-error-light: rgba(198, 87, 70, 0.18);
-  --floating-surface: #1b1e26;
-  --floating-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
+  --floating-surface: #343746;
+  --floating-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
 
-  --text-primary: #eef1f6;
-  --text-secondary: #aab2c0;
-  --text-tertiary: #7d8696;
-  --text-quaternary: #566070;
+  --text-primary: #f8f8f2;
+  --text-secondary: #c3c6d8;
+  --text-tertiary: #929ac4;
+  --text-quaternary: #6272a4;
   --text-muted: var(--text-tertiary);
 
-  --border-color: #262a34;
+  --border-color: #373a4b;
   --border-secondary: var(--border-color);
-  --border-primary: #323744;
-  --border-hover: #414757;
+  --border-primary: #44475a;
+  --border-hover: #6272a4;
 
-  --primary-color: #7c7ff7;
-  --primary-hover: #8f92fa;
-  --primary-active: #a3a5fb;
-  --primary-contrast: #0b0c10;
+  --primary-color: #bd93f9;
+  --primary-hover: #caa8fa;
+  --primary-active: #d7bdfb;
+  --primary-contrast: #282a36;
 
-  --success-color: #10b981;
-  --quota-medium-color: #ffd862;
-  --warning-color: #ef5f50;
-  --error-color: #ef5f50;
+  --success-color: #50fa7b;
+  --quota-medium-color: #f1fa8c;
+  --warning-color: #ff5555;
+  --error-color: #ff5555;
   --danger-color: var(--error-color);
   --info-color: var(--primary-color);
 
-  --warning-bg: rgba(198, 87, 70, 0.22);
-  --warning-border: rgba(198, 87, 70, 0.45);
-  --warning-text: #f1b0a6;
+  --warning-bg: rgba(255, 85, 85, 0.16);
+  --warning-border: rgba(255, 85, 85, 0.45);
+  --warning-text: #ff5555;
 
-  --success-badge-bg: rgba(6, 78, 59, 0.3);
-  --success-badge-text: #6ee7b7;
-  --success-badge-border: #059669;
+  --success-badge-bg: rgba(80, 250, 123, 0.14);
+  --success-badge-text: #50fa7b;
+  --success-badge-border: rgba(80, 250, 123, 0.4);
 
-  --failure-badge-bg: rgba(198, 87, 70, 0.24);
-  --failure-badge-text: #f1b0a6;
-  --failure-badge-border: rgba(198, 87, 70, 0.5);
+  --failure-badge-bg: rgba(255, 85, 85, 0.16);
+  --failure-badge-text: #ff5555;
+  --failure-badge-border: rgba(255, 85, 85, 0.45);
 
-  --count-badge-bg: rgba(124, 127, 247, 0.2);
-  --count-badge-text: var(--primary-active);
+  --count-badge-bg: rgba(189, 147, 249, 0.2);
+  --count-badge-text: #bd93f9;
 
   --shadow: 0 1px 2px rgb(0 0 0 / 0.4);
   --shadow-lg: 0 14px 30px -8px rgb(0 0 0 / 0.6);
@@ -226,8 +232,8 @@
   --primary-8: color-mix(in srgb, var(--primary-color) 8%, transparent);
   --primary-10: color-mix(in srgb, var(--primary-color) 10%, transparent);
   --primary-30: color-mix(in srgb, var(--primary-color) 30%, transparent);
-  --amber-color: #f59e0b;
-  --amber-text: #fcd34d;
+  --amber-color: #ffb86c;
+  --amber-text: #ffb86c;
   --amber-10: color-mix(in srgb, var(--amber-color) 14%, transparent);
   --amber-30: color-mix(in srgb, var(--amber-color) 38%, transparent);
   --destructive-color: var(--error-color);
@@ -239,10 +245,19 @@
 
   --glass-border: color-mix(in srgb, var(--border-color) 55%, transparent);
 
-  // On dark cards #10b981 falls outside OKLCH lightness 0.48–0.67 and is too close to the failure
-  // color for color-blind users, so dark mode uses one step darker.
-  --viz-success: #0fae78;
-  --viz-failure: #cf4b3a;
+  --viz-success: #50fa7b;
+  --viz-failure: #ff5555;
+
+  // Dracula accents, used by charts and highlights.
+  --accent-cyan: #8be9fd;
+  --accent-green: #50fa7b;
+  --accent-orange: #ffb86c;
+  --accent-pink: #ff79c6;
+  --accent-purple: #bd93f9;
+  --accent-red: #ff5555;
+  --accent-yellow: #f1fa8c;
+  --brand-from: #ff79c6;
+  --brand-to: #bd93f9;
 }
 
 @media (max-width: 768px),

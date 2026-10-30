@@ -26,7 +26,7 @@ const getSystemTheme = (): ResolvedTheme => {
 };
 
 const resolveAutoTheme = (): AppliedTheme => {
-  return getSystemTheme() === 'dark' ? 'dark' : 'white';
+  return getSystemTheme() === 'dark' ? 'dark' : 'light';
 };
 
 const normalizeResolvedTheme = (theme: AppliedTheme): ResolvedTheme => {
@@ -60,8 +60,9 @@ const applyTheme = (resolved: AppliedTheme) => {
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set, get) => ({
-      theme: 'auto',
-      resolvedTheme: 'light',
+      // Dracula is the default design.
+      theme: 'dark',
+      resolvedTheme: 'dark',
 
       setTheme: (theme) => {
         const resolved = resolveTheme(theme);
@@ -100,6 +101,15 @@ export const useThemeStore = create<ThemeState>()(
     }),
     {
       name: STORAGE_KEY_THEME,
+      // Version 1 made Dracula the default: move people still on the old 'auto' default to it.
+      version: 1,
+      migrate: (persisted, version) => {
+        const state = (persisted ?? {}) as Partial<ThemeState>;
+        if (version < 1 && (state.theme === undefined || state.theme === 'auto')) {
+          return { ...state, theme: 'dark' } as ThemeState;
+        }
+        return state as ThemeState;
+      },
     }
   )
 );

@@ -95,7 +95,7 @@ func main() {
 		Height:           860,
 		MinWidth:         980,
 		MinHeight:        640,
-		BackgroundColour: &options.RGBA{R: 14, G: 15, B: 18, A: 255},
+		BackgroundColour: &options.RGBA{R: 33, G: 34, B: 44, A: 255}, // Dracula background (#21222c)
 		AssetServer: &assetserver.Options{
 			Assets:  dist,
 			Handler: server,

@@ -1,24 +1,17 @@
 @use '../../../styles/mixins' as *;
 
 /*
- * Series colors for Claude usage. Categorical slots from the validated chart palette,
- * stepped separately for the dark surface. Emerald stays reserved for live traffic.
+ * Series colors for Claude usage: Dracula accents (Alucard in the light themes), so the
+ * charts follow the theme. Green stays reserved for live traffic.
  */
 .figure,
 .barList {
-  --cu-input: #2a78d6;
-  --cu-output: #eb6834;
-  --cu-cache-read: #6250d6;
-  --cu-cache-write: #e87ba4;
+  --cu-input: var(--accent-cyan);
+  --cu-output: var(--accent-pink);
+  --cu-cache-read: var(--accent-purple);
+  --cu-cache-write: var(--accent-orange);
   --cu-single: var(--primary-color);
-  --cu-line: var(--text-primary);
-
-  :global([data-theme='dark']) & {
-    --cu-input: #3987e5;
-    --cu-output: #d95926;
-    --cu-cache-read: #9085e9;
-    --cu-cache-write: #d55181;
-  }
+  --cu-line: var(--accent-yellow);
 }
 
 .srOnly {

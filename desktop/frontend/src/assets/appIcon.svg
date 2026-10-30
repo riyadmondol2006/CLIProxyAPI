@@ -1,16 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Dracula palette: https://draculatheme.com -->
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#1b1f2a"/>
-      <stop offset="1" stop-color="#0d0f14"/>
+      <stop offset="0" stop-color="#343746"/>
+      <stop offset="1" stop-color="#21222c"/>
     </linearGradient>
     <linearGradient id="accent" gradientUnits="userSpaceOnUse" x1="132" y1="168" x2="380" y2="344">
-      <stop offset="0" stop-color="#5eead4"/>
-      <stop offset="1" stop-color="#6366f1"/>
+      <stop offset="0" stop-color="#ff79c6"/>
+      <stop offset="1" stop-color="#bd93f9"/>
     </linearGradient>
   </defs>
   <rect x="24" y="24" width="464" height="464" rx="112" fill="url(#bg)"/>
-  <rect x="24.5" y="24.5" width="463" height="463" rx="111.5" fill="none" stroke="#ffffff" stroke-opacity="0.08"/>
+  <rect x="24.5" y="24.5" width="463" height="463" rx="111.5" fill="none" stroke="#6272a4" stroke-opacity="0.35"/>
   <!-- Three inbound links converge on a hub that fans out: the proxy. -->
   <g fill="none" stroke="url(#accent)" stroke-width="22" stroke-linecap="round">
     <path d="M132 168 C 196 168, 206 256, 256 256"/>
@@ -18,9 +19,9 @@
     <path d="M132 344 C 196 344, 206 256, 256 256"/>
     <path d="M256 256 L 380 256"/>
   </g>
-  <circle cx="256" cy="256" r="46" fill="#0d0f14" stroke="url(#accent)" stroke-width="22"/>
-  <circle cx="132" cy="168" r="18" fill="#5eead4"/>
-  <circle cx="132" cy="256" r="18" fill="#5eead4"/>
-  <circle cx="132" cy="344" r="18" fill="#5eead4"/>
-  <circle cx="380" cy="256" r="24" fill="#818cf8"/>
+  <circle cx="256" cy="256" r="46" fill="#21222c" stroke="url(#accent)" stroke-width="22"/>
+  <circle cx="132" cy="168" r="18" fill="#8be9fd"/>
+  <circle cx="132" cy="256" r="18" fill="#8be9fd"/>
+  <circle cx="132" cy="344" r="18" fill="#8be9fd"/>
+  <circle cx="380" cy="256" r="24" fill="#50fa7b"/>
 </svg>

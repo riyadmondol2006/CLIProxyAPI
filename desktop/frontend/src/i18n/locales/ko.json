@@ -1864,9 +1864,9 @@
   },
   "theme": {
     "switch": "테마",
-    "light": "양모 종이",
+    "light": "Alucard",
     "white": "순백",
-    "dark": "다크",
+    "dark": "Dracula",
     "auto": "시스템 설정 따름"
   },
   "sidebar": {

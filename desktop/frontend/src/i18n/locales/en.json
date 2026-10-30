@@ -1864,9 +1864,9 @@
   },
   "theme": {
     "switch": "Theme",
-    "light": "Wool Paper",
+    "light": "Alucard",
     "white": "Pure White",
-    "dark": "Dark",
+    "dark": "Dracula",
     "auto": "Follow system"
   },
   "sidebar": {
