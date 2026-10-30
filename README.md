@@ -157,7 +157,9 @@ sudo apt install ./cliproxyapi_*.deb      # Ubuntu, Debian
 Open **CLIProxyAPI** from the app menu. On first launch it creates
 `~/.config/cliproxyapi/config.yaml` and starts the `cliproxyapi` user service, which keeps
 running after you close the window. The app needs no login, includes the full docs, and
-manages accounts, providers, access keys with token limits, and LAN sharing. See
+manages accounts, providers, access keys with token limits, and LAN sharing. It also has a
+**Claude usage** dashboard that reads Claude Code's local logs and shows tokens, estimated cost,
+sessions, projects, and subagents (based on [claude-usage](https://github.com/phuryn/claude-usage), MIT). See
 [`desktop/README.md`](desktop/README.md).
 
 ## Management API

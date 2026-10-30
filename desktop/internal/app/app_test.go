@@ -265,3 +265,28 @@ func TestSafeFileName(t *testing.T) {
 		}
 	}
 }
+
+func TestClaudeUsageRoutes(t *testing.T) {
+	server, _ := newTestServer(t, nil)
+	recorder := httptest.NewRecorder()
+	server.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/app/claude-usage/status", nil))
+	if recorder.Code != http.StatusServiceUnavailable || !strings.HasPrefix(recorder.Header().Get("Content-Type"), "application/json") {
+		t.Fatalf("without a handler: %d %s", recorder.Code, recorder.Body.String())
+	}
+
+	var gotPath string
+	server.ClaudeUsage = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotPath = r.URL.Path
+		w.WriteHeader(http.StatusTeapot)
+	})
+	recorder = httptest.NewRecorder()
+	server.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/app/claude-usage/data?from=2026-10-01", nil))
+	if recorder.Code != http.StatusTeapot || gotPath != "/app/claude-usage/data" {
+		t.Fatalf("handler not used: %d %q", recorder.Code, gotPath)
+	}
+	recorder = httptest.NewRecorder()
+	server.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/app/other", nil))
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("other /app/ paths must stay 404, got %d", recorder.Code)
+	}
+}

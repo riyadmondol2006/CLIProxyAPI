@@ -110,7 +110,8 @@
     "logs": "日志",
     "system_info": "关于",
     "home": "首页",
-    "docs": "文档"
+    "docs": "文档",
+    "claude_usage": "Claude 用量"
   },
   "nav_groups": {
     "operate": "运行",
@@ -137,7 +138,8 @@
     "config_management": "网关基础配置",
     "system_info": "运行与诊断信息",
     "home": "状态与快捷操作",
-    "docs": "指南与参考"
+    "docs": "指南与参考",
+    "claude_usage": "本机 Claude Code Token 与费用"
   },
   "dashboard": {
     "hero_verdict_good": "运行平稳",
@@ -2603,5 +2605,135 @@
     "search": "搜索文档",
     "no_results": "没有匹配的页面。",
     "on_this_page": "本页内容"
+  },
+  "claude_usage": {
+    "title": "Claude 用量",
+    "meta": "{{sessions}} 个会话 · {{turns}} 轮对话",
+    "updated": "更新于 {{time}}",
+    "never_updated": "尚未扫描",
+    "lede": "数据从本机 Claude Code 的日志中本地读取，不会发送到任何地方。费用按 API 标价估算；订阅套餐的计费方式不同。",
+    "rescan": "重新扫描",
+    "scanning": "正在扫描日志…",
+    "filters": "筛选",
+    "range_label": "日期范围",
+    "ranges": {
+      "today": "今天",
+      "7d": "7 天",
+      "30d": "30 天",
+      "90d": "90 天",
+      "this_month": "本月",
+      "last_month": "上月",
+      "all": "全部"
+    },
+    "models_label": "模型",
+    "all_models": "全部模型",
+    "unpriced_hint": "该模型没有已知价格，因此不计入费用。",
+    "na": "无",
+    "chart_keys": "使用方向键逐个查看数值。",
+    "show_table": "以表格显示",
+    "duration_hm": "{{hours}} 小时 {{minutes}} 分",
+    "duration_m": "{{minutes}} 分",
+    "duration_lt_minute": "<1 分",
+    "duration_s": "{{seconds}} 秒",
+    "export_csv": "CSV",
+    "export_csv_named": "将{{name}}导出为 CSV",
+    "scan": {
+      "first_title": "正在读取你的 Claude Code 历史",
+      "first_text": "首次扫描会读取所有日志文件，历史较长时可能需要几分钟。这只会发生一次，之后的扫描只读取新增的内容。",
+      "title": "正在读取新的日志内容",
+      "progress": "文件 {{done}} / {{total}} · {{bytesDone}} / {{bytesTotal}}",
+      "progress_label": "扫描进度",
+      "error": "上次扫描出现问题：{{error}}"
+    },
+    "empty": {
+      "no_sources_title": "本机没有 Claude Code 日志",
+      "no_sources_text": "Claude Code 的日志保存在 ~/.claude/projects。在本机使用 Claude Code 后，点击“重新扫描”。",
+      "no_data_title": "此范围内没有用量",
+      "no_data_text": "所选模型在这些日期内没有记录。",
+      "show_all": "查看全部时间",
+      "unavailable": "无法加载 Claude 用量。"
+    },
+    "tiles": {
+      "label": "此范围的合计",
+      "cost": "估算费用",
+      "cost_hint": "按 API 标价",
+      "cost_hint_unpriced": "按 API 标价 · 未计入的无价格模型：{{count}}",
+      "sessions": "会话",
+      "turns": "轮次",
+      "subagent": "子代理 Token"
+    },
+    "daily": {
+      "title": "每日用量",
+      "mode_label": "Token 类型",
+      "mode_io": "输入与输出",
+      "mode_cache": "缓存",
+      "cost_line": "估算费用",
+      "summary": "{{days}} 天内每日 Token 与估算费用：共 {{tokens}} Token，{{cost}}。"
+    },
+    "hourly": {
+      "title": "一天中的时段",
+      "subtitle": "每个活跃日的平均轮次，本地时间",
+      "summary": "按小时统计的每个活跃日平均轮次。最忙时段：{{hour}}，{{value}} 轮。",
+      "summary_empty": "按小时统计的每个活跃日平均轮次。暂无数据。",
+      "avg_turns": "平均轮次",
+      "avg_output": "平均输出",
+      "hour": "时段"
+    },
+    "by_model": {
+      "title": "按模型",
+      "metric_label": "度量",
+      "metric_cost": "费用",
+      "metric_tokens": "Token"
+    },
+    "projects": {
+      "title": "项目",
+      "top_title": "主要项目",
+      "top_subtitle": "按估算费用排名前 10"
+    },
+    "branches": {
+      "title": "项目与分支"
+    },
+    "sessions": {
+      "title": "会话",
+      "untitled": "无标题",
+      "shown": "显示最新的 {{shown}} 个会话，共 {{total}} 个。"
+    },
+    "subagents": {
+      "title": "按类型统计的子代理",
+      "empty": "此范围内没有运行子代理。"
+    },
+    "dispatches": {
+      "title": "主要子代理调用"
+    },
+    "columns": {
+      "model": "模型",
+      "turns": "轮次",
+      "input": "输入",
+      "output": "输出",
+      "cache_read": "缓存读取",
+      "cache_write": "缓存写入",
+      "cost": "估算费用",
+      "topic": "主题",
+      "project": "项目",
+      "branch": "分支",
+      "last_active": "最近活动",
+      "duration": "时长",
+      "tokens": "Token",
+      "sessions": "会话",
+      "agent_type": "代理类型",
+      "dispatches": "调用次数",
+      "started": "开始时间",
+      "tool_uses": "工具调用",
+      "status": "状态",
+      "day": "日期"
+    },
+    "table": {
+      "pages": "{{caption}}分页",
+      "rows": "第 {{from}}–{{to}} 条，共 {{total}} 条",
+      "prev": "上一页",
+      "next": "下一页",
+      "page": "第 {{page}} / {{pages}} 页",
+      "empty": "暂无内容。"
+    }
   }
 }

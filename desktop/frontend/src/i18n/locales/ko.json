@@ -110,7 +110,8 @@
     "logs": "로그",
     "system_info": "정보",
     "home": "홈",
-    "docs": "문서"
+    "docs": "문서",
+    "claude_usage": "Claude 사용량"
   },
   "nav_groups": {
     "operate": "운영",
@@ -137,7 +138,8 @@
     "config_management": "게이트웨이 설정",
     "system_info": "런타임 및 진단",
     "home": "상태와 빠른 작업",
-    "docs": "가이드와 참고 자료"
+    "docs": "가이드와 참고 자료",
+    "claude_usage": "이 컴퓨터의 Claude Code 토큰과 비용"
   },
   "dashboard": {
     "hero_verdict_good": "모든 시스템 정상",
@@ -2605,5 +2607,135 @@
     "search": "문서 검색",
     "no_results": "일치하는 페이지가 없습니다.",
     "on_this_page": "이 페이지 내용"
+  },
+  "claude_usage": {
+    "title": "Claude 사용량",
+    "meta": "세션 {{sessions}}개 · 턴 {{turns}}회",
+    "updated": "{{time}}에 업데이트됨",
+    "never_updated": "아직 스캔하지 않음",
+    "lede": "이 컴퓨터에 있는 Claude Code 로그를 로컬에서 읽으며, 어디에도 전송하지 않습니다. 비용은 API 정가 기준 추정치이며, 구독 요금제는 다르게 청구됩니다.",
+    "rescan": "다시 스캔",
+    "scanning": "로그 스캔 중…",
+    "filters": "필터",
+    "range_label": "기간",
+    "ranges": {
+      "today": "오늘",
+      "7d": "7일",
+      "30d": "30일",
+      "90d": "90일",
+      "this_month": "이번 달",
+      "last_month": "지난달",
+      "all": "전체 기간"
+    },
+    "models_label": "모델",
+    "all_models": "모든 모델",
+    "unpriced_hint": "이 모델의 가격 정보가 없어 비용에 포함되지 않습니다.",
+    "na": "해당 없음",
+    "chart_keys": "화살표 키로 값을 하나씩 확인할 수 있습니다.",
+    "show_table": "표로 보기",
+    "duration_hm": "{{hours}}시간 {{minutes}}분",
+    "duration_m": "{{minutes}}분",
+    "duration_lt_minute": "<1분",
+    "duration_s": "{{seconds}}초",
+    "export_csv": "CSV",
+    "export_csv_named": "{{name}}을(를) CSV로 내보내기",
+    "scan": {
+      "first_title": "Claude Code 기록을 읽는 중",
+      "first_text": "첫 스캔은 모든 로그 파일을 읽으므로 기록이 길면 몇 분 정도 걸릴 수 있습니다. 이 과정은 한 번만 진행되며, 이후에는 새로 추가된 줄만 읽습니다.",
+      "title": "새 로그 줄을 읽는 중",
+      "progress": "파일 {{done}}/{{total}}개 · {{bytesDone}}/{{bytesTotal}}",
+      "progress_label": "스캔 진행률",
+      "error": "마지막 스캔에서 문제가 발생했습니다: {{error}}"
+    },
+    "empty": {
+      "no_sources_title": "이 컴퓨터에 Claude Code 로그가 없습니다",
+      "no_sources_text": "Claude Code는 로그를 ~/.claude/projects에 저장합니다. 이 컴퓨터에서 Claude Code를 사용한 뒤 다시 스캔을 누르세요.",
+      "no_data_title": "이 기간에는 사용량이 없습니다",
+      "no_data_text": "선택한 모델에 대해 이 기간에 기록된 내용이 없습니다.",
+      "show_all": "전체 기간 보기",
+      "unavailable": "Claude 사용량을 불러오지 못했습니다."
+    },
+    "tiles": {
+      "label": "이 기간의 합계",
+      "cost": "예상 비용",
+      "cost_hint": "API 정가 기준",
+      "cost_hint_unpriced": "API 정가 기준 · 제외된 가격 미정 모델: {{count}}개",
+      "sessions": "세션",
+      "turns": "턴",
+      "subagent": "서브에이전트 토큰"
+    },
+    "daily": {
+      "title": "일별 사용량",
+      "mode_label": "토큰 유형",
+      "mode_io": "입력 및 출력",
+      "mode_cache": "캐시",
+      "cost_line": "예상 비용",
+      "summary": "{{days}}일간 일별 토큰과 예상 비용: 토큰 {{tokens}}, {{cost}}."
+    },
+    "hourly": {
+      "title": "시간대",
+      "subtitle": "활동한 날 기준 평균 턴 수, 현지 시간",
+      "summary": "시간대별, 활동한 날 기준 평균 턴 수. 가장 바쁜 시간: {{hour}}, {{value}}턴.",
+      "summary_empty": "시간대별, 활동한 날 기준 평균 턴 수. 아직 턴이 없습니다.",
+      "avg_turns": "평균 턴",
+      "avg_output": "평균 출력",
+      "hour": "시간"
+    },
+    "by_model": {
+      "title": "모델별",
+      "metric_label": "기준",
+      "metric_cost": "비용",
+      "metric_tokens": "토큰"
+    },
+    "projects": {
+      "title": "프로젝트",
+      "top_title": "주요 프로젝트",
+      "top_subtitle": "예상 비용 상위 10개"
+    },
+    "branches": {
+      "title": "프로젝트 및 브랜치"
+    },
+    "sessions": {
+      "title": "세션",
+      "untitled": "제목 없음",
+      "shown": "전체 {{total}}개 중 최신 세션 {{shown}}개를 표시합니다."
+    },
+    "subagents": {
+      "title": "유형별 서브에이전트",
+      "empty": "이 기간에 실행된 서브에이전트가 없습니다."
+    },
+    "dispatches": {
+      "title": "주요 서브에이전트 실행"
+    },
+    "columns": {
+      "model": "모델",
+      "turns": "턴",
+      "input": "입력",
+      "output": "출력",
+      "cache_read": "캐시 읽기",
+      "cache_write": "캐시 쓰기",
+      "cost": "예상 비용",
+      "topic": "주제",
+      "project": "프로젝트",
+      "branch": "브랜치",
+      "last_active": "마지막 활동",
+      "duration": "소요 시간",
+      "tokens": "토큰",
+      "sessions": "세션",
+      "agent_type": "에이전트 유형",
+      "dispatches": "실행 횟수",
+      "started": "시작",
+      "tool_uses": "도구 사용",
+      "status": "상태",
+      "day": "날짜"
+    },
+    "table": {
+      "pages": "{{caption}} 페이지",
+      "rows": "{{total}}개 중 {{from}}–{{to}}",
+      "prev": "이전",
+      "next": "다음",
+      "page": "{{page}}/{{pages}} 페이지",
+      "empty": "표시할 내용이 없습니다."
+    }
   }
 }

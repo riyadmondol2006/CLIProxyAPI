@@ -30,6 +30,8 @@ type Server struct {
 	// SaveFile stores a file the UI downloads and returns where it went, or "" when the
 	// user cancels. WebKitGTK in Wails cannot handle browser downloads itself.
 	SaveFile func(name string, data []byte) (string, error)
+	// ClaudeUsage serves /app/claude-usage/* (the Claude Code usage dashboard).
+	ClaudeUsage http.Handler
 	// Debug logs every request the UI makes (enable with CPA_DESKTOP_DEBUG=1).
 	Debug bool
 }
@@ -57,6 +59,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.handleOpen(w, r)
 	case r.URL.Path == "/app/save":
 		s.handleSave(w, r)
+	case strings.HasPrefix(r.URL.Path, "/app/claude-usage/"):
+		if s.ClaudeUsage == nil {
+			writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "Claude usage is unavailable"})
+			return
+		}
+		s.ClaudeUsage.ServeHTTP(w, r)
 	case strings.HasPrefix(r.URL.Path, "/app/"):
 		writeJSON(w, http.StatusNotFound, map[string]string{"error": "not found"})
 	default:

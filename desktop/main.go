@@ -9,9 +9,11 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path/filepath"
 	"sync/atomic"
 
 	"github.com/router-for-me/CLIProxyAPI/desktop/internal/app"
+	"github.com/router-for-me/CLIProxyAPI/desktop/internal/claudeusage"
 	log "github.com/sirupsen/logrus"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -74,6 +76,13 @@ func main() {
 		},
 	}
 
+	usage, errUsage := claudeusage.New(filepath.Join(paths.ConfigDir, "claude-usage.db"), claudeusage.DefaultSources())
+	if errUsage != nil {
+		log.WithError(errUsage).Warn("Claude usage dashboard is unavailable")
+	} else {
+		server.ClaudeUsage = usage
+	}
+
 	dist, errSub := fs.Sub(assets, "frontend/dist")
 	if errSub != nil {
 		log.WithError(errSub).Error("embedded UI is missing")
@@ -94,6 +103,17 @@ func main() {
 		OnStartup: func(ctx context.Context) {
 			appCtx.Store(&ctx)
 			go startService(ctx, service)
+			if usage != nil {
+				usage.Start(ctx)
+			}
+		},
+		OnShutdown: func(context.Context) {
+			if usage == nil {
+				return
+			}
+			if errClose := usage.Close(); errClose != nil {
+				log.WithError(errClose).Warn("close Claude usage")
+			}
 		},
 		SingleInstanceLock: &options.SingleInstanceLock{
 			UniqueId: "me.router-for.cliproxyapi.desktop",

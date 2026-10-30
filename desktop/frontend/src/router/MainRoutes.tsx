@@ -5,6 +5,7 @@ import { SetupGuidePage } from '@/features/setup/SetupGuidePage';
 import { AccessKeysPage } from '@/features/accessKeys/AccessKeysPage';
 import { HomePage } from '@/features/home/HomePage';
 import { DocsPage } from '@/features/docs/DocsPage';
+import { ClaudeUsagePage } from '@/features/claudeUsage/ClaudeUsagePage';
 import { AuthFilesPage } from '@/features/authFiles/AuthFilesPage';
 import { AuthFilesOAuthExcludedEditPage } from '@/pages/AuthFilesOAuthExcludedEditPage';
 import { AuthFilesOAuthModelAliasEditPage } from '@/pages/AuthFilesOAuthModelAliasEditPage';
@@ -17,10 +18,16 @@ import { ConfigPage } from '@/features/config/ConfigPage';
 import { LogsPage } from '@/features/logs/LogsPage';
 import { SystemPage } from '@/pages/SystemPage';
 import { useAuthStore } from '@/stores';
+import { isDesktopApp } from '@/utils/desktop';
 
 const createMainRoutes = (supportsPlugin: boolean) => [
   { path: '/', element: <HomePage /> },
   { path: '/dashboard', element: <DashboardPage /> },
+  // Reads Claude Code logs through the desktop app backend, so it only exists in the app.
+  {
+    path: '/claude-usage',
+    element: isDesktopApp() ? <ClaudeUsagePage /> : <Navigate to="/" replace />,
+  },
   { path: '/docs', element: <DocsPage /> },
   { path: '/docs/:docId', element: <DocsPage /> },
   { path: '/settings', element: <Navigate to="/config" replace /> },

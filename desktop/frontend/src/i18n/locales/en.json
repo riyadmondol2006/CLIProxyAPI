@@ -110,7 +110,8 @@
     "logs": "Logs",
     "system_info": "About",
     "home": "Home",
-    "docs": "Docs"
+    "docs": "Docs",
+    "claude_usage": "Claude usage"
   },
   "nav_groups": {
     "operate": "Operate",
@@ -137,7 +138,8 @@
     "config_management": "Gateway configuration",
     "system_info": "Runtime & diagnostics",
     "home": "Status and quick actions",
-    "docs": "Guides and reference"
+    "docs": "Guides and reference",
+    "claude_usage": "Local Claude Code tokens and cost"
   },
   "dashboard": {
     "hero_verdict_good": "All systems steady",
@@ -2605,5 +2607,135 @@
     "search": "Search docs",
     "no_results": "No matching pages.",
     "on_this_page": "On this page"
+  },
+  "claude_usage": {
+    "title": "Claude usage",
+    "meta": "{{sessions}} sessions · {{turns}} turns",
+    "updated": "last updated {{time}}",
+    "never_updated": "not scanned yet",
+    "lede": "Read locally from Claude Code's logs on this computer; nothing is sent anywhere. Costs are estimates at API list prices; subscriptions are billed differently.",
+    "rescan": "Rescan",
+    "scanning": "Scanning logs…",
+    "filters": "Filters",
+    "range_label": "Date range",
+    "ranges": {
+      "today": "Today",
+      "7d": "7 days",
+      "30d": "30 days",
+      "90d": "90 days",
+      "this_month": "This month",
+      "last_month": "Last month",
+      "all": "All time"
+    },
+    "models_label": "Models",
+    "all_models": "All models",
+    "unpriced_hint": "No price is known for this model, so its cost isn't counted.",
+    "na": "n/a",
+    "chart_keys": "Use the arrow keys to step through the values.",
+    "show_table": "Show as table",
+    "duration_hm": "{{hours}}h {{minutes}}m",
+    "duration_m": "{{minutes}}m",
+    "duration_lt_minute": "<1m",
+    "duration_s": "{{seconds}}s",
+    "export_csv": "CSV",
+    "export_csv_named": "Export {{name}} as CSV",
+    "scan": {
+      "first_title": "Reading your Claude Code history",
+      "first_text": "The first scan reads every log file and can take a few minutes on a long history. It only happens once: later scans read just the new lines.",
+      "title": "Reading new log lines",
+      "progress": "{{done}} of {{total}} files · {{bytesDone}} of {{bytesTotal}}",
+      "progress_label": "Scan progress",
+      "error": "The last scan ran into a problem: {{error}}"
+    },
+    "empty": {
+      "no_sources_title": "No Claude Code logs on this computer",
+      "no_sources_text": "Claude Code keeps its logs in ~/.claude/projects. Once you use Claude Code on this computer, press Rescan.",
+      "no_data_title": "No usage in this range",
+      "no_data_text": "Nothing was logged in these dates for the selected models.",
+      "show_all": "Show all time",
+      "unavailable": "Couldn't load Claude usage."
+    },
+    "tiles": {
+      "label": "Totals for this range",
+      "cost": "Est. cost",
+      "cost_hint": "At API list prices",
+      "cost_hint_unpriced": "At API list prices · unpriced models left out: {{count}}",
+      "sessions": "Sessions",
+      "turns": "Turns",
+      "subagent": "Subagent tokens"
+    },
+    "daily": {
+      "title": "Daily usage",
+      "mode_label": "Token type",
+      "mode_io": "Input & output",
+      "mode_cache": "Cache",
+      "cost_line": "Est. cost",
+      "summary": "Daily tokens and estimated cost over {{days}} days: {{tokens}} tokens, {{cost}}."
+    },
+    "hourly": {
+      "title": "Time of day",
+      "subtitle": "Average turns per active day, local time",
+      "summary": "Average turns per active day by hour. Busiest: {{hour}}, {{value}} turns.",
+      "summary_empty": "Average turns per active day by hour. No turns yet.",
+      "avg_turns": "Avg. turns",
+      "avg_output": "Avg. output",
+      "hour": "Hour"
+    },
+    "by_model": {
+      "title": "By model",
+      "metric_label": "Measure",
+      "metric_cost": "Cost",
+      "metric_tokens": "Tokens"
+    },
+    "projects": {
+      "title": "Projects",
+      "top_title": "Top projects",
+      "top_subtitle": "Top 10 by estimated cost"
+    },
+    "branches": {
+      "title": "Project & branch"
+    },
+    "sessions": {
+      "title": "Sessions",
+      "untitled": "Untitled",
+      "shown": "Showing the newest {{shown}} of {{total}} sessions."
+    },
+    "subagents": {
+      "title": "Subagents by type",
+      "empty": "No subagents ran in this range."
+    },
+    "dispatches": {
+      "title": "Top subagent dispatches"
+    },
+    "columns": {
+      "model": "Model",
+      "turns": "Turns",
+      "input": "Input",
+      "output": "Output",
+      "cache_read": "Cache read",
+      "cache_write": "Cache write",
+      "cost": "Est. cost",
+      "topic": "Topic",
+      "project": "Project",
+      "branch": "Branch",
+      "last_active": "Last active",
+      "duration": "Duration",
+      "tokens": "Tokens",
+      "sessions": "Sessions",
+      "agent_type": "Agent type",
+      "dispatches": "Dispatches",
+      "started": "Started",
+      "tool_uses": "Tool uses",
+      "status": "Status",
+      "day": "Day"
+    },
+    "table": {
+      "pages": "{{caption}} pages",
+      "rows": "{{from}}–{{to}} of {{total}}",
+      "prev": "Previous",
+      "next": "Next",
+      "page": "Page {{page}} of {{pages}}",
+      "empty": "Nothing to show."
+    }
   }
 }

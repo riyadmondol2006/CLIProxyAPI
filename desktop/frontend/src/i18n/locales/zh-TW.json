@@ -110,7 +110,8 @@
     "logs": "日誌",
     "system_info": "關於",
     "home": "首頁",
-    "docs": "文件"
+    "docs": "文件",
+    "claude_usage": "Claude 用量"
   },
   "nav_groups": {
     "operate": "運行",
@@ -137,7 +138,8 @@
     "config_management": "閘道基礎設定",
     "system_info": "運行與診斷資訊",
     "home": "狀態與快捷操作",
-    "docs": "指南與參考"
+    "docs": "指南與參考",
+    "claude_usage": "本機 Claude Code Token 與費用"
   },
   "dashboard": {
     "hero_verdict_good": "運行平穩",
@@ -2631,5 +2633,135 @@
     "search": "搜尋文件",
     "no_results": "沒有符合的頁面。",
     "on_this_page": "本頁內容"
+  },
+  "claude_usage": {
+    "title": "Claude 用量",
+    "meta": "{{sessions}} 個工作階段 · {{turns}} 輪對話",
+    "updated": "更新於 {{time}}",
+    "never_updated": "尚未掃描",
+    "lede": "資料從本機 Claude Code 的記錄檔在本機讀取，不會傳送到任何地方。費用依 API 牌價估算；訂閱方案的計費方式不同。",
+    "rescan": "重新掃描",
+    "scanning": "正在掃描記錄檔…",
+    "filters": "篩選",
+    "range_label": "日期範圍",
+    "ranges": {
+      "today": "今天",
+      "7d": "7 天",
+      "30d": "30 天",
+      "90d": "90 天",
+      "this_month": "本月",
+      "last_month": "上個月",
+      "all": "全部"
+    },
+    "models_label": "模型",
+    "all_models": "全部模型",
+    "unpriced_hint": "此模型沒有已知價格，因此不計入費用。",
+    "na": "無",
+    "chart_keys": "使用方向鍵逐一查看數值。",
+    "show_table": "以表格顯示",
+    "duration_hm": "{{hours}} 小時 {{minutes}} 分",
+    "duration_m": "{{minutes}} 分",
+    "duration_lt_minute": "<1 分",
+    "duration_s": "{{seconds}} 秒",
+    "export_csv": "CSV",
+    "export_csv_named": "將{{name}}匯出為 CSV",
+    "scan": {
+      "first_title": "正在讀取你的 Claude Code 歷史",
+      "first_text": "首次掃描會讀取所有記錄檔，歷史較長時可能需要幾分鐘。這只會發生一次，之後的掃描只讀取新增的內容。",
+      "title": "正在讀取新的記錄內容",
+      "progress": "檔案 {{done}} / {{total}} · {{bytesDone}} / {{bytesTotal}}",
+      "progress_label": "掃描進度",
+      "error": "上次掃描發生問題：{{error}}"
+    },
+    "empty": {
+      "no_sources_title": "本機沒有 Claude Code 記錄檔",
+      "no_sources_text": "Claude Code 的記錄檔存放在 ~/.claude/projects。在本機使用 Claude Code 後，按下「重新掃描」。",
+      "no_data_title": "此範圍內沒有用量",
+      "no_data_text": "所選模型在這些日期內沒有記錄。",
+      "show_all": "查看全部時間",
+      "unavailable": "無法載入 Claude 用量。"
+    },
+    "tiles": {
+      "label": "此範圍的合計",
+      "cost": "估算費用",
+      "cost_hint": "依 API 牌價",
+      "cost_hint_unpriced": "依 API 牌價 · 未計入的無價格模型：{{count}}",
+      "sessions": "工作階段",
+      "turns": "輪次",
+      "subagent": "子代理 Token"
+    },
+    "daily": {
+      "title": "每日用量",
+      "mode_label": "Token 類型",
+      "mode_io": "輸入與輸出",
+      "mode_cache": "快取",
+      "cost_line": "估算費用",
+      "summary": "{{days}} 天內每日 Token 與估算費用：共 {{tokens}} Token，{{cost}}。"
+    },
+    "hourly": {
+      "title": "一天中的時段",
+      "subtitle": "每個活躍日的平均輪次，本地時間",
+      "summary": "依小時統計的每個活躍日平均輪次。最忙時段：{{hour}}，{{value}} 輪。",
+      "summary_empty": "依小時統計的每個活躍日平均輪次。尚無資料。",
+      "avg_turns": "平均輪次",
+      "avg_output": "平均輸出",
+      "hour": "時段"
+    },
+    "by_model": {
+      "title": "依模型",
+      "metric_label": "度量",
+      "metric_cost": "費用",
+      "metric_tokens": "Token"
+    },
+    "projects": {
+      "title": "專案",
+      "top_title": "主要專案",
+      "top_subtitle": "依估算費用排名前 10"
+    },
+    "branches": {
+      "title": "專案與分支"
+    },
+    "sessions": {
+      "title": "工作階段",
+      "untitled": "未命名",
+      "shown": "顯示最新的 {{shown}} 個工作階段，共 {{total}} 個。"
+    },
+    "subagents": {
+      "title": "依類型統計的子代理",
+      "empty": "此範圍內沒有執行子代理。"
+    },
+    "dispatches": {
+      "title": "主要子代理呼叫"
+    },
+    "columns": {
+      "model": "模型",
+      "turns": "輪次",
+      "input": "輸入",
+      "output": "輸出",
+      "cache_read": "快取讀取",
+      "cache_write": "快取寫入",
+      "cost": "估算費用",
+      "topic": "主題",
+      "project": "專案",
+      "branch": "分支",
+      "last_active": "最近活動",
+      "duration": "時長",
+      "tokens": "Token",
+      "sessions": "工作階段",
+      "agent_type": "代理類型",
+      "dispatches": "呼叫次數",
+      "started": "開始時間",
+      "tool_uses": "工具呼叫",
+      "status": "狀態",
+      "day": "日期"
+    },
+    "table": {
+      "pages": "{{caption}}分頁",
+      "rows": "第 {{from}}–{{to}} 筆，共 {{total}} 筆",
+      "prev": "上一頁",
+      "next": "下一頁",
+      "page": "第 {{page}} / {{pages}} 頁",
+      "empty": "沒有內容。"
+    }
   }
 }

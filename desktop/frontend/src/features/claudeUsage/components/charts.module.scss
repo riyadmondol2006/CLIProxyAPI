@@ -1,0 +1,433 @@
+@use '../../../styles/mixins' as *;
+
+/*
+ * Series colors for Claude usage. Categorical slots from the validated chart palette,
+ * stepped separately for the dark surface. Emerald stays reserved for live traffic.
+ */
+.figure,
+.barList {
+  --cu-input: #2a78d6;
+  --cu-output: #eb6834;
+  --cu-cache-read: #6250d6;
+  --cu-cache-write: #e87ba4;
+  --cu-single: var(--primary-color);
+  --cu-line: var(--text-primary);
+
+  :global([data-theme='dark']) & {
+    --cu-input: #3987e5;
+    --cu-output: #d95926;
+    --cu-cache-read: #9085e9;
+    --cu-cache-write: #d55181;
+  }
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Figure ---------- */
+
+.figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  b {
+    font-weight: 650;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex: none;
+}
+
+.lineKey {
+  width: 14px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--cu-line);
+}
+
+.swatch.fillInput {
+  background: var(--cu-input);
+}
+.swatch.fillOutput {
+  background: var(--cu-output);
+}
+.swatch.fillCacheRead {
+  background: var(--cu-cache-read);
+}
+.swatch.fillCacheWrite {
+  background: var(--cu-cache-write);
+}
+
+.plot {
+  position: relative;
+  min-width: 0;
+  border-radius: 10px;
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 4px;
+  }
+}
+
+.svg {
+  display: block;
+  overflow: visible;
+  touch-action: pan-y;
+}
+
+.gridline {
+  stroke: var(--border-color);
+  stroke-width: 1;
+}
+
+.baseline {
+  stroke: var(--border-primary);
+  stroke-width: 1;
+}
+
+.axisLabel {
+  fill: var(--text-tertiary);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  dominant-baseline: middle;
+}
+
+path.fillInput {
+  fill: var(--cu-input);
+}
+path.fillOutput {
+  fill: var(--cu-output);
+}
+path.fillCacheRead {
+  fill: var(--cu-cache-read);
+}
+path.fillCacheWrite {
+  fill: var(--cu-cache-write);
+}
+path.fillSingle {
+  fill: var(--cu-single);
+}
+
+.svg path,
+.svg g {
+  transition: opacity var(--dur-hover) var(--ease-out-strong);
+}
+
+/* Dim the other marks a little so the active one stands out. */
+.plot:has(.barActive) {
+  path.fillInput,
+  path.fillOutput,
+  path.fillCacheRead,
+  path.fillCacheWrite,
+  path.fillSingle {
+    opacity: 0.55;
+  }
+
+  .barActive path,
+  path.barActive {
+    opacity: 1;
+  }
+}
+
+.costLine {
+  fill: none;
+  stroke: var(--cu-line);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.costDot {
+  fill: var(--cu-line);
+  stroke: var(--bg-primary);
+  stroke-width: 2;
+}
+
+.crosshair {
+  stroke: var(--text-quaternary);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  pointer-events: none;
+}
+
+.hit {
+  fill: transparent;
+}
+
+/* ---------- Tooltip ---------- */
+
+.tooltip {
+  position: absolute;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 168px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-primary) 94%, transparent);
+  backdrop-filter: var(--glass-backdrop-filter);
+  -webkit-backdrop-filter: var(--glass-backdrop-filter);
+  box-shadow: var(--shadow-lg);
+  font-size: 12px;
+  color: var(--text-secondary);
+  pointer-events: none;
+  transition:
+    left var(--dur-hover) var(--ease-out-strong),
+    transform var(--dur-hover) var(--ease-out-strong);
+}
+
+.tooltipTitle {
+  margin-bottom: 2px;
+  font-weight: 650;
+  color: var(--text-primary);
+}
+
+.tooltipRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+
+  b {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ---------- Chart table view ---------- */
+
+.tableToggle {
+  font-size: 13px;
+}
+
+.tableScroll {
+  max-height: 320px;
+  overflow: auto;
+}
+
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+
+  th,
+  td {
+    padding: 5px 8px;
+    text-align: right;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+
+  thead th {
+    position: sticky;
+    top: 0;
+    background: var(--bg-primary);
+    color: var(--text-tertiary);
+    font-weight: 600;
+  }
+
+  tbody th[scope='row'] {
+    text-align: left;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+}
+
+/* ---------- Horizontal bars ---------- */
+
+.barList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.barRow {
+  display: grid;
+  grid-template-columns: minmax(0, 11rem) minmax(0, 1fr) 4.75rem;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+
+  &[data-muted] .barValue {
+    color: var(--text-tertiary);
+  }
+}
+
+.barLabel {
+  @include text-ellipsis;
+  color: var(--text-primary);
+}
+
+.barTrack {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--bg-tertiary);
+  overflow: hidden;
+}
+
+.barFill {
+  display: block;
+  height: 100%;
+  border-radius: 0 4px 4px 0;
+  background: var(--cu-single);
+  transition: width var(--dur-hover) var(--ease-out-strong);
+}
+
+.barValue {
+  text-align: right;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+/* ---------- Data tables ---------- */
+
+.tableBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.usageTable {
+  font-variant-numeric: tabular-nums;
+
+  th {
+    white-space: nowrap;
+  }
+
+  th,
+  td {
+    white-space: nowrap;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  td {
+    padding-top: 9px !important;
+    padding-bottom: 9px !important;
+  }
+
+  th:first-child,
+  td:first-child {
+    padding-left: 14px !important;
+  }
+
+  th:last-child,
+  td:last-child {
+    padding-right: 14px !important;
+  }
+}
+
+.numCell {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The classic shrink-to-fit cell: takes the spare width and ellipsizes its content. */
+.growCell {
+  width: 100%;
+  max-width: 0;
+  min-width: 9rem;
+}
+
+.sortButton {
+  @include button-reset;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font: inherit;
+  color: inherit;
+  border-radius: 4px;
+
+  &[data-active] {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      color: var(--text-primary);
+    }
+  }
+}
+
+.sortMark {
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pagerText {
+  font-size: 12.5px;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+
+  &:first-child {
+    margin-right: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tooltip,
+  .barFill,
+  .svg path,
+  .svg g {
+    transition: none;
+  }
+}

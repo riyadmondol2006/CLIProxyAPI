@@ -4,14 +4,19 @@ package main
 
 import (
 	"bytes"
+	"context"
+	"errors"
 	"flag"
 	"net/http"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path/filepath"
 	"strings"
+	"syscall"
 
 	"github.com/router-for-me/CLIProxyAPI/desktop/internal/app"
+	"github.com/router-for-me/CLIProxyAPI/desktop/internal/claudeusage"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -24,6 +29,7 @@ func main() {
 	config := flag.String("config", "", "config path (default: the app's config path)")
 	token := flag.String("token-file", "", "local management token path (default: the app's token path)")
 	saveDir := flag.String("save-dir", app.DownloadsDir(), "where downloads from the UI are saved")
+	claudeDir := flag.String("claude-dir", "", "comma-separated transcript directories (default: Claude Code's projects directories)")
 	flag.Parse()
 
 	paths := app.DefaultPaths()
@@ -49,6 +55,25 @@ func main() {
 	}
 	index = bytes.Replace(index, []byte("<head>"), []byte("<head>"+desktopMarker), 1)
 
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	sources := claudeusage.DefaultSources()
+	if *claudeDir != "" {
+		sources = nil
+		for _, dir := range strings.Split(*claudeDir, ",") {
+			if dir = strings.TrimSpace(dir); dir != "" {
+				sources = append(sources, dir)
+			}
+		}
+	}
+	usage, errUsage := claudeusage.New(filepath.Join(paths.ConfigDir, "claude-usage.db"), sources)
+	if errUsage != nil {
+		log.WithError(errUsage).Warn("Claude usage dashboard is unavailable")
+	} else {
+		backend.ClaudeUsage = usage
+		usage.Start(ctx)
+	}
+
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" || r.URL.Path == "/index.html" {
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -65,9 +90,23 @@ func main() {
 		}
 		backend.ServeHTTP(w, r)
 	})
+	httpServer := &http.Server{Addr: *listen, Handler: handler}
+	go func() {
+		<-ctx.Done()
+		if errShutdown := httpServer.Shutdown(context.Background()); errShutdown != nil {
+			log.WithError(errShutdown).Warn("shut down")
+		}
+	}()
 	log.Infof("desktop UI on http://%s", *listen)
-	if errServe := http.ListenAndServe(*listen, handler); errServe != nil {
+	errServe := httpServer.ListenAndServe()
+	if usage != nil {
+		if errClose := usage.Close(); errClose != nil {
+			log.WithError(errClose).Warn("close Claude usage")
+		}
+	}
+	if errServe != nil && !errors.Is(errServe, http.ErrServerClosed) {
 		log.WithError(errServe).Error("serve")
+		stop()
 		os.Exit(1)
 	}
 }

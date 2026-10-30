@@ -1,0 +1,512 @@
+@use '../../styles/mixins' as *;
+
+/* Claude usage: Access Keys header vocabulary, Home stat tiles, then one card per view. */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  min-width: 0;
+
+  &[data-loading] .card,
+  &[data-loading] .stats {
+    opacity: 0.7;
+    transition: opacity var(--dur-hover) var(--ease-out-strong);
+  }
+}
+
+/* ---------- Header ---------- */
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(26px, 3.2vw, 30px);
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.meta {
+  margin: 0;
+  font-family: $font-mono;
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+
+  &::before {
+    content: '▍';
+    color: var(--primary-color);
+    margin-right: 6px;
+  }
+}
+
+.metaSep {
+  margin: 0 8px;
+  color: var(--text-quaternary);
+}
+
+.lede {
+  margin: 4px 0 0;
+  max-width: 76ch;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* Sits at the bottom of the header, clear of the floating toolbar in the top corner. */
+.header > :global(.btn) {
+  align-self: flex-end;
+}
+
+/* Button wraps its children in one span, so space the icon inside that span. */
+.withIcon > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ---------- Controls ---------- */
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.segmented {
+  display: inline-flex;
+  align-self: flex-start;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-tertiary);
+
+  &[data-size='sm'] {
+    padding: 2px;
+
+    .segment {
+      padding: 4px 10px;
+      font-size: 12px;
+    }
+  }
+}
+
+.segment {
+  @include button-reset;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 550;
+  line-height: 1.3;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  transition:
+    color var(--dur-hover) var(--ease-out-strong),
+    background-color var(--dur-hover) var(--ease-out-strong),
+    box-shadow var(--dur-hover) var(--ease-out-strong),
+    transform var(--dur-press) var(--ease-out-strong);
+
+  &[aria-pressed='true'] {
+    color: var(--text-primary);
+    background: var(--bg-primary);
+    box-shadow: var(--shadow);
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: -1px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover:not([aria-pressed='true']) {
+      color: var(--text-primary);
+    }
+  }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  @include button-reset;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  font-family: $font-mono;
+  font-size: 12px;
+  color: var(--text-secondary);
+  transition:
+    color var(--dur-hover) var(--ease-out-strong),
+    border-color var(--dur-hover) var(--ease-out-strong),
+    background-color var(--dur-hover) var(--ease-out-strong),
+    transform var(--dur-press) var(--ease-out-strong);
+
+  &:first-child {
+    font-family: inherit;
+    font-weight: 600;
+  }
+
+  &[aria-pressed='true'] {
+    color: var(--primary-color);
+    border-color: color-mix(in srgb, var(--primary-color) 50%, var(--border-color));
+    background: color-mix(in srgb, var(--primary-color) 10%, var(--bg-primary));
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      border-color: var(--border-hover);
+      color: var(--text-primary);
+    }
+  }
+}
+
+.chipNote {
+  padding: 0 5px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 10.5px;
+  color: var(--text-tertiary);
+  background: var(--bg-tertiary);
+}
+
+/* ---------- Scan progress ---------- */
+
+.scanCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 20px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--primary-color) 35%, var(--border-color));
+  background: color-mix(in srgb, var(--primary-color) 5%, var(--bg-primary));
+}
+
+.scanHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.scanPercent {
+  font-family: $font-mono;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+  color: var(--text-primary);
+}
+
+.cardText {
+  margin: 0;
+  max-width: 76ch;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.progress {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg-tertiary);
+  overflow: hidden;
+
+  span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--brand-gradient);
+    transition: width var(--dur-hover) var(--ease-out-strong);
+  }
+}
+
+.note {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.notice {
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--amber-color);
+  background: color-mix(in srgb, var(--amber-color) 10%, transparent);
+}
+
+.muted {
+  margin: 0;
+  font-size: 13px;
+  font-style: normal;
+  color: var(--text-tertiary);
+}
+
+/* ---------- Stat tiles ---------- */
+
+.stats {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.9fr) minmax(0, 3fr);
+  gap: 10px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.costTile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--brand-to) 30%, var(--border-color));
+  background:
+    radial-gradient(
+      120% 90% at 100% 0%,
+      color-mix(in srgb, var(--brand-to) 16%, transparent),
+      color-mix(in srgb, var(--brand-from) 6%, transparent) 55%,
+      transparent
+    ),
+    var(--bg-primary);
+  overflow: hidden;
+}
+
+.costValue {
+  font-size: clamp(34px, 4vw, 44px);
+  line-height: 1.05;
+  font-weight: 750;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.tileGroups {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.tileRow {
+  display: grid;
+  gap: 10px;
+
+  &[data-count='3'] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  &[data-count='4'] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  @media (max-width: 640px) {
+    &[data-count='3'],
+    &[data-count='4'] {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  min-width: 0;
+  border-radius: 14px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+}
+
+.tileLabel {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  @include text-ellipsis;
+}
+
+.tileValue {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.tileHint {
+  font-size: 12.5px;
+  color: var(--text-tertiary);
+}
+
+/* ---------- Cards ---------- */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  padding: 18px 20px;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+}
+
+.cardHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cardHeading {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.cardSubtitle {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--text-tertiary);
+}
+
+.cardActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.twoUp {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+
+  @media (max-width: 960px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Table cells ---------- */
+
+.code {
+  font-family: $font-mono;
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+.ellipsis {
+  display: inline-block;
+  max-width: 9rem;
+  vertical-align: bottom;
+  @include text-ellipsis;
+}
+
+.topic {
+  display: block;
+  @include text-ellipsis;
+}
+
+.pill {
+  display: inline-flex;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+
+  &[data-state='ok'] {
+    color: var(--text-secondary);
+    background: var(--bg-tertiary);
+  }
+
+  &[data-state='warn'] {
+    color: var(--amber-color);
+    background: color-mix(in srgb, var(--amber-color) 12%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .segment,
+  .chip,
+  .progress span,
+  .page[data-loading] .card,
+  .page[data-loading] .stats {
+    transition: none;
+  }
+
+  .segment:active,
+  .chip:active {
+    transform: none;
+  }
+}

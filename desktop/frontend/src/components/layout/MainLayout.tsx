@@ -28,6 +28,7 @@ import {
   IconSidebarQuickStart,
   IconKey,
   IconActivity,
+  IconChartColumn,
   IconBookOpen,
   IconSidebarQuota,
   IconSidebarStore,
@@ -60,6 +61,7 @@ import type { Theme } from '@/types';
 const sidebarIcons: Record<string, ReactNode> = {
   home: <IconSidebarDashboard size={18} />,
   dashboard: <IconActivity size={18} />,
+  claudeUsage: <IconChartColumn size={18} />,
   docs: <IconBookOpen size={18} />,
   quickStart: <IconSidebarQuickStart size={18} />,
   accessKeys: <IconKey size={18} />,
@@ -608,6 +610,16 @@ export function MainLayout() {
           metaKey: 'nav_meta.dashboard',
           icon: sidebarIcons.dashboard,
         },
+        ...(isDesktopApp()
+          ? [
+              {
+                path: '/claude-usage',
+                labelKey: 'nav.claude_usage',
+                metaKey: 'nav_meta.claude_usage',
+                icon: sidebarIcons.claudeUsage,
+              },
+            ]
+          : []),
         quickStartNavItem,
         { path: '/docs', labelKey: 'nav.docs', metaKey: 'nav_meta.docs', icon: sidebarIcons.docs },
       ],

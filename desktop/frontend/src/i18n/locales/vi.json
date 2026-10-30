@@ -110,7 +110,8 @@
     "logs": "Nhật ký",
     "system_info": "Giới thiệu",
     "home": "Trang chủ",
-    "docs": "Tài liệu"
+    "docs": "Tài liệu",
+    "claude_usage": "Mức dùng Claude"
   },
   "nav_groups": {
     "operate": "Vận hành",
@@ -137,7 +138,8 @@
     "config_management": "Cấu hình gateway",
     "system_info": "Runtime & chẩn đoán",
     "home": "Trạng thái và thao tác nhanh",
-    "docs": "Hướng dẫn và tham khảo"
+    "docs": "Hướng dẫn và tham khảo",
+    "claude_usage": "Token và chi phí Claude Code trên máy"
   },
   "dashboard": {
     "hero_verdict_good": "Mọi hệ thống ổn định",
@@ -2611,5 +2613,135 @@
     "search": "Tìm trong tài liệu",
     "no_results": "Không có trang phù hợp.",
     "on_this_page": "Trên trang này"
+  },
+  "claude_usage": {
+    "title": "Mức dùng Claude",
+    "meta": "{{sessions}} phiên · {{turns}} lượt",
+    "updated": "cập nhật lúc {{time}}",
+    "never_updated": "chưa quét",
+    "lede": "Dữ liệu được đọc ngay trên máy từ nhật ký của Claude Code và không được gửi đi đâu cả. Chi phí là ước tính theo giá niêm yết của API; gói thuê bao được tính phí theo cách khác.",
+    "rescan": "Quét lại",
+    "scanning": "Đang quét nhật ký…",
+    "filters": "Bộ lọc",
+    "range_label": "Khoảng thời gian",
+    "ranges": {
+      "today": "Hôm nay",
+      "7d": "7 ngày",
+      "30d": "30 ngày",
+      "90d": "90 ngày",
+      "this_month": "Tháng này",
+      "last_month": "Tháng trước",
+      "all": "Toàn bộ"
+    },
+    "models_label": "Mô hình",
+    "all_models": "Tất cả mô hình",
+    "unpriced_hint": "Chưa có giá cho mô hình này nên chi phí của nó không được tính.",
+    "na": "không có",
+    "chart_keys": "Dùng các phím mũi tên để xem lần lượt từng giá trị.",
+    "show_table": "Xem dạng bảng",
+    "duration_hm": "{{hours}} giờ {{minutes}} phút",
+    "duration_m": "{{minutes}} phút",
+    "duration_lt_minute": "<1 phút",
+    "duration_s": "{{seconds}} giây",
+    "export_csv": "CSV",
+    "export_csv_named": "Xuất {{name}} ra CSV",
+    "scan": {
+      "first_title": "Đang đọc lịch sử Claude Code của bạn",
+      "first_text": "Lần quét đầu tiên đọc mọi tệp nhật ký và có thể mất vài phút nếu lịch sử dài. Việc này chỉ diễn ra một lần: các lần quét sau chỉ đọc những dòng mới.",
+      "title": "Đang đọc các dòng nhật ký mới",
+      "progress": "{{done}}/{{total}} tệp · {{bytesDone}}/{{bytesTotal}}",
+      "progress_label": "Tiến độ quét",
+      "error": "Lần quét gần nhất gặp sự cố: {{error}}"
+    },
+    "empty": {
+      "no_sources_title": "Máy này không có nhật ký Claude Code",
+      "no_sources_text": "Claude Code lưu nhật ký trong ~/.claude/projects. Sau khi dùng Claude Code trên máy này, hãy bấm Quét lại.",
+      "no_data_title": "Không có mức dùng trong khoảng này",
+      "no_data_text": "Không có ghi nhận nào cho các mô hình đã chọn trong những ngày này.",
+      "show_all": "Xem toàn bộ",
+      "unavailable": "Không tải được mức dùng Claude."
+    },
+    "tiles": {
+      "label": "Tổng trong khoảng này",
+      "cost": "Chi phí ước tính",
+      "cost_hint": "Theo giá niêm yết API",
+      "cost_hint_unpriced": "Theo giá niêm yết API · số mô hình chưa có giá bị bỏ qua: {{count}}",
+      "sessions": "Phiên",
+      "turns": "Lượt",
+      "subagent": "Token của subagent"
+    },
+    "daily": {
+      "title": "Theo ngày",
+      "mode_label": "Loại token",
+      "mode_io": "Đầu vào & đầu ra",
+      "mode_cache": "Bộ nhớ đệm",
+      "cost_line": "Chi phí ước tính",
+      "summary": "Token và chi phí ước tính theo ngày trong {{days}} ngày: {{tokens}} token, {{cost}}."
+    },
+    "hourly": {
+      "title": "Thời điểm trong ngày",
+      "subtitle": "Số lượt trung bình mỗi ngày có hoạt động, giờ địa phương",
+      "summary": "Số lượt trung bình mỗi ngày có hoạt động theo giờ. Bận nhất: {{hour}}, {{value}} lượt.",
+      "summary_empty": "Số lượt trung bình mỗi ngày có hoạt động theo giờ. Chưa có lượt nào.",
+      "avg_turns": "Lượt TB",
+      "avg_output": "Đầu ra TB",
+      "hour": "Giờ"
+    },
+    "by_model": {
+      "title": "Theo mô hình",
+      "metric_label": "Chỉ số",
+      "metric_cost": "Chi phí",
+      "metric_tokens": "Token"
+    },
+    "projects": {
+      "title": "Dự án",
+      "top_title": "Dự án hàng đầu",
+      "top_subtitle": "10 dự án có chi phí ước tính cao nhất"
+    },
+    "branches": {
+      "title": "Dự án & nhánh"
+    },
+    "sessions": {
+      "title": "Phiên",
+      "untitled": "Chưa đặt tên",
+      "shown": "Đang hiển thị {{shown}} phiên mới nhất trong tổng số {{total}}."
+    },
+    "subagents": {
+      "title": "Subagent theo loại",
+      "empty": "Không có subagent nào chạy trong khoảng này."
+    },
+    "dispatches": {
+      "title": "Các lần gọi subagent hàng đầu"
+    },
+    "columns": {
+      "model": "Mô hình",
+      "turns": "Lượt",
+      "input": "Đầu vào",
+      "output": "Đầu ra",
+      "cache_read": "Đọc bộ đệm",
+      "cache_write": "Ghi bộ đệm",
+      "cost": "Chi phí ước tính",
+      "topic": "Chủ đề",
+      "project": "Dự án",
+      "branch": "Nhánh",
+      "last_active": "Hoạt động gần nhất",
+      "duration": "Thời lượng",
+      "tokens": "Token",
+      "sessions": "Phiên",
+      "agent_type": "Loại agent",
+      "dispatches": "Lần gọi",
+      "started": "Bắt đầu",
+      "tool_uses": "Lần dùng công cụ",
+      "status": "Trạng thái",
+      "day": "Ngày"
+    },
+    "table": {
+      "pages": "Trang của {{caption}}",
+      "rows": "{{from}}–{{to}} trong {{total}}",
+      "prev": "Trước",
+      "next": "Sau",
+      "page": "Trang {{page}}/{{pages}}",
+      "empty": "Không có gì để hiển thị."
+    }
   }
 }
