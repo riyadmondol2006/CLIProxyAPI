@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { SegmentedControl, type SegmentedOption } from '@/components/ui/SegmentedControl';
 import { IconDownload, IconRefreshCw } from '@/components/ui/icons';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { useNow } from '@/hooks/useNow';
@@ -547,23 +548,17 @@ export function ClaudeUsageView({
   const segmented = <V extends string>(
     label: string,
     value: V,
-    options: Array<{ value: V; label: string }>,
+    options: Array<SegmentedOption<V>>,
     onChange: (value: V) => void,
     size: 'md' | 'sm' = 'md'
   ) => (
-    <div className={styles.segmented} data-size={size} role="group" aria-label={label}>
-      {options.map((option) => (
-        <button
-          key={option.value}
-          type="button"
-          className={styles.segment}
-          aria-pressed={value === option.value}
-          onClick={() => onChange(option.value)}
-        >
-          {option.label}
-        </button>
-      ))}
-    </div>
+    <SegmentedControl
+      label={label}
+      value={value}
+      options={options}
+      onChange={onChange}
+      size={size}
+    />
   );
 
   const renderTiles = (sum: NonNullable<typeof totals>) => {

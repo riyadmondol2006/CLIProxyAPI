@@ -29,6 +29,7 @@ import {
   IconKey,
   IconActivity,
   IconChartColumn,
+  IconChartPie,
   IconBookOpen,
   IconCode,
   IconSidebarQuota,
@@ -63,6 +64,7 @@ import type { Theme } from '@/types';
 const sidebarIcons: Record<string, ReactNode> = {
   home: <IconSidebarDashboard size={18} />,
   dashboard: <IconActivity size={18} />,
+  apiUsage: <IconChartPie size={18} />,
   claudeUsage: <IconChartColumn size={18} />,
   docs: <IconBookOpen size={18} />,
   apiDocs: <IconCode size={18} />,
@@ -612,6 +614,12 @@ export function MainLayout() {
           labelKey: 'nav.dashboard',
           metaKey: 'nav_meta.dashboard',
           icon: sidebarIcons.dashboard,
+        },
+        {
+          path: '/api-usage',
+          labelKey: 'nav.api_usage',
+          metaKey: 'nav_meta.api_usage',
+          icon: sidebarIcons.apiUsage,
         },
         ...(isDesktopApp()
           ? [

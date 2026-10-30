@@ -19,12 +19,19 @@ const PROVIDER_LABELS: Record<string, string> = {
   antigravity: 'Antigravity',
 };
 
+const OPENAI_COMPAT_PREFIX = 'openai-compatible-';
+
 /**
  * Resolves a provider's display name; unknown ids fall back to a capitalized first letter, and
  * `unknown` is left to the caller to localize.
  */
 export function providerLabel(id: string, unknownLabel: string): string {
   if (id === 'unknown' || !id) return unknownLabel;
+  // OpenAI-compatible providers are ids like "openai-compatible-<name from the config>".
+  const compatName = id.startsWith(OPENAI_COMPAT_PREFIX)
+    ? id.slice(OPENAI_COMPAT_PREFIX.length)
+    : '';
+  if (compatName) return `${compatName} (OpenAI Compatible)`;
   return PROVIDER_LABELS[id] ?? id.charAt(0).toUpperCase() + id.slice(1);
 }
 

@@ -98,6 +98,7 @@
   },
   "nav": {
     "dashboard": "活动",
+    "api_usage": "API 用量",
     "access_keys": "访问密钥",
     "quick_start": "连接应用",
     "ai_providers": "服务商",
@@ -127,6 +128,7 @@
   },
   "nav_meta": {
     "dashboard": "运行总览",
+    "api_usage": "按服务商、账号和密钥统计 Token",
     "access_keys": "为其他设备分配密钥与额度",
     "quick_start": "Base URL 与应用配置",
     "ai_providers": "上游模型路由",
@@ -2827,6 +2829,92 @@
       "next": "下一页",
       "page": "第 {{page}} / {{pages}} 页",
       "empty": "暂无内容。"
+    }
+  },
+  "api_usage": {
+    "title": "API 用量",
+    "meta": "服务商：{{providers}} · 账号：{{accounts}} · 模型：{{models}}",
+    "updated": "更新于 {{time}}",
+    "lede": "经由本代理使用的 Token，按各服务商上报的数值统计。重试会计为单独的请求。",
+    "controls_label": "视图选项",
+    "period_label": "时间段",
+    "periods": {
+      "today": "今天",
+      "7d": "7 天",
+      "30d": "30 天",
+      "90d": "90 天"
+    },
+    "period_long": {
+      "today": "今天",
+      "7d": "最近 7 天",
+      "30d": "最近 30 天",
+      "90d": "最近 90 天"
+    },
+    "group_label": "分组方式",
+    "groups": {
+      "provider": "服务商",
+      "account": "账号",
+      "model": "模型",
+      "key": "访问密钥"
+    },
+    "labels": {
+      "unknown_provider": "未知服务商",
+      "unknown_model": "未知模型",
+      "unknown_account": "未知账号",
+      "removed_keys": "已删除的密钥",
+      "other_clients": "其他客户端",
+      "other": "其他"
+    },
+    "tiles": {
+      "label": "此时间段的合计",
+      "tokens": "Token 总量",
+      "input": "输入",
+      "output": "输出",
+      "requests": "请求",
+      "failed": "失败 {{value}} 次",
+      "no_failed": "没有失败"
+    },
+    "chart": {
+      "title": "每日 Token",
+      "by": {
+        "provider": "每天按服务商拆分。",
+        "account": "每天按账号拆分。",
+        "model": "每天按模型拆分。",
+        "key": "每天按访问密钥拆分。"
+      },
+      "other_note": "前 {{top}} 项单独显示，其余合并为“其他”。",
+      "summary": "{{period}}：共 {{tokens}} Token，按天显示。",
+      "keys": "使用方向键逐日查看。",
+      "total": "合计"
+    },
+    "table": {
+      "provider": "按服务商",
+      "account": "按账号",
+      "model": "按模型",
+      "key": "按访问密钥",
+      "subtitle": "请求数包含重试，失败次数显示在旁边。占比按此时间段内的全部 Token 计算。"
+    },
+    "columns": {
+      "requests": "请求",
+      "failed": "失败 {{value}}",
+      "input": "输入",
+      "output": "输出",
+      "total": "合计",
+      "share": "占比"
+    },
+    "empty": {
+      "title": "暂无 Token 用量",
+      "text": "从运行此版本的代理开始统计，此前的请求不包含在内。",
+      "claude_hint": "另一个“Claude 用量”页面则读取本机 Claude Code 的日志。",
+      "open_claude": "打开 Claude 用量",
+      "period_title": "此时间段内没有用量",
+      "period_text": "此时间段内没有请求经过代理。选择更长的时间段可查看更早的用量。",
+      "show_90d": "显示 90 天"
+    },
+    "error": {
+      "title": "无法加载 Token 用量",
+      "text": "如果代理版本比此应用旧，请更新后重试。",
+      "retry": "重试"
     }
   },
   "api_docs": {

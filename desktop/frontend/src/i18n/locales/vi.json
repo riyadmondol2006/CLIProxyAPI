@@ -98,6 +98,7 @@
   },
   "nav": {
     "dashboard": "Hoạt động",
+    "api_usage": "Mức dùng API",
     "access_keys": "Khóa truy cập",
     "quick_start": "Kết nối ứng dụng",
     "ai_providers": "Nhà cung cấp",
@@ -127,6 +128,7 @@
   },
   "nav_meta": {
     "dashboard": "Tổng quan vận hành",
+    "api_usage": "Token theo nhà cung cấp, tài khoản và khóa",
     "access_keys": "Khóa và hạn mức cho thiết bị khác",
     "quick_start": "Base URL và thiết lập ứng dụng",
     "ai_providers": "Định tuyến model upstream",
@@ -2836,6 +2838,92 @@
       "next": "Sau",
       "page": "Trang {{page}}/{{pages}}",
       "empty": "Không có gì để hiển thị."
+    }
+  },
+  "api_usage": {
+    "title": "Mức dùng API",
+    "meta": "Nhà cung cấp: {{providers}} · Tài khoản: {{accounts}} · Mô hình: {{models}}",
+    "updated": "cập nhật lúc {{time}}",
+    "lede": "Số token đã dùng qua proxy này, tính theo số liệu mà từng nhà cung cấp báo về. Mỗi lần thử lại được tính là một yêu cầu riêng.",
+    "controls_label": "Tùy chọn hiển thị",
+    "period_label": "Khoảng thời gian",
+    "periods": {
+      "today": "Hôm nay",
+      "7d": "7 ngày",
+      "30d": "30 ngày",
+      "90d": "90 ngày"
+    },
+    "period_long": {
+      "today": "Hôm nay",
+      "7d": "7 ngày qua",
+      "30d": "30 ngày qua",
+      "90d": "90 ngày qua"
+    },
+    "group_label": "Nhóm theo",
+    "groups": {
+      "provider": "Nhà cung cấp",
+      "account": "Tài khoản",
+      "model": "Mô hình",
+      "key": "Khóa truy cập"
+    },
+    "labels": {
+      "unknown_provider": "Nhà cung cấp không xác định",
+      "unknown_model": "Mô hình không xác định",
+      "unknown_account": "Tài khoản không xác định",
+      "removed_keys": "Khóa đã xóa",
+      "other_clients": "Máy khách khác",
+      "other": "Khác"
+    },
+    "tiles": {
+      "label": "Tổng trong khoảng này",
+      "tokens": "Tổng token",
+      "input": "Đầu vào",
+      "output": "Đầu ra",
+      "requests": "Yêu cầu",
+      "failed": "{{value}} lần thất bại",
+      "no_failed": "Không có lần nào thất bại"
+    },
+    "chart": {
+      "title": "Token theo ngày",
+      "by": {
+        "provider": "Mỗi ngày được chia theo nhà cung cấp.",
+        "account": "Mỗi ngày được chia theo tài khoản.",
+        "model": "Mỗi ngày được chia theo mô hình.",
+        "key": "Mỗi ngày được chia theo khóa truy cập."
+      },
+      "other_note": "{{top}} nhóm lớn nhất được hiển thị riêng, phần còn lại gộp vào “Khác”.",
+      "summary": "{{period}}: {{tokens}} token, theo từng ngày.",
+      "keys": "Dùng các phím mũi tên để xem lần lượt từng ngày.",
+      "total": "Tổng"
+    },
+    "table": {
+      "provider": "Theo nhà cung cấp",
+      "account": "Theo tài khoản",
+      "model": "Theo mô hình",
+      "key": "Theo khóa truy cập",
+      "subtitle": "Số yêu cầu gồm cả các lần thử lại, số lần thất bại hiển thị bên cạnh. Tỷ lệ tính trên tổng token trong khoảng này."
+    },
+    "columns": {
+      "requests": "Yêu cầu",
+      "failed": "{{value}} thất bại",
+      "input": "Đầu vào",
+      "output": "Đầu ra",
+      "total": "Tổng",
+      "share": "Tỷ lệ"
+    },
+    "empty": {
+      "title": "Chưa có mức dùng token",
+      "text": "Việc đếm bắt đầu khi phiên bản proxy này chạy, nên các yêu cầu trước đó không được tính.",
+      "claude_hint": "Trang “Mức dùng Claude” riêng thì đọc nhật ký Claude Code trên máy.",
+      "open_claude": "Mở Mức dùng Claude",
+      "period_title": "Không có dữ liệu trong khoảng này",
+      "period_text": "Không có yêu cầu nào đi qua proxy trong khoảng này. Chọn khoảng dài hơn để xem mức dùng trước đó.",
+      "show_90d": "Xem 90 ngày"
+    },
+    "error": {
+      "title": "Không tải được mức dùng token",
+      "text": "Nếu proxy cũ hơn ứng dụng này, hãy cập nhật rồi thử lại.",
+      "retry": "Thử lại"
     }
   },
   "api_docs": {

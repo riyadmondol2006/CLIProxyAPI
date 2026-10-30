@@ -7,6 +7,7 @@ import { HomePage } from '@/features/home/HomePage';
 import { DocsPage } from '@/features/docs/DocsPage';
 import { ApiReferencePage } from '@/features/apiDocs/ApiReferencePage';
 import { ClaudeUsagePage } from '@/features/claudeUsage/ClaudeUsagePage';
+import { ApiUsagePage } from '@/features/apiUsage/ApiUsagePage';
 import { AuthFilesPage } from '@/features/authFiles/AuthFilesPage';
 import { AuthFilesOAuthExcludedEditPage } from '@/pages/AuthFilesOAuthExcludedEditPage';
 import { AuthFilesOAuthModelAliasEditPage } from '@/pages/AuthFilesOAuthModelAliasEditPage';
@@ -24,6 +25,7 @@ import { isDesktopApp } from '@/utils/desktop';
 const createMainRoutes = (supportsPlugin: boolean) => [
   { path: '/', element: <HomePage /> },
   { path: '/dashboard', element: <DashboardPage /> },
+  { path: '/api-usage', element: <ApiUsagePage /> },
   // Reads Claude Code logs through the desktop app backend, so it only exists in the app.
   {
     path: '/claude-usage',

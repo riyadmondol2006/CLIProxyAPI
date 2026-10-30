@@ -28,6 +28,7 @@ import (
 	"github.com/router-for-me/CLIProxyAPI/v8/internal/managementasset"
 	"github.com/router-for-me/CLIProxyAPI/v8/internal/pluginhost"
 	"github.com/router-for-me/CLIProxyAPI/v8/internal/redisqueue"
+	"github.com/router-for-me/CLIProxyAPI/v8/internal/tokenusage"
 	sdkaccess "github.com/router-for-me/CLIProxyAPI/v8/sdk/access"
 	"github.com/router-for-me/CLIProxyAPI/v8/sdk/api/handlers"
 	"github.com/router-for-me/CLIProxyAPI/v8/sdk/api/handlers/openai"
@@ -265,6 +266,10 @@ func NewServer(cfg *config.Config, authManager *auth.Manager, accessManager *sdk
 	keyTracker.Configure(cfg.APIKeys, cfg.APIKeyLimits)
 	keyTracker.Start(context.Background())
 
+	tokenTracker := tokenusage.Default()
+	tokenTracker.SetStorePath(tokenusage.StorePath(configFilePath))
+	tokenTracker.Start(context.Background())
+
 	if optionState.keepAliveEnabled {
 		s.enableKeepAlive(optionState.keepAliveTimeout, optionState.keepAliveOnTimeout)
 	}
@@ -427,6 +432,9 @@ func (s *Server) Stop(ctx context.Context) error {
 
 	if errFlush := keylimit.Default().Flush(); errFlush != nil {
 		log.WithError(errFlush).Warn("failed to save API key usage")
+	}
+	if errFlush := tokenusage.Default().Flush(); errFlush != nil {
+		log.WithError(errFlush).Warn("failed to save token usage")
 	}
 
 	if s.keepAliveEnabled {

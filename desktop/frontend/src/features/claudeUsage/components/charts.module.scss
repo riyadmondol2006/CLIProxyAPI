@@ -83,6 +83,35 @@
   background: var(--cu-cache-write);
 }
 
+/*
+ * Group tones for stacked charts (`fillTone` with `data-tone`): the top groups take the accents
+ * in order and "Other" stays neutral.
+ */
+.fillTone {
+  /* Neutral gray in every theme; the muted text tokens lean purple, like the first tone. */
+  --cu-tone: color-mix(in srgb, var(--text-primary) 35%, var(--bg-primary));
+
+  &[data-tone='0'] {
+    --cu-tone: var(--accent-purple);
+  }
+  &[data-tone='1'] {
+    --cu-tone: var(--accent-cyan);
+  }
+  &[data-tone='2'] {
+    --cu-tone: var(--accent-pink);
+  }
+  &[data-tone='3'] {
+    --cu-tone: var(--accent-orange);
+  }
+  &[data-tone='4'] {
+    --cu-tone: var(--accent-yellow);
+  }
+}
+
+span.fillTone {
+  background: var(--cu-tone);
+}
+
 .plot {
   position: relative;
   min-width: 0;
@@ -136,6 +165,9 @@ path.fillCacheWrite {
 path.fillSingle {
   fill: var(--cu-single);
 }
+path.fillTone {
+  fill: var(--cu-tone);
+}
 
 .svg path,
 .svg g {
@@ -148,7 +180,8 @@ path.fillSingle {
   path.fillOutput,
   path.fillCacheRead,
   path.fillCacheWrite,
-  path.fillSingle {
+  path.fillSingle,
+  path.fillTone {
     opacity: 0.55;
   }
 
@@ -219,11 +252,23 @@ path.fillSingle {
   justify-content: space-between;
   gap: 16px;
 
+  .swatch {
+    width: 8px;
+    height: 8px;
+  }
+
   b {
     font-weight: 600;
     color: var(--text-primary);
     font-variant-numeric: tabular-nums;
   }
+}
+
+.tooltipLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
 }
 
 /* ---------- Chart table view ---------- */

@@ -130,6 +130,13 @@ describe('providerLabel', () => {
     expect(providerLabel('gemini-interactions', 'Unattributed')).toBe('Interactions API');
   });
 
+  test('names OpenAI-compatible providers by their configured name', () => {
+    expect(providerLabel('openai-compatible-openrouter', 'Unattributed')).toBe(
+      'openrouter (OpenAI Compatible)'
+    );
+    expect(providerLabel('openai-compatible-', 'Unattributed')).toBe('Openai-compatible-');
+  });
+
   test('falls back to a capitalised id, and localises unknown', () => {
     expect(providerLabel('somenewbrand', 'Unattributed')).toBe('Somenewbrand');
     expect(providerLabel('unknown', 'Unattributed')).toBe('Unattributed');

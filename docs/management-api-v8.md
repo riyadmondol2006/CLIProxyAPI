@@ -94,6 +94,7 @@ retain the corresponding business operation's fields.
 | `/access/key-usage` | GET | Get current-period token usage and limits for every client API key. |
 | `/access/key-usage/reset` | POST | Clear the current-period counters for `{"api-key": "..."}`. Daily history is kept. |
 | `/access/key-usage/history?days=30` | GET | Get daily tokens and requests per client API key for the last `days` local days (1–90, default 30), oldest first. |
+| `/usage/tokens?days=30` | GET | Get daily upstream token usage per provider, credential, model, and client API key for the last `days` local days (1–90, default 30). See [Token usage](#token-usage). |
 | `/requests/api-call` | POST | Make an authenticated upstream call. |
 | `/routing/cooldown/reset` | POST | Clear credential cooldown. |
 | `/routing/model-definitions/<channel>` | GET | Get model definitions. |
@@ -121,6 +122,52 @@ retain the corresponding business operation's fields.
 | `/plugins/store` | GET | List the plugin store. |
 | `/plugins/store/<id>/install` | POST | Install or update a plugin. |
 | `/plugins/<id>/quota` | GET, POST, DELETE | Read, fetch, or reset plugin quota. |
+
+### Token usage
+
+`GET /usage/tokens?days=N` reports the tokens every upstream attempt used,
+recorded per local day and kept for 90 days in `token-usage.json` next to the
+config file (or under `WRITABLE_PATH`). `days` is clamped to 1–90; a missing or
+invalid value means 30.
+
+```json
+{
+  "dates": ["2026-10-29", "2026-10-30"],
+  "rows": [
+    {
+      "provider": "codex",
+      "auth-id": "codex-user@example.com.json",
+      "auth-index": "3f2a…",
+      "account": "user@example.com",
+      "model": "gpt-5-codex",
+      "client-kind": "key",
+      "client-key": "sk-…full configured key…",
+      "client-name": "Laptop (Sam)",
+      "tokens": [0, 1200],
+      "input-tokens": [0, 900],
+      "output-tokens": [0, 300],
+      "requests": [0, 3],
+      "failed": [0, 1]
+    }
+  ]
+}
+```
+
+- `dates` are server-local days, oldest first, today last. Every series has one
+  zero-filled entry per date.
+- Rows without activity in the window are left out. Rows are sorted by total
+  tokens, highest first.
+- `tokens` is the reported total, or input plus output when the provider omits
+  it. `requests` counts every upstream attempt; `failed` counts failed attempts.
+- `account` is a credential label: the email, label, or file name for OAuth and
+  file credentials, and the configured name or base-URL host plus a masked key
+  (`sk-ab…cd`) for API-key credentials. It falls back to `auth-id` and never
+  contains an upstream secret.
+- `client-kind` is `key` when the request used a key from `access.api-keys`
+  (`client-key` is that key and `client-name` its `access.key-limits` name),
+  `removed` when that key is no longer configured, and `other` for requests
+  without a config client key. `client-key` and `client-name` are empty unless
+  the kind is `key`. Client keys are stored only as SHA-256 hashes.
 
 ## OAuth
 

@@ -98,6 +98,7 @@
   },
   "nav": {
     "dashboard": "Activity",
+    "api_usage": "API usage",
     "access_keys": "Access keys",
     "quick_start": "Connect apps",
     "ai_providers": "Providers",
@@ -127,6 +128,7 @@
   },
   "nav_meta": {
     "dashboard": "Operations overview",
+    "api_usage": "Tokens by provider, account, and key",
     "access_keys": "Keys and limits for other devices",
     "quick_start": "Base URLs and app setup",
     "ai_providers": "Upstream model routing",
@@ -2830,6 +2832,92 @@
       "next": "Next",
       "page": "Page {{page}} of {{pages}}",
       "empty": "Nothing to show."
+    }
+  },
+  "api_usage": {
+    "title": "API usage",
+    "meta": "Providers: {{providers}} · Accounts: {{accounts}} · Models: {{models}}",
+    "updated": "Updated {{time}}",
+    "lede": "Tokens used through this proxy, counted from what each provider reports. Retries count as separate requests.",
+    "controls_label": "View options",
+    "period_label": "Period",
+    "periods": {
+      "today": "Today",
+      "7d": "7 days",
+      "30d": "30 days",
+      "90d": "90 days"
+    },
+    "period_long": {
+      "today": "Today",
+      "7d": "Last 7 days",
+      "30d": "Last 30 days",
+      "90d": "Last 90 days"
+    },
+    "group_label": "Group by",
+    "groups": {
+      "provider": "Provider",
+      "account": "Account",
+      "model": "Model",
+      "key": "Access key"
+    },
+    "labels": {
+      "unknown_provider": "Unknown provider",
+      "unknown_model": "Unknown model",
+      "unknown_account": "Unknown account",
+      "removed_keys": "Deleted keys",
+      "other_clients": "Other clients",
+      "other": "Other"
+    },
+    "tiles": {
+      "label": "Totals for this period",
+      "tokens": "Total tokens",
+      "input": "Input",
+      "output": "Output",
+      "requests": "Requests",
+      "failed": "{{value}} failed",
+      "no_failed": "None failed"
+    },
+    "chart": {
+      "title": "Daily tokens",
+      "by": {
+        "provider": "Each day split by provider.",
+        "account": "Each day split by account.",
+        "model": "Each day split by model.",
+        "key": "Each day split by access key."
+      },
+      "other_note": "The top {{top}} are shown on their own; the rest are combined as Other.",
+      "summary": "{{period}}: {{tokens}} tokens, by day.",
+      "keys": "Use the arrow keys to step through the days.",
+      "total": "Total"
+    },
+    "table": {
+      "provider": "By provider",
+      "account": "By account",
+      "model": "By model",
+      "key": "By access key",
+      "subtitle": "Requests include retries, with failed attempts beside them. Share is of all tokens in this period."
+    },
+    "columns": {
+      "requests": "Requests",
+      "failed": "{{value}} failed",
+      "input": "Input",
+      "output": "Output",
+      "total": "Total",
+      "share": "Share"
+    },
+    "empty": {
+      "title": "No token usage yet",
+      "text": "Counting starts once this version of the proxy is running, so requests from before then aren't included.",
+      "claude_hint": "The separate Claude usage page reads Claude Code's local logs instead.",
+      "open_claude": "Open Claude usage",
+      "period_title": "Nothing in this period",
+      "period_text": "No requests went through the proxy in this period. Choose a longer one to see earlier usage.",
+      "show_90d": "Show 90 days"
+    },
+    "error": {
+      "title": "Couldn't load token usage",
+      "text": "If the proxy is older than this app, update it and try again.",
+      "retry": "Try again"
     }
   },
   "api_docs": {

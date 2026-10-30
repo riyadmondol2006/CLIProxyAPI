@@ -7,6 +7,7 @@ import service from './content/service.md?raw';
 import configuration from './content/configuration.md?raw';
 import troubleshooting from './content/troubleshooting.md?raw';
 import claudeUsage from './content/claude-usage.md?raw';
+import apiUsage from './content/api-usage.md?raw';
 // Reference pages come straight from the repository so they never drift from the code.
 import configExample from '../../../../../config.example.yaml?raw';
 import managementApi from '../../../../../docs/management-api-v8.md?raw';
@@ -38,6 +39,7 @@ export const DOCS: DocEntry[] = [
   guide('sharing', sharing),
   guide('service', service),
   guide('configuration', configuration),
+  guide('api-usage', apiUsage),
   guide('claude-usage', claudeUsage),
   guide('troubleshooting', troubleshooting),
   {
