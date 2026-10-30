@@ -2604,6 +2604,13 @@
     "update": {
       "title": "Update installed",
       "text": "This app is version {{app}}, but the service is still running {{service}}. Restart the service to finish updating."
+    },
+    "startup": {
+      "title": "Startup",
+      "service": "Start the proxy when you log in",
+      "service_hint": "Apps and other devices can use it without opening this window.",
+      "app": "Open this app when you log in",
+      "app_hint": "Opens minimized, ready in the background."
     }
   },
   "docs": {

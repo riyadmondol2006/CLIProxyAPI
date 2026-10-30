@@ -17,6 +17,8 @@ type Paths struct {
 	ConfigDir string
 	Config    string
 	Token     string
+	// Autostart is the XDG autostart entry that opens the app at login.
+	Autostart string
 }
 
 // DefaultPaths resolves paths from the XDG environment the same way systemd does
@@ -37,5 +39,6 @@ func DefaultPaths() Paths {
 		ConfigDir: configDir,
 		Config:    filepath.Join(configDir, "config.yaml"),
 		Token:     filepath.Join(runtimeDir, "cliproxyapi", "management-token"),
+		Autostart: filepath.Join(configHome, "autostart", "cliproxyapi.desktop"),
 	}
 }

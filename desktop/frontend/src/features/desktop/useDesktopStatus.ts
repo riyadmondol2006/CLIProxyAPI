@@ -7,6 +7,7 @@ export function useDesktopStatus(intervalMs: number, enabled = true) {
   const [status, setStatus] = useState<DesktopStatus | null>(null);
   const [error, setError] = useState('');
   const [pending, setPending] = useState<DesktopServiceAction | null>(null);
+  const [startupPending, setStartupPending] = useState<'service' | 'app' | null>(null);
   const mounted = useRef(true);
 
   const refresh = useCallback(async () => {
@@ -50,5 +51,24 @@ export function useDesktopStatus(intervalMs: number, enabled = true) {
     };
   }, [enabled, intervalMs, refresh]);
 
-  return { status, error, pending, refresh, run };
+  const setStartup = useCallback(async (target: 'service' | 'app', enabled: boolean) => {
+    setStartupPending(target);
+    try {
+      const next = await desktopApi.setStartup(
+        target === 'service' ? { serviceAtLogin: enabled } : { appAtLogin: enabled }
+      );
+      if (mounted.current) {
+        setStatus(next);
+        setError('');
+      }
+      return true;
+    } catch (err) {
+      if (mounted.current) setError(getErrorMessage(err, 'Could not change startup'));
+      return false;
+    } finally {
+      if (mounted.current) setStartupPending(null);
+    }
+  }, []);
+
+  return { status, error, pending, startupPending, refresh, run, setStartup };
 }

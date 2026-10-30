@@ -1,8 +1,19 @@
 # The background service
 
-The proxy runs as the systemd **user** service `cliproxyapi`. The app starts and enables it
-the first time you open the app. **Home** shows its state and has start, stop, and restart
-buttons. The same actions from a terminal:
+The proxy runs as the systemd **user** service `cliproxyapi`. The first time you open the app
+it starts the service and sets it to start when you log in. **Home** shows its state and has
+start, stop, and restart buttons.
+
+## Startup
+
+**Home → Startup** has two switches:
+
+- **Start the proxy when you log in** turns the service's login start on or off
+  (`systemctl --user enable` / `disable`). Turning it off doesn't stop a running proxy.
+- **Open this app when you log in** adds or removes `~/.config/autostart/cliproxyapi.desktop`.
+  The app then opens minimized at login.
+
+The same actions from a terminal:
 
 ```bash
 systemctl --user status cliproxyapi      # state and recent log lines

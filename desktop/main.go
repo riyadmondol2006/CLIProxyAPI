@@ -10,6 +10,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
 	"sync/atomic"
 
 	"github.com/router-for-me/CLIProxyAPI/desktop/internal/app"
@@ -33,19 +34,35 @@ var version = "dev"
 
 func main() {
 	paths := app.DefaultPaths()
+	firstRun := false
 	if created, errConfig := app.EnsureConfig(paths.Config); errConfig != nil {
 		log.WithError(errConfig).Error("could not create the default config")
 	} else if created {
+		firstRun = true
 		log.Infof("created %s", paths.Config)
+	}
+
+	startState := options.Normal
+	if slices.Contains(os.Args[1:], app.MinimizedFlag) {
+		startState = options.Minimised
+	}
+	executable, errExecutable := os.Executable()
+	if errExecutable == nil {
+		if resolved, errResolve := filepath.EvalSymlinks(executable); errResolve == nil {
+			executable = resolved
+		}
+	} else {
+		executable = ""
 	}
 
 	service := app.NewSystemdUser()
 	var appCtx atomic.Pointer[context.Context]
 	server := &app.Server{
-		Paths:   paths,
-		Service: service,
-		Version: version,
-		Debug:   os.Getenv("CPA_DESKTOP_DEBUG") == "1",
+		Paths:      paths,
+		Service:    service,
+		Version:    version,
+		Executable: executable,
+		Debug:      os.Getenv("CPA_DESKTOP_DEBUG") == "1",
 		SaveFile: func(name string, data []byte) (string, error) {
 			ctx := appCtx.Load()
 			if ctx == nil {
@@ -95,6 +112,7 @@ func main() {
 		Height:           860,
 		MinWidth:         980,
 		MinHeight:        640,
+		WindowStartState: startState,
 		BackgroundColour: &options.RGBA{R: 33, G: 34, B: 44, A: 255}, // Dracula background (#21222c)
 		AssetServer: &assetserver.Options{
 			Assets:  dist,
@@ -102,7 +120,7 @@ func main() {
 		},
 		OnStartup: func(ctx context.Context) {
 			appCtx.Store(&ctx)
-			go startService(ctx, service)
+			go startService(ctx, service, firstRun)
 			if usage != nil {
 				usage.Start(ctx)
 			}
@@ -136,11 +154,17 @@ func main() {
 	}
 }
 
-// startService starts the installed proxy service when it is not running yet.
-func startService(ctx context.Context, service app.Service) {
+// startService starts the installed proxy service when it is not running yet. On the first
+// run it also turns on starting at login; after that the Startup setting on Home decides.
+func startService(ctx context.Context, service app.Service, firstRun bool) {
 	status := service.Status(ctx)
 	if !status.Available || !status.Installed {
 		return
+	}
+	if firstRun && status.Enabled != "enabled" {
+		if errEnable := service.Do(ctx, "enable"); errEnable != nil {
+			log.WithError(errEnable).Warn("could not start the proxy service at login")
+		}
 	}
 	if status.Active == "active" || status.Active == "activating" {
 		return

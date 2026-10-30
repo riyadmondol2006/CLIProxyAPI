@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
+import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
 import {
   IconBookOpen,
   IconBot,
@@ -275,6 +276,43 @@ export function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ---------- Startup (desktop app) ---------- */}
+      {desktop && desktopStatus.status?.service.available ? (
+        <section className={styles.startup} aria-labelledby="home-startup">
+          <h2 id="home-startup" className={styles.sectionTitle}>
+            {t('home.startup.title')}
+          </h2>
+          <div className={styles.startupRows}>
+            <div className={styles.startupRow}>
+              <div className={styles.startupText}>
+                <strong>{t('home.startup.service')}</strong>
+                <span>{t('home.startup.service_hint')}</span>
+              </div>
+              <ToggleSwitch
+                checked={desktopStatus.status.service.enabled === 'enabled'}
+                onChange={(value) => void desktopStatus.setStartup('service', value)}
+                ariaLabel={t('home.startup.service')}
+                disabled={
+                  desktopStatus.startupPending !== null || !desktopStatus.status.service.installed
+                }
+              />
+            </div>
+            <div className={styles.startupRow}>
+              <div className={styles.startupText}>
+                <strong>{t('home.startup.app')}</strong>
+                <span>{t('home.startup.app_hint')}</span>
+              </div>
+              <ToggleSwitch
+                checked={desktopStatus.status.autostart}
+                onChange={(value) => void desktopStatus.setStartup('app', value)}
+                ariaLabel={t('home.startup.app')}
+                disabled={desktopStatus.startupPending !== null}
+              />
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {/* ---------- Overview tiles ---------- */}
       <section className={styles.tiles} aria-label={t('home.overview')}>

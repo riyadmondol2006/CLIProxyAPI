@@ -32,6 +32,8 @@ type Server struct {
 	SaveFile func(name string, data []byte) (string, error)
 	// ClaudeUsage serves /app/claude-usage/* (the Claude Code usage dashboard).
 	ClaudeUsage http.Handler
+	// Executable is the app binary the autostart entry launches; empty disables that option.
+	Executable string
 	// Debug logs every request the UI makes (enable with CPA_DESKTOP_DEBUG=1).
 	Debug bool
 }
@@ -44,6 +46,8 @@ type Status struct {
 	Service    ServiceStatus `json:"service"`
 	TokenReady bool          `json:"token-ready"`
 	Reachable  bool          `json:"reachable"`
+	// Autostart reports whether the app opens at login.
+	Autostart bool `json:"autostart"`
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -59,6 +63,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.handleOpen(w, r)
 	case r.URL.Path == "/app/save":
 		s.handleSave(w, r)
+	case r.URL.Path == "/app/startup":
+		s.handleStartup(w, r)
 	case strings.HasPrefix(r.URL.Path, "/app/claude-usage/"):
 		if s.ClaudeUsage == nil {
 			writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "Claude usage is unavailable"})
@@ -90,6 +96,7 @@ func (s *Server) status(ctx context.Context) Status {
 		ConfigPath: s.Paths.Config,
 		Listen:     listen,
 		TokenReady: ReadToken(s.Paths.Token) != "",
+		Autostart:  s.Paths.Autostart != "" && AutostartEnabled(s.Paths.Autostart),
 	}
 	if s.Service != nil {
 		status.Service = s.Service.Status(ctx)
@@ -155,6 +162,47 @@ func (s *Server) handleOpen(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+}
+
+// handleStartup changes what runs at login: the proxy service and/or the app window.
+func (s *Server) handleStartup(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "use POST"})
+		return
+	}
+	var body struct {
+		ServiceAtLogin *bool `json:"service-at-login"`
+		AppAtLogin     *bool `json:"app-at-login"`
+	}
+	if errDecode := json.NewDecoder(io.LimitReader(r.Body, 4<<10)).Decode(&body); errDecode != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid body"})
+		return
+	}
+	if body.ServiceAtLogin != nil {
+		if s.Service == nil {
+			writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "service control is unavailable"})
+			return
+		}
+		action := "disable"
+		if *body.ServiceAtLogin {
+			action = "enable"
+		}
+		if errDo := s.Service.Do(r.Context(), action); errDo != nil {
+			writeJSON(w, http.StatusBadGateway, map[string]string{"error": errDo.Error()})
+			return
+		}
+	}
+	if body.AppAtLogin != nil {
+		if s.Paths.Autostart == "" {
+			writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "autostart is unavailable"})
+			return
+		}
+		if errSet := SetAutostart(s.Paths.Autostart, s.Executable, *body.AppAtLogin); errSet != nil {
+			writeJSON(w, http.StatusInternalServerError, map[string]string{"error": errSet.Error()})
+			return
+		}
+	}
+	writeJSON(w, http.StatusOK, s.status(r.Context()))
 }
 
 func (s *Server) handleSave(w http.ResponseWriter, r *http.Request) {

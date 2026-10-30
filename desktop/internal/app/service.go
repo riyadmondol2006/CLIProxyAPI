@@ -24,7 +24,7 @@ type ServiceStatus struct {
 // Service controls the proxy service.
 type Service interface {
 	Status(ctx context.Context) ServiceStatus
-	// Do runs start, stop, or restart. Start also enables the unit so it runs at login.
+	// Do runs start, stop, restart, enable (start at login), or disable.
 	Do(ctx context.Context, action string) error
 }
 
@@ -79,7 +79,11 @@ func (s *SystemdUser) Do(ctx context.Context, action string) error {
 	var args []string
 	switch action {
 	case "start":
-		args = []string{"enable", "--now", ServiceName}
+		args = []string{"start", ServiceName}
+	case "enable":
+		args = []string{"enable", ServiceName}
+	case "disable":
+		args = []string{"disable", ServiceName}
 	case "stop":
 		args = []string{"stop", ServiceName}
 	case "restart":

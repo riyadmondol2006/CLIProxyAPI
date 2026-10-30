@@ -2610,6 +2610,13 @@
     "update": {
       "title": "Đã cài bản cập nhật",
       "text": "Ứng dụng là phiên bản {{app}}, nhưng dịch vụ vẫn đang chạy {{service}}. Khởi động lại dịch vụ để hoàn tất cập nhật."
+    },
+    "startup": {
+      "title": "Khởi động",
+      "service": "Khởi động proxy khi đăng nhập",
+      "service_hint": "Ứng dụng và thiết bị khác dùng được mà không cần mở cửa sổ này.",
+      "app": "Mở ứng dụng này khi đăng nhập",
+      "app_hint": "Mở ở dạng thu nhỏ, sẵn sàng trong nền."
     }
   },
   "docs": {

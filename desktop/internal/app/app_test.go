@@ -90,8 +90,16 @@ func TestSystemdUserStatusAndActions(t *testing.T) {
 		t.Fatalf("start: %v", errStart)
 	}
 	last := strings.Join(runner.calls[len(runner.calls)-1], " ")
-	if last != "systemctl --user enable --now "+ServiceName {
-		t.Fatalf("start should enable and start the unit, ran %q", last)
+	if last != "systemctl --user start "+ServiceName {
+		t.Fatalf("start must only start the unit (not change login startup), ran %q", last)
+	}
+	for action, want := range map[string]string{"enable": "enable", "disable": "disable"} {
+		if errDo := service.Do(context.Background(), action); errDo != nil {
+			t.Fatalf("%s: %v", action, errDo)
+		}
+		if got := strings.Join(runner.calls[len(runner.calls)-1], " "); got != "systemctl --user "+want+" "+ServiceName {
+			t.Fatalf("%s ran %q", action, got)
+		}
 	}
 	if errBad := service.Do(context.Background(), "rm -rf"); errBad == nil {
 		t.Fatal("unknown actions must be rejected")
@@ -288,5 +296,79 @@ func TestClaudeUsageRoutes(t *testing.T) {
 	server.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/app/other", nil))
 	if recorder.Code != http.StatusNotFound {
 		t.Fatalf("other /app/ paths must stay 404, got %d", recorder.Code)
+	}
+}
+
+type recordingService struct{ actions []string }
+
+func (r *recordingService) Status(context.Context) ServiceStatus {
+	return ServiceStatus{Available: true, Installed: true, Active: "active", Enabled: "enabled"}
+}
+
+func (r *recordingService) Do(_ context.Context, action string) error {
+	r.actions = append(r.actions, action)
+	return nil
+}
+
+func TestAutostartEntryRoundTrip(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "autostart", "cliproxyapi.desktop")
+	if AutostartEnabled(path) {
+		t.Fatal("no entry yet")
+	}
+	if errSet := SetAutostart(path, "/opt/My Apps/cliproxyapi-desktop", true); errSet != nil {
+		t.Fatalf("enable: %v", errSet)
+	}
+	data, _ := os.ReadFile(path)
+	if !strings.Contains(string(data), `Exec="/opt/My Apps/cliproxyapi-desktop" --minimized`) {
+		t.Fatalf("unexpected entry:\n%s", data)
+	}
+	if !AutostartEnabled(path) {
+		t.Fatal("entry should count as enabled")
+	}
+	if errWrite := os.WriteFile(path, []byte("[Desktop Entry]\nHidden=true\n"), 0o644); errWrite != nil {
+		t.Fatal(errWrite)
+	}
+	if AutostartEnabled(path) {
+		t.Fatal("Hidden=true means the user switched it off")
+	}
+	if errSet := SetAutostart(path, "", false); errSet != nil || AutostartEnabled(path) {
+		t.Fatalf("disable: %v", errSet)
+	}
+	if errSet := SetAutostart(path, "", false); errSet != nil {
+		t.Fatalf("disabling twice must be fine: %v", errSet)
+	}
+	if errSet := SetAutostart(path, "", true); errSet == nil {
+		t.Fatal("enabling without a known executable must fail")
+	}
+}
+
+func TestStartupEndpoint(t *testing.T) {
+	server, paths := newTestServer(t, nil)
+	paths.Autostart = filepath.Join(t.TempDir(), "autostart", "cliproxyapi.desktop")
+	server.Paths = paths
+	service := &recordingService{}
+	server.Service = service
+	server.Executable = "/usr/bin/cliproxyapi-desktop"
+
+	post := func(body string) (int, Status) {
+		rec := httptest.NewRecorder()
+		server.ServeHTTP(rec, httptest.NewRequest(http.MethodPost, "/app/startup", strings.NewReader(body)))
+		var status Status
+		_ = json.Unmarshal(rec.Body.Bytes(), &status)
+		return rec.Code, status
+	}
+	code, status := post(`{"service-at-login":false,"app-at-login":true}`)
+	if code != http.StatusOK || !status.Autostart {
+		t.Fatalf("enable app at login: %d %+v", code, status)
+	}
+	if strings.Join(service.actions, ",") != "disable" {
+		t.Fatalf("service actions: %v", service.actions)
+	}
+	code, status = post(`{"app-at-login":false}`)
+	if code != http.StatusOK || status.Autostart || len(service.actions) != 1 {
+		t.Fatalf("disable app at login only: %d %+v %v", code, status, service.actions)
+	}
+	if code, _ := post(`not json`); code != http.StatusBadRequest {
+		t.Fatalf("bad body: %d", code)
 	}
 }

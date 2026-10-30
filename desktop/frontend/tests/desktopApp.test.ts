@@ -113,6 +113,7 @@ describe('desktop integration helpers', () => {
       },
       tokenReady: true,
       reachable: true,
+      autostart: false,
     });
     expect(normalizeDesktopStatus(null).service.available).toBe(false);
   });

@@ -43,7 +43,9 @@ func main() {
 		Paths:   paths,
 		Service: app.NewSystemdUser(),
 		Version: "dev",
-		OpenURL: func(rawURL string) error { return exec.Command("xdg-open", rawURL).Start() },
+		// The real app binary, so the autostart entry can be tested from a browser.
+		Executable: "cliproxyapi-desktop",
+		OpenURL:    func(rawURL string) error { return exec.Command("xdg-open", rawURL).Start() },
 		// No native dialog here: save straight into the save directory.
 		SaveFile: func(name string, data []byte) (string, error) { return app.WriteUnique(*saveDir, name, data) },
 	}

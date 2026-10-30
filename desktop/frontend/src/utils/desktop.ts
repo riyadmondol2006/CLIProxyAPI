@@ -36,6 +36,8 @@ export interface DesktopStatus {
   service: DesktopServiceStatus;
   tokenReady: boolean;
   reachable: boolean;
+  /** The app opens at login. */
+  autostart: boolean;
 }
 
 export type DesktopServiceAction = 'start' | 'stop' | 'restart';
@@ -61,6 +63,7 @@ export const normalizeDesktopStatus = (input: unknown): DesktopStatus => {
     },
     tokenReady: record['token-ready'] === true,
     reachable: record.reachable === true,
+    autostart: record.autostart === true,
   };
 };
 
@@ -86,6 +89,23 @@ export const desktopApi = {
       body: blob,
     });
     return isRecord(body) && typeof body.path === 'string' ? body.path : '';
+  },
+
+  /** Changes what runs at login; omitted fields stay as they are. */
+  async setStartup(changes: {
+    serviceAtLogin?: boolean;
+    appAtLogin?: boolean;
+  }): Promise<DesktopStatus> {
+    const body: Record<string, boolean> = {};
+    if (changes.serviceAtLogin !== undefined) body['service-at-login'] = changes.serviceAtLogin;
+    if (changes.appAtLogin !== undefined) body['app-at-login'] = changes.appAtLogin;
+    return normalizeDesktopStatus(
+      await requestJSON('/app/startup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+    );
   },
 
   async service(action: DesktopServiceAction): Promise<DesktopStatus> {
