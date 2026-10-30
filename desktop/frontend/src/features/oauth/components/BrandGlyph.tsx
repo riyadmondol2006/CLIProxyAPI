@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { IconPlug } from '@/components/ui/icons';
 
-/** 提供商品牌图标；插件 logo 加载失败时回退到插头图标。 */
+/** Provider brand icon; falls back to a plug icon if a plugin logo fails to load. */
 export function BrandGlyph({
   src,
   size,

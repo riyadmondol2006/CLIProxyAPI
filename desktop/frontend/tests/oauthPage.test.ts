@@ -19,13 +19,14 @@ import type { PluginListEntry } from '@/types';
 describe('OAuth dialog view resolution', () => {
   test('maps every flow state to exactly one view', () => {
     expect(resolveFlowView({})).toBe('idle');
-    // 正在生成链接：已进入步骤视图（骨架占位）
+    // Generating the link: already in the steps view (skeleton placeholder)
     expect(resolveFlowView({ status: 'waiting' })).toBe('flow');
     expect(resolveFlowView({ status: 'waiting', url: 'https://a.test' })).toBe('flow');
     expect(resolveFlowView({ status: 'success' })).toBe('success');
-    // 轮询网络失败但链接仍在：留在步骤视图，手动回调仍可恢复
+    // Polling hit a network error but the link is still valid: stay in the steps view; manual
+    // callback can still recover
     expect(resolveFlowView({ status: 'error', url: 'https://a.test' })).toBe('flow');
-    // 链接已失效（启动失败 / Devin 终态失败）：失败视图
+    // The link is no longer valid (start failed / Devin terminal failure): failure view
     expect(resolveFlowView({ status: 'error', error: 'denied' })).toBe('failed');
   });
 
@@ -136,7 +137,7 @@ describe('OAuth provider gallery', () => {
       expect(markup).toContain('Vertex AI');
       expect(markup).toContain(i18n.t('siwc.bind'));
       expect(markup).not.toMatch(/auth_login\.|vertex_import\.|siwc\./);
-      // 每个磁贴都是打开对话框的按钮（提供商 + Vertex + SIWC 绑定）
+      // Every tile is a button that opens a dialog (providers + Vertex + SIWC binding)
       expect(markup.match(/aria-haspopup="dialog"/g)?.length).toBe(OAUTH_PROVIDERS.length + 2);
     });
   }

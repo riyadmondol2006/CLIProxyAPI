@@ -27,15 +27,16 @@ export interface ProviderFlowState {
   callbackSubmitting?: boolean;
   callbackStatus?: 'success' | 'error';
   callbackError?: string;
-  /** 本地校验失败（未提交到后端），内联展示在输入框下。 */
+  /** Local validation failure (not submitted to the backend), shown inline below the input. */
   callbackValidation?: string;
 }
 
 interface UseOAuthFlowsOptions {
   providerCards: OAuthProviderCard[];
   /**
-   * 该提供商的对话框是否正开着。开着时结果已在对话框内联展示，不再重复弹 toast；
-   * 成功态也会保留到对话框关闭，而不是 5 秒后自动清空。
+   * Whether this provider's dialog is open. While it is open, results are already shown inline
+   * in the dialog, so no duplicate toast is raised; the success state also stays until the
+   * dialog closes instead of auto-clearing after 5 seconds.
    */
   isFocused: (provider: string) => boolean;
 }
@@ -51,7 +52,7 @@ function getErrorStatus(error: unknown): number | undefined {
   return typeof error.status === 'number' ? error.status : undefined;
 }
 
-/** 已启用且声明 OAuth 能力的插件 → 追加到内置提供商之后。 */
+/** Enabled plugins that declare OAuth capability → appended after the built-in providers. */
 export function usePluginOAuthProviders(apiBase: string) {
   const [pluginProviders, setPluginProviders] = useState<PluginOAuthProviderCard[]>([]);
 
@@ -75,14 +76,15 @@ export function usePluginOAuthProviders(apiBase: string) {
 }
 
 /**
- * 每个提供商一条独立的登录尝试（attempt）：开始 → 轮询状态 → 成功/失败，
- * 可选的手动回调提交与 Devin 会话取消。尝试失效后，已发出的请求落地也不再写状态。
+ * One independent sign-in attempt per provider: start → poll status → success/failure, with
+ * optional manual callback submission and Devin session cancellation. Once an attempt is
+ * invalidated, requests already sent no longer write state when they land.
  */
 export function useOAuthFlows({ providerCards, isFocused }: UseOAuthFlowsOptions) {
   const { t } = useTranslation();
   const { showNotification } = useNotificationStore();
   const [states, setStates] = useState<Record<string, ProviderFlowState>>({});
-  /** 本次会话新增的凭证数（含 Vertex 导入），换连接时归零。 */
+  /** Credentials added this session (incl. Vertex imports); reset to 0 on connection switch. */
   const [addedCount, setAddedCount] = useState(0);
   const recordCredentialAdded = useCallback(() => setAddedCount((count) => count + 1), []);
   const attempts = useRef(
@@ -123,7 +125,7 @@ export function useOAuthFlows({ providerCards, isFocused }: UseOAuthFlowsOptions
       : t(getAuthKey(provider, suffix));
   };
 
-  /** 对话框没开时，toast 是唯一的结果反馈。 */
+  /** When the dialog is not open, the toast is the only result feedback. */
   const notify = (provider: string, message: string, type: 'success' | 'error' | 'warning') => {
     if (!isFocused(provider)) showNotification(message, type);
   };
@@ -158,7 +160,8 @@ export function useOAuthFlows({ providerCards, isFocused }: UseOAuthFlowsOptions
       callbackError: undefined,
       callbackValidation: undefined,
     });
-    // 后台完成时磁贴短暂显示「已添加」；对话框开着则保留成功页，关闭时再清。
+    // When it completes in the background the tile briefly shows "Added"; if the dialog is
+    // open, keep the success page and clear it when the dialog closes.
     resetAttempt.schedule(() => {
       if (!isFocused(provider)) resetProviderAttempt(provider);
     }, SUCCESS_RESET_DELAY_MS);
@@ -386,7 +389,10 @@ export function useOAuthFlows({ providerCards, isFocused }: UseOAuthFlowsOptions
     }
   };
 
-  /** 关闭对话框时收起成功页，磁贴回到可再次登录的初始态。 */
+  /**
+   * Closing the dialog dismisses the success page, and the tile returns to its initial state,
+   * ready to sign in again.
+   */
   const dismissSuccess = (provider: string) => {
     if (states[provider]?.status === 'success') resetProviderAttempt(provider);
   };

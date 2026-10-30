@@ -2,17 +2,20 @@
 @use '../sponsor' as *;
 
 /* ============================================================
- * 授权对话框：品牌头 → 步骤（打开授权页 / 设备码 / 回调）→ 底部实时状态条。
- * 主操作是墨色药丸；次操作描边药丸；遥测（链接、设备码、状态）一律 mono。
+ * Authorization dialog: brand header → steps (open auth page / device code / callback) → live
+ * status bar at the bottom.
+ * The primary action is an ink pill; secondary actions are outlined pills; telemetry (link,
+ * device code, status) is always mono.
  * ============================================================ */
 
-/* ---------- 壳层：局部改写全局 modal 的头/体/脚与动效 ---------- */
+/* ---------- Shell: locally overrides the global modal's head/body/foot and motion ---------- */
 
 :global(.modal).dialog {
   border-radius: 18px;
   transform-origin: 50% 45%;
 
-  /* 全局 modal 是回弹放大 + 收缩到 0；这里换成 Premium 档：无回弹、退出更快 */
+  /* The global modal scales up with a bounce and shrinks to 0; here it switches to the
+     Premium tier: no bounce, faster exit */
   &:global(.modal-entering) {
     animation: oauth-dialog-in 280ms var(--ease-out-strong, ease-out) both;
   }
@@ -61,7 +64,7 @@
   }
 }
 
-/* ---------- 品牌头 ---------- */
+/* ---------- Brand header ---------- */
 
 .heading {
   display: flex;
@@ -114,7 +117,8 @@
   color: var(--text-tertiary);
 }
 
-/* ---------- 视图切换：容器先落定，内容随后 60ms 淡入（次级运动） ---------- */
+/* ---------- View switch: container settles first, content fades in 60ms later ----------
+ * (secondary motion) */
 
 .view {
   animation: oauth-view-in 220ms var(--ease-out-strong, ease-out) 60ms backwards;
@@ -174,7 +178,7 @@
   overflow-wrap: anywhere;
 }
 
-/* ---------- 步骤：mono 序号 + 细竖轨 ---------- */
+/* ---------- Steps: mono numbers + thin vertical rail ---------- */
 
 .steps {
   counter-reset: oauth-step;
@@ -197,7 +201,7 @@
     padding-bottom: 0;
   }
 
-  /* 竖轨连到下一个序号 */
+  /* The rail connects to the next number */
   &:not(:last-child)::before {
     content: '';
     position: absolute;
@@ -271,7 +275,7 @@
   overflow-wrap: anywhere;
 }
 
-/* ---------- 授权链接 ---------- */
+/* ---------- Authorization link ---------- */
 
 .urlField {
   display: flex;
@@ -327,7 +331,7 @@
   }
 }
 
-/* ---------- 设备码 ---------- */
+/* ---------- Device code ---------- */
 
 .codeRow {
   display: flex;
@@ -350,7 +354,7 @@
   user-select: all;
 }
 
-/* ---------- 回调 ---------- */
+/* ---------- Callback ---------- */
 
 .callbackRow {
   display: flex;
@@ -389,7 +393,7 @@
   color: var(--viz-success);
 }
 
-/* ---------- 按钮 ---------- */
+/* ---------- Buttons ---------- */
 
 %pill {
   @include button-reset;
@@ -431,7 +435,7 @@
   }
 }
 
-/* 墨色药丸（深色主题自动反相） */
+/* Ink pill (auto-inverted in the dark theme) */
 .primary {
   @extend %pill;
   background: var(--text-primary);
@@ -484,7 +488,7 @@
   }
 }
 
-/* ---------- 底部状态条 ---------- */
+/* ---------- Bottom status bar ---------- */
 
 .statusBar {
   display: flex;
@@ -521,7 +525,7 @@
   border-radius: 50%;
   background: currentColor;
 
-  /* 轮询中的呼吸环：说明系统正在等，而不是卡住 */
+  /* Breathing ring while polling: shows the system is waiting, not stuck */
   &::after {
     content: '';
     position: absolute;
@@ -560,7 +564,7 @@
   text-align: right;
 }
 
-/* ---------- 成功 ---------- */
+/* ---------- Success ---------- */
 
 .result {
   display: flex;
@@ -633,13 +637,14 @@
   margin-top: 14px;
 }
 
-/* ---------- 赞助商对话框（Kimi）：延续卡片的品牌蓝 ---------- */
+/* ---------- Sponsor dialog (Kimi): carries over the card's brand blue ---------- */
 
 :global(.modal).sponsorDialog {
   background:
     radial-gradient(90% 60% at 100% 0%, sponsor-tint(12%), transparent 60%), var(--bg-primary);
 
-  /* 与赞助卡一致：图标自带圆角方块，直接铺满，不再套一层描边容器 */
+  /* Matches the sponsor card: the icon has its own rounded square, so it fills the
+     space directly without an extra bordered container */
   .headingGlyph {
     border: 0;
     background: none;
@@ -674,7 +679,7 @@
   }
 }
 
-/* ---------- 窄屏 ---------- */
+/* ---------- Narrow screens ---------- */
 
 @include mobile {
   :global(.modal).dialog {
@@ -699,7 +704,7 @@
     flex-direction: column;
   }
 
-  /* 纵向堆叠时 flex: 1 会沿主轴压扁输入框 */
+  /* When stacked vertically, flex: 1 would squash the input along the main axis */
   .callbackInput {
     flex: none;
   }

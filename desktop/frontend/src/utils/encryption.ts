@@ -1,8 +1,9 @@
 /**
- * 本地存储混淆工具函数（可逆）
- * 从原项目 src/utils/secure-storage.js 迁移
+ * Local storage obfuscation utilities (reversible)
+ * Migrated from the original project's src/utils/secure-storage.js
  *
- * IMPORTANT: 这不是安全边界。浏览器端长期持久化的密钥仍应视为可被读取。
+ * IMPORTANT: this is not a security boundary. Keys persisted long-term in the browser should
+ * still be treated as readable.
  */
 
 const ENC_PREFIX = 'enc::v1::';
@@ -61,7 +62,7 @@ function fromBase64(base64: string): Uint8Array {
 }
 
 /**
- * 加密数据
+ * Encrypt data
  */
 export function obfuscateData(value: string): string {
   if (!value) return value;
@@ -77,7 +78,7 @@ export function obfuscateData(value: string): string {
 }
 
 /**
- * 解密数据
+ * Decrypt data
  */
 export function deobfuscateData(payload: string): string {
   if (!payload || !payload.startsWith(ENC_PREFIX)) {
@@ -96,7 +97,7 @@ export function deobfuscateData(payload: string): string {
 }
 
 /**
- * 检查是否已加密
+ * Check whether the data is already encrypted
  */
 export function isObfuscated(value: string): boolean {
   return value?.startsWith(ENC_PREFIX) || false;

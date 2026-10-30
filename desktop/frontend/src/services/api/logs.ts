@@ -1,5 +1,5 @@
 /**
- * 日志相关 API
+ * Log-related API
  */
 
 import type { ApiError } from '@/types';

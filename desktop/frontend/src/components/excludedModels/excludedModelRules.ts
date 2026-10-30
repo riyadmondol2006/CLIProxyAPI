@@ -1,17 +1,22 @@
 /**
- * 排除模型规则 —— 唯一的纯逻辑源。
+ * Excluded-model rules: the single source of pure logic.
  *
- * 由两个已删除的模块合并而来：`excludedModelSelection.ts`（文本/数组式）与
- * `oauthExcludedRules.ts`（Set 式），二者曾是同一个领域模型写了两遍——
- * 其 normalize 实现逐字相同，只是一个吃换行文本、一个吃可迭代对象。
+ * Merged from two deleted modules: `excludedModelSelection.ts` (text/array based) and
+ * `oauthExcludedRules.ts` (Set based). They were the same domain model written twice: their
+ * normalize implementations were identical word for word; one just took newline-separated text
+ * and the other took an iterable.
  *
- * 规则语义（与后端一致）：
- * - 大小写不敏感；
- * - `*` 匹配任意字符，其余字符按字面量处理（`gpt-4.1` 里的 `.` 不是正则通配符）；
- * - 去重按小写 key，但**保留首次出现的拼写**。
+ * Rule semantics (matching the backend):
+ * - Case-insensitive;
+ * - `*` matches any characters; all other characters are literal (the `.` in `gpt-4.1` is not
+ *   a regex wildcard);
+ * - Deduplication uses the lowercase key, but **keeps the spelling of the first occurrence**.
  */
 
-/** 后端「停用整个 provider」的编码。只属于 provider 表单的 disabled 开关，排除面永不产出它。 */
+/**
+ * Backend encoding for "disable the whole provider". Owned only by the provider form's disabled
+ * toggle; the exclusion editor never produces it.
+ */
 export const DISABLE_ALL_RULE = '*';
 
 const ruleKey = (value: string): string => value.trim().toLowerCase();
@@ -44,7 +49,8 @@ export function matchesExcludedRule(rule: string, modelId: string): boolean {
   if (!normalizedRule || !normalizedModel) return false;
   if (!isWildcardRule(normalizedRule)) return normalizedRule === normalizedModel;
 
-  // 按 `*` 切开，逐段转义正则元字符，再用 `.*` 接回——只有 `*` 是通配符。
+  // Split on `*`, escape regex metacharacters in each segment, then rejoin with `.*`: only `*`
+  // is a wildcard.
   const escaped = normalizedRule
     .split('*')
     .map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
@@ -52,11 +58,11 @@ export function matchesExcludedRule(rule: string, modelId: string): boolean {
   return new RegExp(`^${escaped}$`, 'i').test(normalizedModel);
 }
 
-/** 该模型是否被某条**通配符**规则命中（精确规则不算）。 */
+/** Whether the model is matched by some **wildcard** rule (exact rules don't count). */
 export const isMatchedByWildcardRule = (rules: Iterable<string>, modelId: string): boolean =>
   Array.from(rules).some((rule) => isWildcardRule(rule) && matchesExcludedRule(rule, modelId));
 
-/** 规则列表里是否存在与 candidate 字面相等（忽略大小写）的一条。不做通配符展开。 */
+/** Whether a rule literally equals candidate (ignoring case). Wildcards are not expanded. */
 export function hasExcludedRule(rules: Iterable<string>, candidate: string): boolean {
   const candidateKey = ruleKey(candidate);
   if (!candidateKey) return false;
@@ -64,11 +70,13 @@ export function hasExcludedRule(rules: Iterable<string>, candidate: string): boo
 }
 
 /**
- * 增删一条字面规则。
+ * Add or remove a single literal rule.
  *
- * 注意：这里按 key 过滤，**不**豁免含 `*` 的规则。旧的 `toggleExcludedModel` 曾拒绝删除
- * 通配符规则，那是因为调用点有两个互不知情的写入面（列表管精确、textarea 管通配符）需要
- * 互不践踏。统一组件里两个面同属一个组件，该守卫属于组件而非纯函数。
+ * Note: this filters by key and does **not** exempt rules containing `*`. The old
+ * `toggleExcludedModel` refused to remove wildcard rules because its call site had two writers
+ * unaware of each other (the list owned exact rules, the textarea owned wildcards) that had to
+ * avoid trampling each other. In the unified component both editors live in one component, so
+ * that guard belongs to the component, not to the pure function.
  */
 export function toggleExcludedRule(
   rules: Iterable<string>,
@@ -84,13 +92,22 @@ export function toggleExcludedRule(
 }
 
 export interface SplitExcludedRules {
-  /** 精确命中目录的规则，**改写为目录的拼写**（勾选框驱动，id 应当规范化）。 */
+  /**
+   * Rules that exactly match the catalog, **rewritten to the catalog's spelling** (checkbox-driven,
+   * so ids should be canonical).
+   */
   exactRules: string[];
-  /** 含 `*` 的规则，保留配置里的拼写。 */
+  /** Rules containing `*`, keeping the spelling from the config. */
   wildcardRules: string[];
-  /** 精确但目录里没有的规则（如已下线的模型 id），保留配置里的拼写。 */
+  /**
+   * Exact rules not in the catalog (e.g. ids of retired models), keeping the spelling from the
+   * config.
+   */
   unknownRules: string[];
-  /** `wildcardRules ∪ unknownRules`，但按**原始出现顺序**——textarea 的内容与顺序敏感的 diff 都依赖它。 */
+  /**
+   * `wildcardRules ∪ unknownRules`, but in **original order of appearance**: both the textarea
+   * content and the order-sensitive diff depend on it.
+   */
   customRules: string[];
 }
 
@@ -122,7 +139,10 @@ export function splitExcludedRules(
   return { exactRules, wildcardRules, unknownRules, customRules };
 }
 
-/** 用一段文本整体替换「自定义」半边（通配符 + 目录外精确规则），保留精确勾选的那一半。 */
+/**
+ * Replace the "custom" half (wildcards + exact rules outside the catalog) with a block of text,
+ * keeping the exact checked half.
+ */
 export function replaceCustomExcludedRules(
   rules: Iterable<string>,
   candidateIds: readonly string[],
@@ -133,15 +153,15 @@ export function replaceCustomExcludedRules(
 }
 
 /* -------------------------------------------------------------------------- */
-/* 展示用派生量                                                                */
+/* Display-derived values                                                     */
 /* -------------------------------------------------------------------------- */
 
 /**
- * 单个模型的排除态。
+ * Exclusion state of a single model.
  *
- * `both` 是最微妙的一档：模型既被显式勾选、又被某条通配符规则命中。取消勾选后它**依然
- * 被排除**，所以那一行不能在视觉上「取消打勾」，否则用户会以为点击失败。旧 UI 把这一档
- * 完全藏了起来。
+ * `both` is the subtlest level: the model is both explicitly checked and matched by some
+ * wildcard rule. After unchecking it is **still excluded**, so that row must not visually
+ * "uncheck", or the user would think the click failed. The old UI hid this level entirely.
  */
 export type ModelExclusionState =
   | { state: 'included' }
@@ -178,12 +198,12 @@ export const isModelExcluded = (rules: readonly string[], modelId: string): bool
 
 export interface RuleMatchSummary {
   rule: string;
-  /** 该规则命中的目录模型，按目录顺序。 */
+  /** Catalog models matched by this rule, in catalog order. */
   matched: string[];
   matchCount: number;
 }
 
-/** 每条规则各命中了目录里的哪些模型——通配符编辑器的实时反馈就靠它。 */
+/** Which catalog models each rule matches: the wildcard editor's live feedback relies on it. */
 export const matchedModelsByRule = (
   rules: readonly string[],
   candidateIds: readonly string[]
@@ -200,11 +220,12 @@ export interface ExclusionStats {
 }
 
 /**
- * 摘要行与计量条的数据源。
+ * Data source for the summary line and the meter.
  *
- * `excluded` 数的是**目录内被任意规则命中的模型数**，不是 `rules.length`——一条
- * `gpt-5-*` 可能命中 6 个模型，也可能一个都不命中。用规则数当分子会在新地方复刻
- * 旧 UI 那个谎言：分子分母必须同源，计量条才是诚实的。
+ * `excluded` counts **catalog models matched by any rule**, not `rules.length`: a single
+ * `gpt-5-*` may match 6 models or none at all. Using the rule count as the numerator would
+ * recreate the old UI's lie in a new place: numerator and denominator must share a source for
+ * the meter to be honest.
  */
 export function summarizeExclusion(
   rules: readonly string[],

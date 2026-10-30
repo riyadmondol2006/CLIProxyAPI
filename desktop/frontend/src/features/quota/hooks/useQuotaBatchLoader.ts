@@ -1,11 +1,12 @@
 /**
- * 混合提供商批量额度加载（原 useQuotaLoader 的跨分区泛化）。
+ * Mixed-provider batch quota loading (the cross-section generalization of the old
+ * useQuotaLoader).
  *
- * 保留的三道守卫与旧实现逐一对应：
- * - loadingRef：并发批量加载去重；
- * - requestIdRef：被超越的响应直接丢弃；
- * - cacheGeneration：断线重连后过期请求不得写入新会话缓存。
- * 提交按 provider 分组进行 —— 快的提供商先落地，不等慢的。
+ * The three preserved guards map one-to-one to the old implementation:
+ * - loadingRef: dedupes concurrent batch loads;
+ * - requestIdRef: superseded responses are dropped;
+ * - cacheGeneration: after a reconnect, stale requests must not write to the new session cache.
+ * Commits are grouped by provider, so fast providers land first without waiting for slow ones.
  */
 
 import { useCallback, useRef, useState } from 'react';

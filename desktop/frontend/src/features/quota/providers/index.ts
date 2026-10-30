@@ -1,8 +1,9 @@
 /**
- * 额度提供商适配器 = 数据层（data.ts，React-free）+ 渲染体（*QuotaBody.tsx）。
+ * Quota provider adapter = data layer (data.ts, React-free) + render body (*QuotaBody.tsx).
  *
- * 页面侧以擦除泛型的 QuotaAdapter 视图统一消费（与 AuthFileQuotaSection 的
- * 窄接口 cast 同一模式）；具体状态类型由各 data.ts 的强类型导出承载。
+ * The page consumes them uniformly through a generic-erased QuotaAdapter view (the same pattern
+ * as AuthFileQuotaSection's narrow-interface cast); concrete state types come from each
+ * data.ts's strongly typed exports.
  */
 
 import type { ComponentType } from 'react';
@@ -28,7 +29,7 @@ import { PluginQuotaBody } from './plugin/PluginQuotaBody';
 import { XAI_CONFIG } from './xai/data';
 import { XaiQuotaBody } from './xai/XaiQuotaBody';
 
-/** 所有 provider 额度状态的公共骨架（各 *QuotaState 的结构子集）。 */
+/** Common skeleton of every provider's quota state (a structural subset of each *QuotaState). */
 export interface QuotaCardState {
   status: 'idle' | 'loading' | 'success' | 'error';
   error?: string;
@@ -69,10 +70,10 @@ export type QuotaMapUpdater = (
   updater: (prev: Record<string, QuotaCardState>) => Record<string, QuotaCardState>
 ) => void;
 
-/** 取 adapter 对应的 store setter（getState 直读，不建立订阅）。 */
+/** Get the store setter for an adapter (reads getState directly; no subscription). */
 export const getQuotaSetter = (adapter: QuotaAdapter): QuotaMapUpdater =>
   useQuotaStore.getState()[adapter.storeSetter] as unknown as QuotaMapUpdater;
 
-/** 取 adapter 对应的额度缓存快照（getState 直读，不建立订阅）。 */
+/** Get the quota cache snapshot for an adapter (reads getState directly; no subscription). */
 export const getQuotaMap = (adapter: QuotaAdapter): Record<string, QuotaCardState> =>
   adapter.storeSelector(useQuotaStore.getState() as unknown as QuotaStore);

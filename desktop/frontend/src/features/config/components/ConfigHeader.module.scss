@@ -1,6 +1,7 @@
 @use '../../../styles/mixins' as *;
 
-/* 配置面板头部：与凭证库/额度页同语汇（紧排标题 / ▍mono 遥测 / ghost 次按钮） */
+/* Config panel header: same vocabulary as the vault/quota pages (tight title / ▍mono telemetry /
+   ghost secondary button) */
 
 .header {
   display: flex;
@@ -39,7 +40,7 @@
   letter-spacing: 0.02em;
   color: var(--text-secondary);
 
-  /* 终端游标：全站页头 meta 行的结构记号 */
+  /* Terminal cursor: the structural mark of every page header's meta row */
   &::before {
     content: '▍';
     color: var(--viz-success);
@@ -71,7 +72,7 @@
   color: var(--viz-success);
 }
 
-/* ---------- 动作区 ---------- */
+/* ---------- Actions ---------- */
 
 .actions {
   display: flex;
@@ -80,7 +81,7 @@
   flex-shrink: 0;
 }
 
-/* 次按钮：安静的文字链接 */
+/* Secondary button: a quiet text link */
 .ghostAction {
   display: inline-flex;
   align-items: center;

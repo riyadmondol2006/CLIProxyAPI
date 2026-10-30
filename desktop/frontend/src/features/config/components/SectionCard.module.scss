@@ -1,6 +1,6 @@
 @use '../../../styles/mixins' as *;
 
-/* 分区卡片：自然高度，无固定高度/无滚动吸附（旧轮播已退役） */
+/* Section card: natural height, no fixed height/no scroll snapping (the old carousel is retired) */
 
 .card {
   display: flex;
@@ -19,8 +19,9 @@
   }
 }
 
-/* 首载入场：0.45s 强减速上浮（与全站卡片入场同拍），排在头部级联
-   （标题 0 / meta 70 / 动作 140 / 工具栏 210 / tabs 280ms）之后收尾，仅首载播一次 */
+/* First-load entrance: 0.45s strong ease-out rise (in step with site-wide card entrances),
+   finishing after the header cascade (title 0 / meta 70 / actions 140 / toolbar 210 /
+   tabs 280ms); plays only on first load */
 .cardEnter {
   animation: config-card-in 0.45s var(--ease-out-strong, ease-out) 0.32s backwards;
 }

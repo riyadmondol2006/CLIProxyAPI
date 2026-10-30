@@ -4,7 +4,7 @@
   height: 6px;
   border-radius: $radius-full;
   overflow: hidden;
-  // 轨道 = 填充色的淡化步阶，状态在整条上都可读
+  // Track = a faded step of the fill color, so the state is readable along the whole bar
   background: color-mix(in srgb, var(--meter-fill) 16%, transparent);
 }
 
@@ -12,7 +12,8 @@
   height: 100%;
   border-radius: $radius-full;
   background: var(--meter-fill);
-  // 数据刷新时填充平滑走位；曲线继承页面级 token，独立使用时退回 ease
+  // The fill moves smoothly on data refresh; the curve inherits the page-level token and falls
+  // back to ease when used standalone
   transition: width 360ms var(--ease-out-strong, ease);
 
   @media (prefers-reduced-motion: reduce) {

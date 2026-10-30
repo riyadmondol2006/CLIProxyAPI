@@ -20,8 +20,8 @@ describe('Codex Pro display names', () => {
 
 describe('resolvePlanTier', () => {
   test("elite wins for 'pro' even though it is also in the premium set (order contract)", () => {
-    // 顺序契约回归：'pro' 同时命中 PREMIUM_CODEX_PLAN_TYPES，
-    // 一旦 premium 判断先行，Pro 200 会静默退回金卡。
+    // Ordering contract regression: 'pro' also matches PREMIUM_CODEX_PLAN_TYPES;
+    // if the premium check runs first, Pro 200 silently falls back to the gold card.
     expect(PREMIUM_CODEX_PLAN_TYPES.has(ELITE_CODEX_PLAN_TYPE)).toBe(true);
     expect(resolvePlanTier('pro')).toBe('elite');
   });

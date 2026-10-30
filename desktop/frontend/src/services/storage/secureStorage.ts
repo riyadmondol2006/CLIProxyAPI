@@ -1,8 +1,8 @@
 /**
- * 本地存储混淆服务（可逆）
- * 基于原项目 src/utils/secure-storage.js
+ * Local storage obfuscation service (reversible)
+ * Based on src/utils/secure-storage.js from the original project
  *
- * IMPORTANT: 这不是安全边界，仅用于避免“肉眼直读”的轻度混淆。
+ * IMPORTANT: this is not a security boundary, only light obfuscation against reading at a glance.
  */
 
 import { obfuscateData, deobfuscateData, isObfuscated } from '@/utils/encryption';
@@ -18,7 +18,7 @@ interface StorageOptions {
 
 class ObfuscatedStorageService {
   /**
-   * 存储数据
+   * Store data
    */
   setItem(key: string, value: unknown, options: StorageOptions = {}): void {
     const obfuscate = options.obfuscate ?? options.encrypt ?? true;
@@ -35,7 +35,7 @@ class ObfuscatedStorageService {
   }
 
   /**
-   * 获取数据
+   * Get data
    */
   getItem<T = unknown>(key: string, options: StorageOptions = {}): T | null {
     const obfuscate = options.obfuscate ?? options.encrypt ?? true;
@@ -47,39 +47,39 @@ class ObfuscatedStorageService {
       const decrypted = obfuscate ? deobfuscateData(raw) : raw;
       return JSON.parse(decrypted) as T;
     } catch {
-      // JSON解析失败,尝试兼容旧的纯字符串数据 (非JSON格式)
+      // JSON parsing failed; try to stay compatible with old plain-string data (non-JSON)
       try {
-        // 如果是加密的,尝试解密后直接返回
+        // If it is encrypted, try to decrypt it and return it directly
         if (obfuscate && isObfuscated(raw)) {
           const decrypted = deobfuscateData(raw);
-          // 解密后如果还不是JSON,返回原始字符串
+          // If it is still not JSON after decryption, return the raw string
           return decrypted as T;
         }
-        // 非加密的纯字符串,直接返回
+        // Unencrypted plain string, return it directly
         return raw as T;
       } catch {
-        // 完全失败,静默返回null (避免控制台污染)
+        // Complete failure: silently return null (to avoid console noise)
         return null;
       }
     }
   }
 
   /**
-   * 删除数据
+   * Remove data
    */
   removeItem(key: string): void {
     localStorage.removeItem(key);
   }
 
   /**
-   * 迁移旧的明文缓存为加密格式
+   * Migrate the old plaintext cache to the encrypted format
    */
   migratePlaintextKeys(keys: string[]): void {
     keys.forEach((key) => {
       const raw = localStorage.getItem(key);
       if (!raw) return;
 
-      // 如果已经是加密格式，跳过
+      // Skip if it is already in the encrypted format
       if (isObfuscated(raw)) {
         return;
       }
@@ -88,7 +88,7 @@ class ObfuscatedStorageService {
       try {
         parsed = JSON.parse(raw);
       } catch {
-        // 原值不是 JSON，直接使用字符串
+        // The original value is not JSON; use the string as is
         parsed = raw;
       }
 

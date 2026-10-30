@@ -5,7 +5,8 @@ import iconMeta from '@/assets/icons/meta.svg';
 import iconCodex from '@/assets/icons/codex.svg';
 import iconClaude from '@/assets/icons/claude.svg';
 import iconAntigravity from '@/assets/icons/antigravity.svg';
-// 赞助卡用的 App 图标版：K 与蓝点等比内缩进方块，蓝点不再顶出圆角
+// App icon variant for the sponsor card: the K and blue dot are scaled down proportionally into
+// the square, so the blue dot no longer pokes past the rounded corner
 import iconKimiTileBlack from '@/assets/icons/kimi-tile-black.svg';
 import iconKimiTileWhite from '@/assets/icons/kimi-tile-white.svg';
 import iconGrok from '@/assets/icons/grok.svg';
@@ -15,19 +16,25 @@ import iconDevinDark from '@/assets/icons/devin-dark.svg';
 
 export type ThemedIcon = string | { light: string; dark: string };
 
-/** 设备码流程会返回 user_code；浏览器流程依赖回调（本地自动 / 远程手动粘贴）。 */
+/**
+ * The device code flow returns a user_code; the browser flow relies on a callback (automatic
+ * locally / manual paste when remote).
+ */
 export type OAuthFlowKind = 'device' | 'browser';
 
 export interface BuiltInOAuthProviderCard {
   kind: 'builtin';
   id: BuiltInOAuthProvider;
-  /** 磁贴短名：品牌名是常量（与仪表盘 providerLabel 一致），区域站点走 i18n。 */
+  /**
+   * Short tile name: brand names are constants (matching the dashboard's providerLabel); regional
+   * sites go through i18n.
+   */
   label: string | { key: string };
-  /** 对话框标题，沿用 `auth_login.<id>_oauth_title`。 */
+  /** Dialog title, following `auth_login.<id>_oauth_title`. */
   titleKey: string;
   icon: ThemedIcon;
   flow: OAuthFlowKind;
-  /** 区分同品牌的不同站点，磁贴副行展示。 */
+  /** Distinguishes different sites of the same brand; shown in the tile's secondary row. */
   domain?: string;
 }
 
@@ -40,7 +47,10 @@ export interface PluginOAuthProviderCard {
 
 export type OAuthProviderCard = BuiltInOAuthProviderCard | PluginOAuthProviderCard;
 
-/** 展示顺序即数组顺序：赞助商（Kimi 两站）置首，其余沿用原有次序。 */
+/**
+ * Display order is array order: sponsors (Kimi's two sites) come first; the rest keep their
+ * original order.
+ */
 export const OAUTH_PROVIDERS: BuiltInOAuthProviderCard[] = [
   {
     kind: 'builtin',
@@ -112,7 +122,10 @@ export const OAUTH_PROVIDERS: BuiltInOAuthProviderCard[] = [
 
 const BUILTIN_PROVIDER_IDS = new Set<string>(OAUTH_PROVIDERS.map((provider) => provider.id));
 
-/** 后端接受手动回调提交的内置提供商；插件提供商一律允许。 */
+/**
+ * Built-in providers for which the backend accepts manual callback submission; plugin providers
+ * are always allowed.
+ */
 export const CALLBACK_SUPPORTED = new Set<string>([
   'codex',
   'anthropic',

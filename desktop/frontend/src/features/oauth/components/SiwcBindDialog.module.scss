@@ -1,11 +1,11 @@
 @use '../../../styles/mixins' as *;
 
 /* ============================================================
- * SIWC 绑定对话框的专属部件：凭证选择 + 锁定摘要。
- * 壳层、步骤、按钮、状态条全部复用 OAuthFlowDialog.module.scss。
+ * Parts specific to the SIWC bind dialog: credential picker + locked summary.
+ * The shell, steps, buttons and status bar all reuse OAuthFlowDialog.module.scss.
  * ============================================================ */
 
-/* ---------- 凭证选择 ---------- */
+/* ---------- Credential picker ---------- */
 
 .picker {
   min-width: 0;
@@ -25,7 +25,8 @@
   color: var(--text-tertiary);
 }
 
-/* 一组行共用一个圆角容器，行间细分隔线：比一摞独立卡片更安静 */
+/* A group of rows shares one rounded container with thin dividers between rows: quieter than
+   a stack of separate cards */
 .options {
   display: flex;
   flex-direction: column;
@@ -63,7 +64,7 @@
   }
 }
 
-/* 视觉隐藏但保留原生 radio 的键盘与读屏语义 */
+/* Visually hidden, but keeps the native radio's keyboard and screen reader semantics */
 .radioInput {
   position: absolute;
   width: 1px;
@@ -150,7 +151,7 @@
   }
 }
 
-/* ---------- 加载 / 空态 ---------- */
+/* ---------- Loading / empty state ---------- */
 
 .skeletonRow {
   display: block;
@@ -189,7 +190,7 @@
   color: var(--text-tertiary);
 }
 
-/* ---------- 锁定摘要 ---------- */
+/* ---------- Locked summary ---------- */
 
 .summary {
   display: flex;

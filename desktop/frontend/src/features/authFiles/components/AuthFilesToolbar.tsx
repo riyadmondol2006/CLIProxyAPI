@@ -36,8 +36,9 @@ export type AuthFilesToolbarProps = {
 };
 
 /**
- * 工作区工具栏：搜索 · 状态分段 · 排序 · 显示设置 popover。
- * 「删除筛选结果」放在工具栏最右端——与限定它作用域的过滤器相邻（映射原则）。
+ * Workspace toolbar: search · status segments · sort · display settings popover.
+ * "Delete filtered results" sits at the far right of the toolbar, next to the filters that
+ * scope it (mapping principle).
  */
 export function AuthFilesToolbar(props: AuthFilesToolbarProps) {
   const {

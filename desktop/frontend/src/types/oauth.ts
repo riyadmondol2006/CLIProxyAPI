@@ -1,9 +1,9 @@
 /**
- * OAuth 相关类型
- * 基于原项目 src/modules/oauth.js
+ * OAuth-related types
+ * Based on the original project's src/modules/oauth.js
  */
 
-// OAuth 模型别名
+// OAuth model alias
 export interface OAuthModelAliasEntry {
   name: string;
   alias: string;

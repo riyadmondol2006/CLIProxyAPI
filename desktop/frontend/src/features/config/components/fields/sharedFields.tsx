@@ -1,6 +1,7 @@
-// 6 个高频字段的唯一渲染源：SectionCommon（常用 tab）与各正典分区共用这些组件，
-// 两处渲染结构性不可能漂移（旧简单模式靠共享 JSX 常量达成同一目的）。
-// 注意：只挂载激活 tab，所以设置行的 DOM id 不会重复。
+// Single render source for the 6 high-frequency fields: SectionCommon (the common tab) and the
+// canonical sections share these components, so the two renderings structurally cannot drift
+// apart (the old simple mode achieved the same with shared JSX constants).
+// Note: only the active tab is mounted, so setting row DOM ids are never duplicated.
 
 import { useTranslation } from 'react-i18next';
 import type { VisualConfigValues } from '@/types/visualConfig';
@@ -14,8 +15,9 @@ export type SharedFieldProps = {
   disabled: boolean;
   onChange: (patch: Partial<VisualConfigValues>) => void;
   /**
-   * 原样转给设置行。SettingList 只看直接子元素的 props 排布两列，
-   * 所以「占整行」必须写在调用处（或由 SettingList 给落单行注入），不能藏在组件内部。
+   * Passed through to the setting row as is. SettingList only looks at its direct children's
+   * props to lay out the two columns, so "span the full row" must be set at the call site (or
+   * injected by SettingList for orphan rows) and cannot be hidden inside the component.
    */
   wide?: boolean;
 };
@@ -61,7 +63,8 @@ export function PortField({
 
 export function ProxyUrlField({ values, disabled, onChange, wide }: SharedFieldProps) {
   const { t } = useTranslation();
-  // 代理 URL 较长，调用处传 wide 独占整行；说明位挂赞助跳转（数据见 sponsors.ts，空则不渲染）。
+  // Proxy URLs are long, so the call site passes wide to take the whole row; the description
+  // slot holds a sponsor link (data in sponsors.ts; nothing is rendered when it is empty).
   const sponsor = SPONSORS[0];
   return (
     <TextSetting

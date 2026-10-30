@@ -1,5 +1,5 @@
 /**
- * 定时器 Hook
+ * Timer hook
  */
 
 import { useEffect, useRef } from 'react';

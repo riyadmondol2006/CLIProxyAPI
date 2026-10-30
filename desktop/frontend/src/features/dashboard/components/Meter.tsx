@@ -9,7 +9,7 @@ const TONE_COLORS: Record<MeterTone, string> = {
 };
 
 interface MeterProps {
-  /** 0–100；null 表示窗口内无请求 */
+  /** 0–100; null means no requests in the window */
   value: number | null;
   tone?: MeterTone;
   ariaLabel: string;
@@ -17,8 +17,8 @@ interface MeterProps {
 }
 
 /**
- * 细条计量器：填充色承载严重度，轨道是同色淡化步阶，
- * 因此在整条上都能读出状态。
+ * Thin bar meter: the fill color carries severity and the track is a faded step of the same
+ * color, so the state can be read along the whole bar.
  */
 export function Meter({ value, tone, ariaLabel, className }: MeterProps) {
   const resolvedTone = tone ?? toneForSuccessRate(value);

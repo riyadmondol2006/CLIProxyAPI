@@ -22,9 +22,9 @@ const FILES: AuthFileItem[] = [
   file('claude-a.json', 'claude'),
   file('kimi-a.json', 'kimi'),
   file('codex-b.json', 'codex'),
-  file('grok-a.json', 'grok'), // 别名归一到 xai
-  file('gemini-a.json', 'gemini'), // 不支持额度
-  file('claude-off.json', 'claude', { disabled: true }), // 停用
+  file('grok-a.json', 'grok'), // alias normalized to xai
+  file('gemini-a.json', 'gemini'), // quota not supported
+  file('claude-off.json', 'claude', { disabled: true }), // disabled
 ];
 
 describe('refresh-all list handoff', () => {

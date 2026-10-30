@@ -1,5 +1,5 @@
 /**
- * Antigravity 额度数据层：分组配额 + 订阅信息 + 服务器时钟偏移。
+ * Antigravity quota data layer: grouped quotas + subscription info + server clock offset.
  * React-free / SCSS-free。
  */
 

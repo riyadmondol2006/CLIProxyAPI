@@ -5,8 +5,8 @@ import type { StatusBarData, StatusBlockDetail } from '@/utils/recentRequests';
 const defaultStyles: Record<string, string> = {};
 
 /**
- * 根据成功率 (0–1) 在三个色标之间做 RGB 线性插值
- * 0 → 红 (#ef4444)  →  0.5 → 金黄 (#facc15)  →  1 → 绿 (#22c55e)
+ * Linearly interpolates RGB between three color stops based on the success rate (0–1)
+ * 0 → red (#ef4444)  →  0.5 → golden yellow (#facc15)  →  1 → green (#22c55e)
  */
 const COLOR_STOPS = [
   { r: 239, g: 68, b: 68 }, // #ef4444
@@ -60,7 +60,7 @@ export function ProviderStatusBar({ statusData, styles: stylesProp }: ProviderSt
         ? s.statusRateMedium
         : s.statusRateLow;
 
-  // 点击外部关闭 tooltip（移动端）
+  // Close the tooltip on outside click (mobile)
   useEffect(() => {
     if (activeTooltip === null) return;
     const handler = (e: PointerEvent) => {

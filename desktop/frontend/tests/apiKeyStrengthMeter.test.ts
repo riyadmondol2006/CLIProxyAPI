@@ -35,18 +35,18 @@ describe('ApiKeyStrengthMeter', () => {
     const delays = (segments: number, previous: number) =>
       [0, 1, 2, 3].map((index) => segmentFillDelayMs(index, segments, previous));
 
-    // 0 → 4（点「生成」）：四段依次起跑
+    // 0 → 4 (click "Generate"): the four segments start in sequence
     expect(delays(4, 0)).toEqual([
       0,
       SEGMENT_STAGGER_MS,
       SEGMENT_STAGGER_MS * 2,
       SEGMENT_STAGGER_MS * 3,
     ]);
-    // 2 → 3（键入一个字符）：新增的那段立刻亮，不为它的下标排队
+    // 2 → 3 (type one character): the new segment lights up immediately, not queued by its index
     expect(delays(3, 2)).toEqual([0, 0, 0, 0]);
-    // 1 → 3：只有新增的两段排队
+    // 1 → 3: only the two new segments queue
     expect(delays(3, 1)).toEqual([0, 0, SEGMENT_STAGGER_MS, 0]);
-    // 4 → 2（删字符）：熄灭立即发生
+    // 4 → 2 (delete characters): turning off happens immediately
     expect(delays(2, 4)).toEqual([0, 0, 0, 0]);
   });
 

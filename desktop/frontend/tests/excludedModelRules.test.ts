@@ -40,16 +40,17 @@ describe('normalizeExcludedRules / parseExcludedRulesText', () => {
   });
 
   /**
-   * 凭证编辑器把 excluded_models 存成换行文本，保存时用 `JSON.stringify` 做**顺序敏感**的
-   * diff（useAuthFilesPrefixProxyEditor.ts:327）。picker 只要在读写之间保持顺序不变，
-   * 「打开但不修改就保存」就永远不会写出与原文件不同的内容。
+   * The credential editor stores excluded_models as newline-separated text and, on save, does an
+   * **order-sensitive** diff with `JSON.stringify` (useAuthFilesPrefixProxyEditor.ts:327). As long
+   * as the picker keeps the order unchanged between read and write, "open and save without
+   * changes" will never write content that differs from the original file.
    */
   test('parse→format is a fixed point for already-normalized input (order preserved)', () => {
     const fromBackend = ['GPT-5-Codex', 'gpt-5-*', 'retired-model'];
     const text = fromBackend.join('\n');
 
     expect(formatExcludedRulesText(parseExcludedRulesText(text))).toBe(text);
-    // 再跑一轮仍是同一个不动点。
+    // Another round still yields the same fixed point.
     expect(parseExcludedRulesText(formatExcludedRulesText(parseExcludedRulesText(text)))).toEqual(
       fromBackend
     );

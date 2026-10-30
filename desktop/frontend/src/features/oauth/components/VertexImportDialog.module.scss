@@ -12,7 +12,8 @@
   color: var(--text-primary);
 }
 
-/* 选文件 + 拖放落点：虚线 → 悬停/拖入变实线（与额度卡 idle 落点同语汇） */
+/* File picker + drop target: dashed → solid on hover/drag-over (same vocabulary as the quota
+   card's idle drop target) */
 .dropZone {
   @include button-reset;
   display: flex;
@@ -123,7 +124,7 @@
   }
 }
 
-/* 导入结果：发丝分隔的键值行 */
+/* Import result: hairline-separated key-value rows */
 .facts {
   width: 100%;
   margin: 12px 0 0;

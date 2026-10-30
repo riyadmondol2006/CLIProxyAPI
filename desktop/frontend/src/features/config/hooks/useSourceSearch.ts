@@ -1,5 +1,6 @@
-// 源码模式的文档内搜索 —— 从旧 pages/ConfigPage.tsx 逐字提取。
-// 手写 indexOf 扫描 + 光标定位（大小写不敏感、回绕），不依赖 @codemirror/search 面板。
+// In-document search for source mode, extracted verbatim from the old pages/ConfigPage.tsx.
+// Hand-written indexOf scan + cursor positioning (case-insensitive, wrap-around), without the
+// @codemirror/search panel.
 
 import { useCallback, useRef, useState } from 'react';
 import type { ReactCodeMirrorRef } from '@uiw/react-codemirror';

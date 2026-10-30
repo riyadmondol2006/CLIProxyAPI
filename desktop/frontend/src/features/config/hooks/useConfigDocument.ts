@@ -1,5 +1,5 @@
-// 两阶段保存：预览前读取 → 确认时再读取；服务端变化则重新预览。
-// 可视化仅提交 v8 字段差异，源码保留整份 YAML 保存。
+// Two-phase save: read before preview → read again on confirm; re-preview if the server changed.
+// Visual mode submits only the v8 field diff; source mode saves the whole YAML.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { parse as parseYaml, parseDocument } from 'yaml';
@@ -56,7 +56,7 @@ function normalizeYamlForVisualDiff(yamlContent: string): string {
 }
 
 export type UseConfigDocumentArgs = {
-  /** 当前编辑模式（旧实现中的 activeTab）。 */
+  /** Current editing mode (activeTab in the old implementation). */
   mode: ConfigEditorMode;
   visualDirty: boolean;
   visualParseError: string | null;
@@ -83,8 +83,9 @@ export function buildConfigSaveDraft(
 }
 
 /**
- * 未编辑源码的模式往返不应重载可视化值，否则会清空字段级 dirty，改变并发合并策略。
- * YAML 曾解析失败时仍须重试解析，避免仅靠切换模式绕过错误。
+ * A mode round trip without source edits must not reload visual values; otherwise field-level
+ * dirty state is cleared and the concurrent merge strategy changes. If YAML previously failed to
+ * parse, parsing must still be retried so switching modes alone can't bypass the error.
  */
 export function shouldReloadVisualDraft(sourceDirty: boolean, visualParseError: string | null) {
   return sourceDirty || visualParseError !== null;
@@ -107,7 +108,8 @@ export function useConfigDocument({
   const [saving, setSaving] = useState(false);
   const [recoveryRequired, setRecoveryRequired] = useState(false);
   const [error, setError] = useState('');
-  // 仅表示用户在源码编辑器中改过草稿；可视化字段同步到 content 不得修改它。
+  // Only means the user edited the draft in the source editor; syncing visual fields into
+  // content must not change it.
   const [sourceDirty, setSourceDirty] = useState(false);
   const [diffModalOpen, setDiffModalOpen] = useState(false);
   const [serverYaml, setServerYaml] = useState('');
@@ -432,12 +434,15 @@ export function useConfigDocument({
     visualParseError,
   ]);
 
-  /** 可视化→源码时只物化当前字段值，不把同步动作冒充为用户源码编辑。 */
+  /**
+   * Visual → source: only materialize current field values, without passing the sync off as a
+   * user source edit.
+   */
   const syncContentFromVisual = useCallback((value: string) => {
     setContent(value);
   }, []);
 
-  /** 源码编辑器 onChange：写入内容并记录真正的源码草稿。 */
+  /** Source editor onChange: write the content and record a genuine source draft. */
   const handleChange = useCallback((value: string) => {
     setContent(value);
     setSourceDirty(true);
@@ -461,7 +466,7 @@ export function useConfigDocument({
     });
   }, [isDirty, loadConfig, showConfirmation, t]);
 
-  /** 无需联网，直接恢复最近一次成功读取的原始服务端 YAML。 */
+  /** Restores the last successfully read raw server YAML directly, without a network request. */
   const handleDiscard = useCallback(() => {
     if (!isDirty) return;
     if (recoveryRequired) {

@@ -33,10 +33,10 @@ export interface OAuthFlowDialogProps {
   providerId: string;
   heading: DialogHeading;
   state: ProviderFlowState;
-  /** 提供商专属文案：`auth_login.<id>_<suffix>` 或插件模板。 */
+  /** Provider-specific copy: `auth_login.<id>_<suffix>` or a plugin template. */
   text: (suffix: string) => string;
   supportsCallback: boolean;
-  /** 赞助商：品牌蓝主按钮 + 提示行里的注册链接。 */
+  /** Sponsor: brand-blue primary button + a sign-up link in the hint row. */
   sponsor?: { url: string; label: string };
   onStart: () => void;
   onCancel: () => void;
@@ -304,7 +304,7 @@ function FlowStatusBar({ providerId, state, text, onStart, onCancel }: OAuthFlow
   const isDevin = providerId === 'devin';
   const failed = state.status === 'error';
   const generating = !failed && !state.url;
-  // Devin 会话在服务端可能仍挂着：必须先取消才能重开
+  // A Devin session may still be pending on the server: it must be cancelled before reopening
   const canCancel = isDevin && Boolean(state.state);
 
   return (

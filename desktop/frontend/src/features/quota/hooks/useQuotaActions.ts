@@ -1,7 +1,8 @@
 /**
- * 单卡额度操作：刷新 + Codex 重置积分。
- * 流程 1:1 移植旧 QuotaSection（confirm modal、resetting 再入守卫、
- * generation-guarded commit、成功/失败通知），仅把 config 换成 adapter。
+ * Per-card quota actions: refresh + Codex reset credits.
+ * The flow is a 1:1 port of the old QuotaSection (confirm modal, resetting re-entry guard,
+ * generation-guarded commit, success/failure notifications); only the config is swapped for an
+ * adapter.
  */
 
 import { useCallback, useState } from 'react';

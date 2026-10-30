@@ -1,5 +1,5 @@
 /**
- * i18next 国际化配置
+ * i18next internationalization config
  */
 
 import i18n from 'i18next';
@@ -24,7 +24,7 @@ i18n.use(initReactI18next).init({
   lng: getInitialLanguage(),
   fallbackLng: 'en',
   interpolation: {
-    escapeValue: false, // React 已经转义
+    escapeValue: false, // React already escapes
   },
   react: {
     useSuspense: false,

@@ -1,5 +1,5 @@
 /**
- * Kimi 额度数据层。React-free / SCSS-free。
+ * Kimi quota data layer. React-free / SCSS-free.
  */
 
 import type { TFunction } from 'i18next';

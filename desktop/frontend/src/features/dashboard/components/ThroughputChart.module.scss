@@ -10,7 +10,7 @@
   gap: $spacing-md;
 }
 
-/* ---------- 图例 ---------- */
+/* ---------- Legend ---------- */
 
 .legend {
   display: flex;
@@ -47,12 +47,12 @@
   background: var(--viz-failure);
 }
 
-/* ---------- 绘图区 ---------- */
+/* ---------- Plot area ---------- */
 
 .plot {
   display: flex;
   gap: $spacing-sm;
-  /* 给峰值直标留出空间：柱子顶到 100% 时标签仍落在这段留白里 */
+  /* Leave room for the direct peak label: when a bar reaches 100% the label still lands here */
   padding-top: 22px;
 }
 
@@ -101,7 +101,7 @@
   }
 }
 
-/* ---------- 柱体 ---------- */
+/* ---------- Bars ---------- */
 
 .columns {
   position: absolute;
@@ -109,8 +109,8 @@
   display: flex;
   align-items: flex-end;
   /*
-   * 相邻柱体之间同样保持 2px 表面色间隙。窄屏时槽位宽度小于 24px，
-   * 柱体会填满槽位，没有这个 gap 就会连成一片、读起来像面积图。
+   * Adjacent bars also keep a 2px surface-color gap. On narrow screens the slot width drops
+   * below 24px and bars fill their slots; without this gap they merge and read like an area chart.
    */
   gap: 2px;
 }
@@ -122,7 +122,7 @@
   height: 100%;
   display: flex;
   align-items: flex-end;
-  /* 命中区域比柱体本身更大：整列高度都可悬停 */
+  /* The hit area is larger than the bar itself: the full column height is hoverable */
   cursor: default;
 }
 
@@ -136,7 +136,7 @@
   flex-direction: column;
   justify-content: flex-end;
   animation: barGrow 0.42s cubic-bezier(0.4, 0, 0.2, 1) both;
-  /* 级差由 TSX 按桶数归一化写入，整波 ≤360ms */
+  /* The stagger step is written by the TSX, normalized by bucket count; the whole wave is ≤360ms */
   animation-delay: var(--bar-delay, 0ms);
   transform-origin: bottom center;
   transition: filter 120ms ease-out;
@@ -154,7 +154,7 @@
 .segment {
   display: block;
   width: 100%;
-  /* 数据末端 4px 圆角，基线端保持直角 */
+  /* 4px radius at the data end; the baseline end stays square */
   border-radius: $radius-sm $radius-sm 0 0;
 }
 
@@ -166,12 +166,12 @@
   background: var(--viz-failure);
 }
 
-/* 堆叠段之间留 2px 表面色间隙 —— 用留白而不是描边来分隔 */
+/* 2px surface-color gap between stacked segments: separate them with space, not strokes */
 .segmentGap {
   margin-bottom: 2px;
 }
 
-/* 上方还有失败段时，成功段顶部不再圆角 */
+/* When a failure segment sits above, the success segment's top is no longer rounded */
 .segmentSquareTop {
   border-radius: 0;
 }
@@ -184,7 +184,7 @@
   background: var(--border-primary);
 }
 
-/* bottom 由 TSX 按柱高写入；柱子全部落定后再淡入 */
+/* bottom is written by the TSX from the bar height; fades in after all bars have settled */
 .peakLabel {
   position: absolute;
   left: 50%;
@@ -214,7 +214,7 @@
   pointer-events: none;
 }
 
-/* ---------- 悬浮提示 ---------- */
+/* ---------- Tooltip ---------- */
 
 .tooltip {
   --glass-blur: 10px;
@@ -236,7 +236,8 @@
   font-size: 12px;
   color: var(--text-secondary);
   pointer-events: none;
-  /* 悬停换柱时滑到新位置（可中断，CSS transition 自然 retarget），入场只淡入 */
+  /* Slides to the new position when hovering another bar (interruptible; the CSS transition
+     retargets naturally); the entrance only fades in */
   transition:
     left 200ms var(--ease-out-strong, ease-out),
     transform 200ms var(--ease-out-strong, ease-out),
@@ -277,7 +278,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* ---------- 横轴 ---------- */
+/* ---------- X axis ---------- */
 
 .xAxis {
   position: relative;
@@ -298,7 +299,7 @@
   white-space: nowrap;
 }
 
-/* ---------- 数据表 ---------- */
+/* ---------- Data table ---------- */
 
 .tableToggle {
   font-size: 13px;
@@ -331,7 +332,7 @@
   }
 }
 
-/* ---------- 无数据占位 ---------- */
+/* ---------- Empty-state placeholder ---------- */
 
 .placeholder {
   display: flex;

@@ -37,9 +37,12 @@ export interface SiwcBindDialogProps {
 }
 
 /**
- * SIWC 绑定：与 OAuth 授权对话框同一套语汇（品牌头 / 步骤 / 底部状态条 / 成功视图）。
- * 先在对话框内选择 Codex 凭证，再开始授权；授权开始后凭证锁定，失败可原地重来。
- * 每次打开由父级以新 key 重新挂载，关闭时取消仍在进行的服务端会话。
+ * SIWC binding: same vocabulary as the OAuth authorization dialog (brand header / steps / bottom
+ * status bar / success view).
+ * First pick a Codex credential in the dialog, then start authorization; once authorization
+ * starts the credential is locked, and a failure can be retried in place.
+ * The parent remounts it with a new key on every open; closing cancels any server-side session
+ * still in progress.
  */
 export function SiwcBindDialog({ open, onClose, onViewAuthFiles }: SiwcBindDialogProps) {
   const { t, i18n } = useTranslation();
@@ -59,7 +62,8 @@ export function SiwcBindDialog({ open, onClose, onViewAuthFiles }: SiwcBindDialo
     closeRef.current = onClose;
   }, [onClose]);
 
-  // 连接守卫 + 凭证列表：切换连接或登出时立即作废并关闭，旧响应不得写入。
+  // Connection guard + credential list: on a connection switch or logout, invalidate and close
+  // immediately; stale responses must not be written.
   useEffect(() => {
     let active = true;
     const connection = useAuthStore.getState();
@@ -169,7 +173,10 @@ export function SiwcBindDialog({ open, onClose, onViewAuthFiles }: SiwcBindDialo
     onClose();
   };
 
-  /** 失败后原地重来：丢弃旧尝试（effect 清理会取消服务端会话），回到选择视图。 */
+  /**
+   * Retry in place after a failure: discard the old attempt (the effect cleanup cancels the
+   * server-side session) and go back to the picker view.
+   */
   const restart = () => {
     setSession(undefined);
     setCallback('');
@@ -321,7 +328,8 @@ export function SiwcBindDialog({ open, onClose, onViewAuthFiles }: SiwcBindDialo
   );
 }
 
-/* ---------- 凭证选择：原生 radio（键盘/读屏零成本），视觉为可点行 ---------- */
+/* ---------- Credential picker: native radios (keyboard / screen reader for free) ----------
+ * styled as clickable rows */
 
 function TargetPicker({
   targets,
@@ -406,7 +414,7 @@ function TargetPicker({
   );
 }
 
-/** 授权开始后的锁定目标：单行摘要，不再可改。 */
+/** The locked target once authorization starts: a one-line summary, no longer editable. */
 function TargetSummary({ file }: { file: AuthFileItem }) {
   const { t } = useTranslation();
   const identity = deriveAuthFileIdentity(file);
@@ -424,7 +432,7 @@ function TargetSummary({ file }: { file: AuthFileItem }) {
   );
 }
 
-/* ---------- 步骤：与 OAuthFlowDialog 同构 ---------- */
+/* ---------- Steps: same structure as OAuthFlowDialog ---------- */
 
 function Step({
   title,

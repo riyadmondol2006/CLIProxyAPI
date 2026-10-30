@@ -16,16 +16,19 @@ export interface ExcludedModelCandidate {
 interface ExcludedModelsPanelProps {
   rules: readonly string[];
   candidates: readonly ExcludedModelCandidate[];
-  /** 由 Picker 算好传下来，避免在 footer 里把整个目录再扫一遍。 */
+  /** Computed by the Picker and passed down, so the footer doesn't rescan the whole catalog. */
   stats: ExclusionStats;
   onToggle: (modelId: string, excluded: boolean) => void;
   onSelectAll: () => void;
   onClear: () => void;
   disabled: boolean;
   listboxId: string;
-  /** 展开后是否把焦点送进搜索框（键盘展开时为 true，鼠标点开时也为 true）。 */
+  /**
+   * Whether to move focus into the search box after expanding (true when expanded via keyboard,
+   * and also true when clicked open with the mouse).
+   */
   autoFocus: boolean;
-  /** 收起面板并把焦点还给 trigger。 */
+  /** Collapse the panel and return focus to the trigger. */
   onDismiss: () => void;
 }
 
@@ -56,13 +59,15 @@ export function ExcludedModelsPanel({
     return candidates.filter((candidate) => matchesQuery(candidate, normalized));
   }, [candidates, query]);
 
-  // 高亮永远钳在可见范围内：过滤后列表变短，旧索引会指向不存在的行。
+  // Always clamp the highlight to the visible range: filtering shortens the list, and the old
+  // index would point at a row that no longer exists.
   const activeIndex = visible.length === 0 ? -1 : Math.min(highlight, visible.length - 1);
   const activeId = activeIndex >= 0 ? `${listboxId}-opt-${activeIndex}` : undefined;
 
   useLayoutEffect(() => {
     if (!autoFocus) return;
-    // preventScroll：裸 focus() 会把外层 Sheet 的滚动猛拽过来，动画中途还会把面板顶出视野。
+    // preventScroll: a bare focus() yanks the outer Sheet's scroll position, and mid-animation
+    // it would also push the panel out of view.
     inputRef.current?.focus({ preventScroll: true });
   }, [autoFocus]);
 
@@ -77,7 +82,8 @@ export function ExcludedModelsPanel({
     const candidate = visible[index];
     if (!candidate || disabled) return;
     const current = getModelExclusionState(rules, candidate.id);
-    // 纯通配符命中的行不可直接切换——它的排除权属于那条规则。行内副文本常驻解释原因。
+    // Rows matched only by a wildcard can't be toggled directly — their exclusion belongs to
+    // that rule. The row's always-visible secondary text explains why.
     if (current.state === 'excluded' && current.by === 'wildcard') return;
     onToggle(candidate.id, current.state !== 'excluded');
   };
@@ -107,8 +113,9 @@ export function ExcludedModelsPanel({
         if (activeIndex >= 0) toggleAt(activeIndex);
         return;
       case 'Escape':
-        // 外层 Sheet 在 document 上、OAuth 页在 window 上都听 Escape。
-        // 不拦住就会「关面板 = 关 Sheet / 离开页面 + 触发未保存弹窗」。
+        // The outer Sheet listens for Escape on document, and the OAuth page on window.
+        // Without stopping it here, "close panel" would also close the Sheet / leave the page
+        // and trigger the unsaved-changes dialog.
         event.preventDefault();
         event.stopPropagation();
         if (query) {
@@ -222,7 +229,8 @@ function ExcludedModelRow({
   const { t } = useTranslation();
   const excluded = state.state === 'excluded';
   const lockedByRule = state.state === 'excluded' && state.by === 'wildcard';
-  // 把「哪条规则、用哪句话解释」在一处收敛好，下面的 JSX 就不必再做类型收窄。
+  // Settle "which rule, and which sentence explains it" in one place, so the JSX below doesn't
+  // need any more type narrowing.
   const wildcardReason =
     state.state === 'excluded' && (state.by === 'wildcard' || state.by === 'both')
       ? {
@@ -248,8 +256,9 @@ function ExcludedModelRow({
     <div
       id={id}
       role="option"
-      // 行永不进 tab 序：外层 Sheet 的焦点陷阱每次 Tab 都枚举全部可聚焦元素，
-      // 几十个可聚焦的行会把它拖垮。漫游全靠 aria-activedescendant。
+      // Rows never enter the tab order: the outer Sheet's focus trap enumerates every focusable
+      // element on each Tab, and dozens of focusable rows would bog it down. Roving relies
+      // entirely on aria-activedescendant.
       tabIndex={-1}
       aria-selected={excluded}
       aria-disabled={lockedByRule || undefined}

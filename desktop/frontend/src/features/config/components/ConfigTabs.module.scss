@@ -1,6 +1,7 @@
 @use '../../../styles/mixins' as *;
 
-/* 分区 tabs：安静的下划线式（种子自提供商 tabs），加错误徽章与脏点两个状态通道 */
+/* Section tabs: quiet underline style (seeded from the provider tabs), plus two status
+   channels: error badges and dirty dots */
 
 .tabs {
   display: flex;
@@ -77,7 +78,7 @@
     background: var(--text-primary);
   }
 
-  /* 整体禁用（保存中）时激活 tab 仍保持完整对比度 */
+  /* When fully disabled (saving), the active tab keeps full contrast */
   &:disabled {
     opacity: 1;
   }
@@ -96,7 +97,7 @@
   line-height: 1.4;
 }
 
-/* 校验错误徽章：mono 数字，失败色（数据墨水走 --viz-*） */
+/* Validation error badge: mono digits, failure color (data ink uses --viz-*) */
 .tabBadge {
   font-family: $font-mono;
   font-size: 10.5px;
@@ -109,7 +110,7 @@
   background: color-mix(in srgb, var(--viz-failure) 12%, transparent);
 }
 
-/* 待保存脏点：6px 琥珀 */
+/* Unsaved dirty dot: 6px amber */
 .tabDirtyDot {
   width: 6px;
   height: 6px;

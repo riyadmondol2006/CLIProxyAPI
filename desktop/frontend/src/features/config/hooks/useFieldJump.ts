@@ -1,5 +1,7 @@
-// 搜索跳转：切换到目标分区 tab → 等目标挂载 → 展开折叠组 → 滚动居中 → 1800ms 脉冲高亮。
-// 旧实现要与横向滚动吸附轮播搏斗（两段式 scrollIntoView）；轮播已退役，只剩纵向滚动。
+// Search jump: switch to the target section tab → wait for the target to mount → expand
+// collapsible groups → scroll to center → 1800ms pulse highlight.
+// The old implementation had to fight a horizontal scroll-snap carousel (two-step
+// scrollIntoView); the carousel is retired, so only vertical scrolling remains.
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { prefersReducedMotion } from '@/hooks/motion';
@@ -14,7 +16,7 @@ import {
 
 export type UseFieldJumpArgs = {
   values: VisualConfigValues;
-  /** 切换激活 tab（页面的 handleSectionChange，含 localStorage 持久化）。 */
+  /** Switch the active tab (the page's handleSectionChange, with localStorage persistence). */
   setActiveSection: (id: ConfigTabId) => void;
 };
 
@@ -31,7 +33,8 @@ export function useFieldJump({ values, setActiveSection }: UseFieldJumpArgs) {
 
   const jumpToField = useCallback(
     (entry: ConfigFieldSearchEntry) => {
-      // 永远跳正典分区（常用 tab 是别名视图，字段的老家在各自分区）。
+      // Always jump to the canonical section (the common tab is an alias view; each field's home is
+      // its own section).
       setActiveSection(entry.sectionId);
       setJumpRequest({ fieldId: entry.fieldId, sectionId: entry.sectionId });
     },
@@ -44,14 +47,15 @@ export function useFieldJump({ values, setActiveSection }: UseFieldJumpArgs) {
     if (!jumpRequest || handledJumpRef.current === jumpRequest) return;
     handledJumpRef.current = jumpRequest; // handle each request once, even if deps re-fire
     const { fieldId } = jumpRequest;
-    // TLS cert/key 在 TLS 关闭时不渲染 —— 重定向到 tlsEnable 开关。
+    // TLS cert/key aren't rendered while TLS is off, so redirect to the tlsEnable toggle.
     const targetFieldId =
       (fieldId === 'tlsCert' || fieldId === 'tlsKey') && !values.tlsEnable ? 'tlsEnable' : fieldId;
 
     const attempt = (retriesLeft: number) => {
       const el = document.getElementById(configFieldDomId(targetFieldId));
       if (!el) {
-        // Tab 刚切换：目标分区可能还没提交到 DOM，隔帧重试一次。
+        // The tab just switched: the target section may not be committed to the DOM yet, so retry
+        // once on the next frame.
         if (retriesLeft > 0) requestAnimationFrame(() => attempt(retriesLeft - 1));
         return;
       }

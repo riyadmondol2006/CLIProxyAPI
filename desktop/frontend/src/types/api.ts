@@ -1,16 +1,16 @@
 /**
- * API 相关类型定义
- * 基于原项目 src/core/api-client.js 和各模块 API
+ * API type definitions
+ * Based on src/core/api-client.js and the module APIs of the original project
  */
 
-// API 客户端配置
+// API client config
 export interface ApiClientConfig {
   apiBase: string;
   managementKey: string;
   timeout?: number;
 }
 
-// API 错误
+// API error
 export type ApiError = Error & {
   status?: number;
   /** Axios/network error code, such as ERR_NETWORK. */

@@ -1,17 +1,19 @@
 @use '../../../styles/mixins' as *;
 
 /* ============================================================
- * 额度卡片 body 的全页外衣（类型化契约见 features/quota/types.ts）。
+ * Full-page skin for the quota card body (typed contract in features/quota/types.ts).
  *
- * 两段构成：
- * 1. 额度行 / 水位条 / Antigravity 分组 —— mono 遥测风，与紧凑外衣同族；
- * 2. 套餐徽章区（.codexPlan* 起至文件末尾）—— 从 pages/QuotaPage.module.scss
- *    第 429–1023 行逐字节搬迁的定稿资产（金卡 + Pro 20x 液态铂金，含暗色 /
- *    HDR / 减动效冻结帧 / 移动端降级）。**该区块禁止改动**：改配方等于重设计
- *    已验收的徽章，验证方式是与 git 历史做 diff（应为空）。
+ * Two parts:
+ * 1. Quota rows / meter bars / Antigravity groups: mono telemetry style, same family as the
+ *    compact skin;
+ * 2. Plan badge area (from .codexPlan* to the end of the file): finalized assets moved
+ *    byte-for-byte from lines 429–1023 of pages/QuotaPage.module.scss (gold card + Pro 20x
+ *    liquid platinum, including dark mode / HDR / reduced-motion frozen frames / mobile
+ *    fallbacks). **Do not modify this block**: changing the recipe means redesigning an
+ *    approved badge; verify by diffing against git history (the diff should be empty).
  * ============================================================ */
 
-/* ---------- 额度行 ---------- */
+/* ---------- Quota rows ---------- */
 
 .quotaRow {
   display: flex;
@@ -36,7 +38,7 @@
   @include text-ellipsis;
 }
 
-/* 遥测：mono + 等宽数字，刷新时数字不跳位 */
+/* Telemetry: mono + tabular numerals, so digits don't shift on refresh */
 .quotaMeta {
   display: inline-flex;
   align-items: baseline;
@@ -48,7 +50,8 @@
   letter-spacing: 0.01em;
 }
 
-/* 百分比穿墨色而非填充色 —— 文字不承担状态编码，颜色留给水位条 */
+/* The percentage is in ink rather than the fill color: text doesn't encode state, color is
+   left to the meter bar */
 .quotaPercent {
   font-weight: 650;
   color: var(--text-primary);
@@ -93,9 +96,9 @@
   padding: 6px 4px;
 }
 
-/* ---------- 水位条（QuotaMeter）----------
- * 轨道退居背景（8% 墨色），填充按剩余量三档着色；
- * percent === null 时宽度为 0 —— 未知不着色。 */
+/* ---------- Meter bar (QuotaMeter) ----------
+ * The track recedes into the background (8% ink); the fill is colored in three tiers by the
+ * remaining amount; when percent === null the width is 0, so unknown gets no color. */
 
 .quotaBar {
   height: 6px;
@@ -107,10 +110,11 @@
 .quotaBarFill {
   height: 100%;
   border-radius: $radius-full;
-  /* 刷新时平滑重定向到新水位（可中断） */
+  /* On refresh, smoothly retarget to the new level (interruptible) */
   transition: width 360ms var(--ease-out-strong, ease);
-  /* 数据到达是本页的高潮时刻：水位逐行铺开（每行 40ms 级差）。
-   * 走 scaleX 而非 width，避免与上面的 width 过渡互相抢夺同一属性。 */
+  /* Data arriving is this page's peak moment: the meters roll out row by row (40ms stagger
+   * per row). Uses scaleX rather than width, so it doesn't fight the width transition above
+   * over the same property. */
   transform-origin: left center;
   animation: quota-meter-fill 480ms var(--ease-out-strong, ease-out) both;
   animation-delay: calc(var(--meter-index, 0) * 40ms);
@@ -134,7 +138,7 @@
   background: var(--viz-failure);
 }
 
-/* ---------- Antigravity 分组 ---------- */
+/* ---------- Antigravity groups ---------- */
 
 .antigravityQuotaGroup {
   display: flex;
@@ -193,7 +197,7 @@
 }
 
 /* ============================================================
- * 以下至文件末尾：套餐徽章定稿区块（逐字节搬迁，禁止改动）
+ * From here to the end of the file: finalized plan badge block (moved byte-for-byte, do not modify)
  * ============================================================ */
 
 .codexPlan {
@@ -453,15 +457,18 @@
   }
 }
 
-/* Codex Pro 20x —— 液态铂金（B2：精修液态铬 + 呼吸光晕，2026-07-31 定稿）。
- * 与金卡（premiumPlanValue）的档差来自「材质行为」而非颜色：金是静止的贵金属，
- * 20x 是一枚会流动的镜面铬 —— 三层异速反光带永续对流（12s）+ 光晕呼吸（7s）
- * + 每 7.5s 一道巡回扫光。全程零彩色，唯一的色彩暗示是第三层几乎无色的冰蓝微光。
+/* Codex Pro 20x: liquid platinum (B2: refined liquid chrome + breathing glow, finalized
+ * 2026-07-31). The tier gap from the gold card (premiumPlanValue) comes from "material
+ * behavior" rather than color: gold is a static precious metal, while 20x is flowing mirror
+ * chrome, with three reflective bands at different speeds in perpetual convection (12s) + a
+ * breathing glow (7s) + a roaming sweep every 7.5s. Zero color throughout; the only hint of
+ * color is the nearly colorless ice-blue shimmer of the third layer.
  *
- * 试过并被推翻的方向（勿回退）：MC 青绿换色（太保守）、切面宝石区（20px 糊成噪点）、
- * 黑曜/紫晶/全息黑钻（弃暗体）、棱镜彩虹环、极光/油膜/星云晶体（太花）。
- * 口味锚点：单色金属 + 慢动态。文字两主题同为深灰蓝 —— 铬体恒亮，
- * 主题只微调石体明度与光晕强度。 */
+ * Directions tried and rejected (do not revert): MC teal recolor (too conservative), faceted
+ * gem area (blurs into noise at 20px), obsidian/amethyst/holographic black diamond (dark bodies
+ * dropped), prism rainbow ring, aurora/oil-slick/nebula crystal (too busy).
+ * Taste anchor: monochrome metal + slow motion. Text is dark gray-blue in both themes, since
+ * the chrome body is always bright; themes only fine-tune the body lightness and glow strength. */
 .elitePlanValue {
   position: relative;
   display: inline-flex;
@@ -534,7 +541,8 @@
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
   text-transform: capitalize;
 
-  /* 呼吸光晕：与金卡同一套 blur 光晕构造，外加 7s 极缓呼吸 */
+  /* Breathing glow: same blur glow construction as the gold card, plus a very slow
+     7s breathing */
   &::before {
     content: '';
     position: absolute;
@@ -554,7 +562,8 @@
     z-index: -1;
   }
 
-  /* 巡回扫光：一道冷白亮带扫过镜面，只占 7.5s 周期的前 13%，其余时间静止 */
+  /* Roaming sweep: a cool white band sweeps across the mirror in only the first 13%
+     of the 7.5s cycle and stays still the rest of the time */
   &::after {
     content: '';
     position: absolute;
@@ -575,8 +584,9 @@
     pointer-events: none;
   }
 
-  /* 中性铬没有彩度可扩，P3 分支无收益（金卡需要它是因为暖金有色域外的彩度）。
-   * HDR 增益全部走 rec2100 超白：扫光与外发光在 HDR 屏上亮过 SDR 白。 */
+  /* Neutral chrome has no chroma to extend, so a P3 branch gains nothing (the gold card needs
+   * one because warm gold has out-of-gamut chroma). All HDR gain goes through rec2100
+   * super-white: the sweep and outer glow shine brighter than SDR white on HDR screens. */
   @supports (color: #{'color(rec2100-linear 1 1 1)'}) {
     @media (dynamic-range: high) {
       dynamic-range-limit: no-limit;
@@ -642,7 +652,8 @@
   }
 }
 
-/* 暗色：铬体不换血统只提亮 —— 暗卡上它自己就是光源；文字保持深灰蓝。 */
+/* Dark mode: the chrome keeps its lineage and is only brightened; on a dark card it is the
+ * light source itself. Text stays dark gray-blue. */
 :global([data-theme='dark']) .elitePlanValue {
   background:
     radial-gradient(
@@ -715,7 +726,8 @@
   }
 }
 
-/* 减动效：三条动画全停，亮带冻结在压字前的一帧 —— 静态也是完成品。 */
+/* Reduced motion: all three animations stop, with the bright band frozen on the frame before
+ * it crosses the text; the static state is a finished piece too. */
 @media (prefers-reduced-motion: reduce) {
   .elitePlanValue,
   :global([data-theme='dark']) .elitePlanValue {
@@ -775,8 +787,10 @@
       0 0 10px rgba(255, 196, 44, 0.18);
   }
 
-  // 铂金徽章移动端：与金卡同一刀 —— 砍模糊光晕层（呼吸随之消失）、收一档外发光。
-  // 液态对流与扫光只是 background-position 重绘，~70×20px 成本可忽略，保留。
+  // Platinum badge on mobile: the same cut as the gold card; drop the blurred glow layer (the
+  // breathing goes with it) and tone the outer glow down one step.
+  // The liquid convection and sweep are only background-position repaints; at ~70×20px the
+  // cost is negligible, so they stay.
   .elitePlanValue {
     overflow: hidden;
     box-shadow:

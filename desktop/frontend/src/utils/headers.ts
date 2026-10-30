@@ -1,5 +1,5 @@
 /**
- * 自定义请求头处理工具
+ * Custom request header utilities
  */
 
 export interface HeaderEntry {

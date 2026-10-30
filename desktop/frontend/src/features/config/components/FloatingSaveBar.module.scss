@@ -1,6 +1,7 @@
 @use '../../../styles/mixins' as *;
 
-/* 悬浮保存栏：底部居中的玻璃工具栏（--content-center-x 对齐内容列中心） */
+/* Floating save bar: bottom-centered glass toolbar (--content-center-x aligns it with the center
+   of the content column) */
 
 .container {
   position: fixed;
@@ -28,7 +29,7 @@
   box-shadow: var(--shadow-lg);
 }
 
-/* 状态文案：mono 遥测 */
+/* Status text: mono telemetry */
 .status {
   font-family: $font-mono;
   font-size: 12px;
@@ -63,7 +64,7 @@
   flex-shrink: 0;
 }
 
-/* 保存：墨色药丸主按钮 */
+/* Save: ink pill primary button */
 .savePill {
   display: inline-flex;
   align-items: center;
@@ -105,7 +106,7 @@
   }
 }
 
-/* 放弃更改：安静的文字链接 */
+/* Discard changes: a quiet text link */
 .ghostAction {
   display: inline-flex;
   align-items: center;

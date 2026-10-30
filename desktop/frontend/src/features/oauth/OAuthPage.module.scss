@@ -1,5 +1,5 @@
 /* ============================================================
- * OAuth 页壳层：纯布局，视觉细节都在各组件的 colocated 模块里。
+ * OAuth page shell: pure layout; visual details live in each component's colocated module.
  * ============================================================ */
 
 .page {
@@ -25,7 +25,8 @@
   color: var(--text-secondary);
 }
 
-/* 磁贴网格：一屏看全所有提供商（窄屏自动单列）；280 让常见宽度下 6 家排成 3+3 */
+/* Tile grid: all providers visible on one screen (auto single column on narrow screens);
+   280 lets 6 providers lay out as 3+3 at common widths */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));

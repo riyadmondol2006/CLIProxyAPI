@@ -1,7 +1,7 @@
 /* ============================================================
- * VaultPulse —— 凭证谱条（签名元素）。
- * 颜色 + 高度双通道编码；scaleY 自底部生长入场，
- * 总预算 360ms，在头部 reveal 之后（基准延迟 0.35s）起播。
+ * VaultPulse — the credential spectrum (signature element).
+ * Dual-channel encoding via color + height; bars grow in from the bottom via scaleY,
+ * with a 360ms total budget, starting after the header reveal (0.35s base delay).
  * ============================================================ */
 
 .pulse {
@@ -20,7 +20,7 @@
   flex: 1;
   min-width: 0;
   height: 100%;
-  /* 基线 + 两端渐隐：与 LiveWire 的水平 mask 同语汇 */
+  /* Baseline + fade at both ends: same visual language as LiveWire's horizontal mask */
   padding-bottom: 3px;
   border-bottom: 1px solid color-mix(in srgb, var(--border-color) 85%, transparent);
   mask-image: linear-gradient(to right, transparent, #000 2%, #000 98%, transparent);
@@ -42,7 +42,7 @@
   }
 }
 
-/* 高度编码状态（色盲冗余通道） */
+/* Height encodes status (redundant channel for color blindness) */
 .barLive {
   height: 100%;
   background: var(--viz-success);
@@ -79,7 +79,7 @@
   padding-bottom: 1px;
 }
 
-/* 零凭证：LiveWire 式虚线基线 */
+/* Zero credentials: LiveWire-style dashed baseline */
 .idleLine {
   flex: 1;
   height: 0;

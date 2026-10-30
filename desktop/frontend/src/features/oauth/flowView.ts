@@ -3,8 +3,10 @@ import type { ProviderFlowState } from './hooks/useOAuthFlows';
 export type FlowView = 'idle' | 'flow' | 'success' | 'failed';
 
 /**
- * 对话框视图：有授权链接（或正在生成）→ 步骤视图；链接失效后的失败 → 失败视图。
- * 轮询网络失败时链接仍在，留在步骤视图里：手动回调仍可提交并恢复轮询。
+ * Dialog view: an authorization link exists (or is being generated) → steps view; a failure
+ * after the link is no longer valid → failure view.
+ * When polling hits a network failure the link is still there, so stay in the steps view: a
+ * manual callback can still be submitted and polling resumed.
  */
 export const resolveFlowView = (state: ProviderFlowState): FlowView => {
   if (state.status === 'success') return 'success';
@@ -13,7 +15,10 @@ export const resolveFlowView = (state: ProviderFlowState): FlowView => {
   return 'idle';
 };
 
-/** 授权链接拆成 host + 余下部分：host 高亮，方便用户核对要去的域名。 */
+/**
+ * Splits the authorization link into host + the rest: the host is highlighted so users can
+ * check the domain they are about to visit.
+ */
 export const splitAuthUrl = (url: string): { host: string; rest: string } => {
   try {
     const { host } = new URL(url);

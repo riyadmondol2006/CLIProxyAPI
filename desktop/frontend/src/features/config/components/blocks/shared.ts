@@ -1,5 +1,6 @@
-// 区块编辑器共享的纯工具（载荷/规则部分从旧 VisualConfigEditorBlocks 原样迁出，
-// 独立成文件以规避组件文件导出非组件的 react-refresh 限制）。
+// Pure utilities shared by the block editors (the payload/rule parts were moved as-is from the
+// old VisualConfigEditorBlocks, and split into their own file to avoid the react-refresh
+// restriction on component files exporting non-components).
 
 import type { useTranslation } from 'react-i18next';
 import type {
@@ -41,12 +42,17 @@ export function buildProtocolOptions(
   return options;
 }
 
-/** API Key 强度条相邻两段点亮的间隔；4 段全亮 = 135ms + 段内 160ms，整组仍在 300ms 内 */
+/**
+ * Delay between lighting adjacent segments of the API key strength bar; all 4 segments lit =
+ * 135ms + 160ms within a segment, so the whole group stays under 300ms
+ */
 export const SEGMENT_STAGGER_MS = 45;
 
 /**
- * 强度条段填充的起跑延迟：只有本次新增的段排队，已亮的段和熄灭都不延迟。
- * 因此「生成」一次点亮四段是依次的波，而键入让强度 +1 段是即时的。
+ * Start delay for filling a strength bar segment: only segments newly added this time are
+ * queued; already-lit segments and turning off are never delayed.
+ * So "Generate" lighting four segments at once plays as a sequential wave, while typing that
+ * raises the strength by one segment is instant.
  */
 export function segmentFillDelayMs(
   index: number,

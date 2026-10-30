@@ -3,19 +3,22 @@ import { FIELDS_ROOT_CLASS } from './fields/FieldPrimitives';
 import styles from './SectionCard.module.scss';
 
 export type SectionCardProps = {
-  /** 分区序号（01–07）。常用 tab 是别名视图，不传即不显示。 */
+  /** Section number (01–07). The common tab is an alias view; omit it to hide the number. */
   indexLabel?: string;
   icon?: ReactNode;
   title: ReactNode;
   description?: ReactNode;
-  /** 仅首载入场为 true（页面挂载时用 useState 捕获），tab 切换零动画不重播。 */
+  /**
+   * True only for the first-load entrance (captured with useState on page mount); tab switches
+   * have no animation and do not replay it.
+   */
   animateIn?: boolean;
   children: ReactNode;
 };
 
 /**
- * 分区卡片：自然高度纵向流（替代旧的固定高度滚动吸附轮播）。
- * 表面配方与全站卡片一致：14px 圆角 / 1px 描边 / 82% color-mix。
+ * Section card: natural-height vertical flow (replaces the old fixed-height scroll-snap carousel).
+ * The surface recipe matches cards site-wide: 14px radius / 1px border / 82% color-mix.
  */
 export function SectionCard({
   indexLabel,

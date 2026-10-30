@@ -1,5 +1,5 @@
 /**
- * Kimi 额度渲染体：用量行水位条。
+ * Kimi quota body: level meters for usage rows.
  */
 
 import { useMemo } from 'react';

@@ -15,7 +15,7 @@ const BASE_TRANSFORM = 'translateX(-50%)';
 const HIDDEN_TRANSFORM = 'translateX(-50%) translateY(56px)';
 
 export type FloatingSaveBarProps = {
-  /** 有未保存修改时可见（与未保存离开守卫的 block 条件一致）。 */
+  /** Visible when there are unsaved changes (same block condition as the unsaved-leave guard). */
   visible: boolean;
   statusText: string;
   statusTone: ConfigStatusTone;
@@ -27,10 +27,11 @@ export type FloatingSaveBarProps = {
 };
 
 /**
- * 悬浮保存栏：portal 到 body 的玻璃工具栏，仅在 dirty 时出现。
- * - 上浮入场 0.28s 强减速，退场 0.22s 加速后卸载；
- * - reduced-motion 只做透明度淡入淡出（保留 translateX(-50%)，防止错位半宽）；
- * - 实时高度写入 --config-action-bar-height 供页面底部留白。
+ * Floating save bar: a glass toolbar portaled to body, shown only when dirty.
+ * - Slides up on enter with a 0.28s strong ease-out; exits with a 0.22s ease-in, then unmounts;
+ * - Under reduced-motion, only fades opacity (keeps translateX(-50%) to avoid a half-width
+ *   misalignment);
+ * - Writes its live height to --config-action-bar-height for the page's bottom padding.
  */
 export function FloatingSaveBar(props: FloatingSaveBarProps) {
   const {

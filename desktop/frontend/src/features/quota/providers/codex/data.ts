@@ -1,6 +1,6 @@
 /**
- * Codex 额度数据层：用量窗口 + 套餐 + 重置积分（含消费流程）。
- * React-free / SCSS-free —— 由 tests/codexQuota.test.ts 直接消费。
+ * Codex quota data layer: usage windows + plan + reset credits (including the consume flow).
+ * React-free / SCSS-free — consumed directly by tests/codexQuota.test.ts.
  */
 
 import type { TFunction } from 'i18next';

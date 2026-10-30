@@ -6,12 +6,12 @@ import { TRAFFIC_BUCKET_MINUTES, type TrafficWindow } from '../types';
 import { axisMax } from '../utils';
 import styles from './ThroughputChart.module.scss';
 
-/** 纵轴刻度条数（含 0），即 TICK_COUNT - 1 个间隔 */
+/** Number of y-axis ticks (including 0), i.e. TICK_COUNT - 1 intervals */
 const TICK_COUNT = 5;
 
 /**
- * 桶时间标签。后端返回的是服务器本地时间字符串（"15:04-15:14"），
- * 优先使用它，而不是用浏览器时钟反推，避免时区不一致。
+ * Bucket time label. The backend returns a server-local time string ("15:04-15:14");
+ * prefer it over deriving one from the browser clock, to avoid time zone mismatches.
  */
 function bucketRangeLabel(time: string | undefined, index: number, count: number): string {
   if (time) return time;
@@ -75,7 +75,8 @@ export function ThroughputChart({ traffic }: ThroughputChartProps) {
 
   return (
     <figure className={styles.chart}>
-      {/* 两条序列 → 图例常驻，并直接带上数值（浅色主题下绿色对比度偏低，数值即为补偿） */}
+      {/* Two series → the legend stays visible and carries the values directly (green has
+          low contrast in the light theme; the values compensate) */}
       <figcaption className={styles.legend}>
         <span className={styles.legendItem}>
           <span className={`${styles.legendSwatch} ${styles.swatchSuccess}`} aria-hidden="true" />
@@ -124,7 +125,8 @@ export function ThroughputChart({ traffic }: ThroughputChartProps) {
               const successHeight = (bucket.success / scaleMax) * 100;
               const failureHeight = (bucket.failed / scaleMax) * 100;
               const hasBoth = bucket.success > 0 && bucket.failed > 0;
-              /* 级差按桶数归一化：不管窗口多长，整波入场都收在 360ms 内 */
+              /* Stagger is normalized by bucket count: however long the window, the whole
+                 entrance wave finishes within 360ms */
               const barDelayMs =
                 buckets.length > 1 ? Math.round((index / (buckets.length - 1)) * 360) : 0;
 
@@ -135,7 +137,8 @@ export function ThroughputChart({ traffic }: ThroughputChartProps) {
                   onMouseEnter={() => setActiveIndex(index)}
                   onClick={() => setActiveIndex((current) => (current === index ? null : index))}
                 >
-                  {/* 峰值直标放在 scaleY 容器之外，避免入场时被一起挤压 */}
+                  {/* The direct peak label sits outside the scaleY container so it isn't squashed
+                      along with it during the entrance */}
                   {index === peakIndex && peakTotal > 0 && (
                     <span
                       className={styles.peakLabel}

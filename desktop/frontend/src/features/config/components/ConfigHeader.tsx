@@ -5,18 +5,21 @@ import type { HeaderMetaSegment } from '../uiState';
 import styles from './ConfigHeader.module.scss';
 
 export type ConfigHeaderProps = {
-  /** ▍mono meta 行的段落序列（uiState.buildHeaderMeta 的产物）。 */
+  /** Segment sequence for the ▍mono meta line (produced by uiState.buildHeaderMeta). */
   meta: HeaderMetaSegment[];
   reloadDisabled: boolean;
   reloading: boolean;
   onReload: () => void;
-  /** 移动端上移到头部动作行的 ModeSwitch 槽位（桌面端为 null，ModeSwitch 在 tabs 行右端）。 */
+  /**
+   * ModeSwitch slot moved up into the header action row on mobile (null on desktop, where
+   * ModeSwitch sits at the right end of the tabs row).
+   */
   extraActions?: ReactNode;
 };
 
 /**
- * 配置面板头部：标题领衔 + ▍mono 遥测 meta 行 + 重载 ghost。
- * 保存动作不在头部常驻 —— 由 FloatingSaveBar 在 dirty 时承载。
+ * Config panel header: title first + ▍mono telemetry meta line + ghost reload button.
+ * Save does not live permanently in the header; FloatingSaveBar carries it while dirty.
  */
 export function ConfigHeader({
   meta,

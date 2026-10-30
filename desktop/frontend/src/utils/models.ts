@@ -1,6 +1,6 @@
 /**
- * 模型工具函数
- * 迁移自基线 utils/models.js
+ * Model utility functions
+ * Migrated from the baseline utils/models.js
  */
 
 import { isRecord } from './helpers';

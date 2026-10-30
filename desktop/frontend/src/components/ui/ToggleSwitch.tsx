@@ -6,7 +6,7 @@ interface ToggleSwitchProps {
   onChange: (value: boolean) => void;
   label?: ReactNode;
   ariaLabel?: string;
-  /** 外部 <label htmlFor> 关联用；不传则仅靠 label / ariaLabel 命名。 */
+  /** Links an external <label htmlFor>; when omitted, naming relies on label / ariaLabel only. */
   id?: string;
   ariaDescribedBy?: string;
   disabled?: boolean;

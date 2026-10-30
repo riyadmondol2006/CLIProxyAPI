@@ -1,6 +1,6 @@
 /**
- * 通知状态管理
- * 替代原项目中的 showNotification 方法
+ * Notification state management
+ * Replaces the showNotification method from the original project
  */
 
 import { create } from 'zustand';

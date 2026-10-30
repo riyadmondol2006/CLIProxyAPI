@@ -2,13 +2,13 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { animate } from 'motion/mini';
 
 /**
- * Premium 动效档位：入场 0.45s、减速曲线、无回弹。
- * 与 PageTransition 保持同一套自定义 easing 写法。
+ * Premium motion tier: 0.45s entrance, decelerating curve, no overshoot.
+ * Uses the same custom easing style as PageTransition.
  */
 const REVEAL_DISTANCE = 24;
 const REVEAL_DURATION = 0.45;
 const COUNT_UP_DURATION = 900;
-/** 分组入场的级差与总预算：级差再大也不许整组拖过 360ms */
+/** Group entrance stagger and total budget: no matter the stagger, the group never exceeds 360ms */
 const GROUP_STAGGER = 0.07;
 const GROUP_MAX_TOTAL = 0.36;
 
@@ -20,10 +20,10 @@ export const prefersReducedMotion = (): boolean =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /**
- * 元素滚动进入视口时上浮淡入。
+ * Fades an element in while sliding it up as it scrolls into the viewport.
  *
- * 初始态由 JS 在绘制前写入行内样式，因此脚本未执行时内容始终可见，
- * 不依赖任何 CSS 前置类。
+ * The initial state is written to inline styles by JS before paint, so content always stays
+ * visible if the script doesn't run, and no CSS pre-class is required.
  */
 export function useRevealOnScroll<T extends HTMLElement>(delaySeconds = 0) {
   const ref = useRef<T | null>(null);
@@ -80,11 +80,14 @@ export function useRevealOnScroll<T extends HTMLElement>(delaySeconds = 0) {
 }
 
 /**
- * 容器进入视口时，其内 `[data-reveal]` 子元素按 DOM 顺序级联上浮淡入。
+ * When the container enters the viewport, its `[data-reveal]` children fade in and slide up in a
+ * cascade in DOM order.
  *
- * 级差 70ms、整组封顶 360ms（子项多时自动压缩级差），符合 micro-cascade 预算；
- * `data-reveal="scale"` 的子项额外从 0.97 缩放入场（用于玻璃面板的 materialize）。
- * 初始态同样在绘制前写入行内样式，脚本缺席时内容始终可见。
+ * 70ms stagger, with the whole group capped at 360ms (the stagger compresses automatically when
+ * there are many children), matching the micro-cascade budget; children with
+ * `data-reveal="scale"` additionally scale in from 0.97 (used for glass panel materialize).
+ * The initial state is likewise written to inline styles before paint, so content always stays
+ * visible without the script.
  */
 export function useRevealGroup<T extends HTMLElement>(baseDelaySeconds = 0) {
   const ref = useRef<T | null>(null);
@@ -166,7 +169,8 @@ export function useRevealGroup<T extends HTMLElement>(baseDelaySeconds = 0) {
 }
 
 /**
- * 数字滚动到目标值。减少动效偏好下直接落到终值。
+ * Counts a number up to its target value. With the reduced-motion preference, jumps straight to
+ * the final value.
  */
 export function useCountUp(target: number, enabled = true): number {
   const [displayValue, setDisplayValue] = useState(target);

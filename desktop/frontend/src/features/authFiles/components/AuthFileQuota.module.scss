@@ -3,15 +3,16 @@
 $quota-font-size: 11.5px;
 
 /* ============================================================
- * 认证文件卡片的配额区外衣。
+ * Skin for the quota area of auth file cards.
  *
- * 契约：quotaConfigs.renderQuotaItems 通过 helpers.styles 按名查找
- * 以下类（antigravity/claude/codex/kimi/xai 五条渲染路径共 24 个），
- * 另加本组件宿主类与 QuotaProgressBar 的 5 个注入类。
- * 漏名会静默渲染 class="undefined" —— 增删前先对照 quotaConfigs.ts。
+ * Contract: quotaConfigs.renderQuotaItems looks up the classes below by name via
+ * helpers.styles (24 in total across the five render paths antigravity/claude/codex/kimi/xai),
+ * plus this component's host class and the 5 classes injected by QuotaProgressBar.
+ * A missing name silently renders class="undefined"; check quotaConfigs.ts before adding or
+ * removing any.
  * ============================================================ */
 
-/* ---------- 宿主 ---------- */
+/* ---------- Host ---------- */
 
 .quotaSection {
   display: flex;
@@ -78,7 +79,7 @@ button.quotaMessageAction {
   }
 }
 
-/* ---------- 配额行（全 provider 通用） ---------- */
+/* ---------- Quota rows (shared by all providers) ---------- */
 
 .quotaRow {
   display: flex;
@@ -145,7 +146,7 @@ button.quotaMessageAction {
   color: var(--text-secondary);
 }
 
-/* ---------- 进度条（QuotaProgressBar 注入，Meter 风 6px 轨道） ---------- */
+/* ---------- Progress bar (injected by QuotaProgressBar, Meter-style 6px track) ---------- */
 
 .quotaBar {
   height: 6px;
@@ -172,7 +173,7 @@ button.quotaMessageAction {
   background: var(--viz-failure);
 }
 
-/* ---------- 计划徽章（codexPlan*：antigravity/claude/xai 复用） ---------- */
+/* ---------- Plan badges (codexPlan*: reused by antigravity/claude/xai) ---------- */
 
 .codexPlan {
   display: flex;
@@ -210,16 +211,19 @@ button.quotaMessageAction {
   color: var(--amber-text);
 }
 
-/* Codex Pro 20x 铂金（紧凑版）：与 5x 金色值完全同构，只换色相为铂金钢蓝灰。
+/* Codex Pro 20x platinum (compact): structurally identical to the 5x gold value, only the hue
+ * changes to a platinum steel blue-gray.
  *
- * 这一行里 5x 就是一枚变了色的 mono 文本（premiumPlanValue = amber 文字），
- * 所以 20x 也只是一枚变了色的 mono 文本。之前这里镶了整块切面宝石：
- * 15px 宽的切面在 11px 行里糊成噪点，还得吃掉 18px 左内边距把文字挤偏，
- * 而兄弟 chip 全是朴素文字 —— 一枚发光石头在其中只是吵，不是贵。
+ * In this row 5x is just recolored mono text (premiumPlanValue = amber text), so 20x is
+ * just recolored mono text too. This used to carry a whole faceted gem: the 15px-wide facets
+ * blurred into noise in an 11px row and ate 18px of left padding that pushed the text off,
+ * while the sibling chips are all plain text, so a glowing stone among them was just loud,
+ * not premium.
  *
- * 色值与配额页同族（液态铂金，2026-07-31 起替代 MC 钻石青）：
- * 浅色 #526379 对白底 6.1:1；深色提亮成银蓝。钢灰在 mono 文本里偏安静，
- * 但这正是该档的性格 —— 铂金的贵是冷的，吵的留给 amber。 */
+ * The color is from the same family as the quota page (liquid platinum, replacing MC diamond
+ * cyan since 2026-07-31): light #526379 on white is 6.1:1; dark mode brightens it to
+ * silver-blue. Steel gray reads quiet in mono text, but that is exactly this tier's character:
+ * platinum's luxury is cool, and the loudness is left to amber. */
 .elitePlanValue {
   font-family: $font-mono;
   font-size: $quota-font-size;
@@ -231,7 +235,7 @@ button.quotaMessageAction {
   color: #c3d3e4;
 }
 
-/* ---------- Antigravity 分组 ---------- */
+/* ---------- Antigravity groups ---------- */
 
 .antigravityQuotaGroup {
   display: flex;
@@ -267,7 +271,7 @@ button.quotaMessageAction {
   color: var(--text-quaternary);
 }
 
-/* ---------- Codex 重置积分 ---------- */
+/* ---------- Codex reset credits ---------- */
 
 .codexResetCredits {
   display: flex;
@@ -344,7 +348,7 @@ button.quotaMessageAction {
   }
 }
 
-/* ---------- 降级 ---------- */
+/* ---------- Fallbacks ---------- */
 
 @media (prefers-reduced-motion: reduce) {
   .quotaBarFill {

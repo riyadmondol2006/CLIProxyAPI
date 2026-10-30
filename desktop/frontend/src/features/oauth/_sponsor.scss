@@ -1,10 +1,11 @@
 /* ============================================================
- * 赞助商强调色 —— Kimi 品牌蓝（logo 右上角的点就是这个色）。
+ * Sponsor accent color: Kimi brand blue (the dot at the logo's top right is this color).
  *
- * 只在赞助商卡与其授权对话框里出现，别处一律墨色语汇。
- * - $sponsor-blue：光晕、描边、投影、「+」圆点等不承载文字的面
- * - $sponsor-blue-strong：承载白字的按钮底（白字对比 4.7:1，过 AA）
- * - sponsor-ink()：蓝色文字，向正文色混合 —— 浅色主题变深、深色主题变亮，两边都可读
+ * Used only in the sponsor card and its authorization dialog; everything else uses the ink palette.
+ * - $sponsor-blue: non-text surfaces such as glows, outlines, shadows, and the "+" dot
+ * - $sponsor-blue-strong: button backgrounds carrying white text (4.7:1 contrast, passes AA)
+ * - sponsor-ink(): blue text mixed toward the body text color: darker in the light theme,
+ *   brighter in the dark theme, readable in both
  * ============================================================ */
 
 $sponsor-blue: #1783ff;

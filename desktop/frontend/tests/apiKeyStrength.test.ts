@@ -34,11 +34,11 @@ describe('API key strength', () => {
   });
 
   test('short keys are capped regardless of charset richness', () => {
-    // 7 位就算四类字符齐全也只能是最弱档
+    // 7 chars can only be the weakest tier, even with all four character classes
     expect(evaluateApiKeyStrength('aA1!bB2').tier).toBe('weak');
-    // 15 位封顶在第二档
+    // 15 chars are capped at the second tier
     expect(evaluateApiKeyStrength('aA1!bB2@cC3#dD4').tier).toBe('fair');
-    // 23 位封顶在第三档
+    // 23 chars are capped at the third tier
     expect(evaluateApiKeyStrength('aA1!bB2@cC3#dD4$eE5%fG').tier).toBe('good');
   });
 
@@ -52,10 +52,10 @@ describe('API key strength', () => {
   });
 
   test('periodic keys score like a single period', () => {
-    // 32 位却只有 8 位的猜测成本
+    // 32 chars, yet only the guessing cost of 8
     expect(evaluateApiKeyStrength('deadbeefdeadbeefdeadbeefdeadbeef').tier).toBe('fair');
     expect(evaluateApiKeyStrength('abababababababababababababab').tier).toBe('weak');
-    // 尾部不完整的周期同样识别
+    // An incomplete trailing period is detected too
     const periodic = evaluateApiKeyStrength('myproxy2024myproxy2024myproxy');
     const aperiodic = evaluateApiKeyStrength('myproxy2024ZtRv4Ns8Lc3Bd7hQwK');
     expect(periodic.bits).toBeLessThan(aperiodic.bits);

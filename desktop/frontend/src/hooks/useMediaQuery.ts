@@ -1,5 +1,5 @@
 /**
- * 媒体查询 Hook
+ * Media query hook
  */
 
 import { useState, useEffect } from 'react';

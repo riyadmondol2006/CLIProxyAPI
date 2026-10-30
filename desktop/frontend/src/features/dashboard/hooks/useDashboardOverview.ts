@@ -29,7 +29,9 @@ const EMPTY_TRAFFIC: TrafficWindow = {
   windowMinutes: 0,
 };
 
-/** `api-key-usage` 的键形如 `<baseUrl>|<apiKey>`，取第一个分隔符之后的部分 */
+/**
+ * `api-key-usage` keys look like `<baseUrl>|<apiKey>`; take the part after the first separator
+ */
 const apiKeyFromCompositeKey = (compositeKey: string): string => {
   const separatorIndex = compositeKey.indexOf('|');
   return separatorIndex < 0 ? '' : compositeKey.slice(separatorIndex + 1).trim();
@@ -103,11 +105,12 @@ export const getProviderKeyCounts = (config: Config) => ({
 });
 
 /**
- * 汇总仪表盘所需的全部数据。
+ * Aggregates all the data the dashboard needs.
  *
- * 流量数据有两个互不重叠的来源：`api-key-usage`（配置内联的 API Key 凭证）
- * 与 `auth-files`（文件/运行时凭证）。后端对二者的判定条件互斥，但插件提供的
- * 凭证理论上可同时命中，因此这里按 `account_type` + `account` 做一次防御性去重。
+ * Traffic data has two non-overlapping sources: `api-key-usage` (API key credentials inlined in
+ * the config) and `auth-files` (file/runtime credentials). The backend's criteria for the two are
+ * mutually exclusive, but plugin-provided credentials could in theory match both, so a defensive
+ * dedup by `account_type` + `account` is done here.
  */
 export function useDashboardOverview() {
   const connectionStatus = useAuthStore((state) => state.connectionStatus);
@@ -145,7 +148,7 @@ export function useDashboardOverview() {
       const apiKeys = await resolveApiKeysForModels();
       await fetchModelsFromStore(apiBase, apiKeys[0]);
     } catch {
-      // 模型列表失败不应影响仪表盘其余部分
+      // A failed model list shouldn't affect the rest of the dashboard
     }
   }, [connected, apiBase, resolveApiKeysForModels, fetchModelsFromStore]);
 
@@ -203,7 +206,7 @@ export function useDashboardOverview() {
         .trim()
         .toLowerCase();
       const account = String(file.account ?? '').trim();
-      // 已经由 api-key-usage 统计过的凭证不再重复计入
+      // Credentials already counted via api-key-usage aren't counted again
       if (accountType === 'api_key' && account && apiKeysFromUsage.has(account)) {
         return;
       }

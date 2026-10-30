@@ -1,8 +1,8 @@
 @use '../../../styles/mixins' as *;
 
 /* ============================================================
- * 凭证卡片 — statTile 配方（14px 圆角 / 1px 边框 / 82% 透感纸面）
- * 身份优先；停用时弱化内容，操作区保持清晰以便重新启用。
+ * Credential card: statTile recipe (14px radius / 1px border / 82% translucent paper surface)
+ * Identity first. When disabled, content is muted but actions stay clear for re-enabling.
  * ============================================================ */
 
 .card {
@@ -41,7 +41,7 @@
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary-color) 40%, transparent);
 }
 
-/* 首次数据到达时的一次性级联入场；过滤/翻页/轮询不重播 */
+/* One-time cascade entrance when data first arrives; filtering/paging/polling don't replay it */
 .cardEnter {
   animation: card-in 180ms var(--ease-out-strong, ease-out) both;
   animation-delay: var(--card-delay, 0s);
@@ -53,7 +53,7 @@
   }
 }
 
-/* ---------- 头部：选择 + 供应商药丸 / 账号 ---------- */
+/* ---------- Header: selection + provider pill / account ---------- */
 
 .head {
   display: flex;
@@ -79,7 +79,8 @@
   line-height: 1.6;
 }
 
-/* 品牌药丸与账号按盒子中心对齐，避免不同字号的基线造成视觉偏移。 */
+/* Align the brand pill and account by box center so the baselines of different font sizes
+   don't cause a visual offset. */
 .providerBadge {
   flex-shrink: 0;
   max-width: 100%;
@@ -97,7 +98,8 @@
   color: var(--text-tertiary);
 }
 
-/* 窄卡片保留基本阅读宽度；空间不足时换行，不截断邮箱或项目 ID。 */
+/* Narrow cards keep a basic reading width; wrap when space runs short instead of truncating
+   the email or project ID. */
 .account {
   flex: 1 1 12ch;
   min-width: 0;
@@ -106,15 +108,17 @@
   overflow-wrap: anywhere;
 }
 
-/* 无账号线索时主行回落到文件名，沿用 mono 语汇。
-   必须声明在 .account 之后——两者同为单类选择器，letter-spacing 靠源序决胜。 */
+/* Without account hints the primary line falls back to the file name, keeping the mono style.
+   Must be declared after .account: both are single-class selectors, so source order decides
+   letter-spacing. */
 .accountMono {
   font-family: $font-mono;
   letter-spacing: -0.01em;
 }
 
-/* 副行：满卡宽的文件名。email 在 codex 名字的中段，必须能换行才不丢信息，
-   overflow-wrap + -webkit-box 的组合与本文件 .warning span 同配方。 */
+/* Secondary line: full-card-width file name. In codex names the email sits mid-string, so it
+   must be able to wrap to avoid losing information; the overflow-wrap + -webkit-box combo is
+   the same recipe as .warning span in this file. */
 .fileName {
   margin: -4px 0 0;
   font-family: $font-mono;
@@ -133,7 +137,7 @@
   @include text-ellipsis;
 }
 
-/* ---------- 告警行 ---------- */
+/* ---------- Warning row ---------- */
 
 .warning {
   display: flex;
@@ -159,7 +163,7 @@
   margin-top: 2px;
 }
 
-/* ---------- 健康区：eyebrow + 计数 + 状态条 ---------- */
+/* ---------- Health area: eyebrow + counts + status bar ---------- */
 
 .health {
   display: flex;
@@ -201,7 +205,7 @@
   color: var(--text-quaternary);
 }
 
-/* 绿色只给活的流量：有计数才点亮 */
+/* Green is reserved for live traffic: light up only when there are counts */
 .countLive.countOk {
   color: var(--viz-success);
 }
@@ -210,7 +214,7 @@
   color: var(--viz-failure);
 }
 
-/* ---------- ProviderStatusBar 注入样式（18 个契约类名） ---------- */
+/* ---------- ProviderStatusBar injected styles (18 contract class names) ---------- */
 
 .statusBar {
   display: flex;
@@ -323,7 +327,7 @@
   color: var(--text-secondary);
 }
 
-/* ---------- 元数据行：size · modified · priority · WRR weight ---------- */
+/* ---------- Metadata row: size · modified · priority · WRR weight ---------- */
 
 .metaRow {
   display: flex;
@@ -373,7 +377,7 @@
   opacity: 0.78;
 }
 
-/* ---------- SIWC：状态药丸 + 到期时间，与元数据行同为 mono 小字 ---------- */
+/* ---------- SIWC: status pill + expiry time, small mono text like the metadata row ---------- */
 
 .siwcRow {
   display: flex;
@@ -390,7 +394,7 @@
   color: var(--text-tertiary);
 }
 
-/* ---------- 页脚动作区 ---------- */
+/* ---------- Footer actions ---------- */
 
 .actions {
   margin-top: auto;
@@ -417,7 +421,8 @@
   gap: 4px;
 }
 
-/* Button 会用 span 包裹 children；将包裹层也设为 flex，避免 SVG 按文本基线偏移。 */
+/* Button wraps children in a span; make that wrapper flex too so the SVG isn't offset to the
+   text baseline. */
 .actions :global(.btn > span) {
   display: inline-flex;
   align-items: center;
@@ -431,7 +436,8 @@
   flex-shrink: 0;
 }
 
-/* 图标按钮：方形紧凑的安静描边风——危险动作静默存在，hover 才显色块 */
+/* Icon buttons: compact square, quiet outline style. Destructive actions stay muted and only
+   show a color block on hover */
 .card .actions .iconButton {
   display: inline-flex;
   align-items: center;
@@ -463,7 +469,7 @@
   }
 }
 
-/* 按压反馈：所有可点元素 scale 0.96（reduced-motion 下豁免） */
+/* Press feedback: all clickable elements scale 0.96 (exempt under reduced-motion) */
 .actions :global(.btn) {
   transition:
     transform var(--dur-press, 160ms) var(--ease-out-strong, ease-out),
@@ -506,7 +512,7 @@
   }
 }
 
-/* ---------- 降级 ---------- */
+/* ---------- Graceful degradation ---------- */
 
 @media (prefers-reduced-motion: reduce) {
   .card {

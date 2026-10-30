@@ -1,25 +1,25 @@
 import type { RecentRequestBucket } from '@/utils/recentRequests';
 
-/** 每个统计桶覆盖的分钟数（后端固定为 10 分钟 × 20 桶） */
+/** Minutes covered by each stats bucket (fixed by the backend at 10 minutes × 20 buckets) */
 export const TRAFFIC_BUCKET_MINUTES = 10;
 
-/** 聚合后的整体流量窗口 */
+/** Aggregated overall traffic window */
 export interface TrafficWindow {
   buckets: RecentRequestBucket[];
   totalSuccess: number;
   totalFailure: number;
   total: number;
-  /** 0–100；窗口内无请求时为 null */
+  /** 0–100; null when there are no requests in the window */
   successRate: number | null;
-  /** 单桶最大请求数，用于图表纵轴 */
+  /** Max requests in a single bucket, used for the chart's y-axis */
   peakTotal: number;
-  /** 峰值所在桶下标，-1 表示无数据 */
+  /** Index of the peak bucket; -1 means no data */
   peakIndex: number;
-  /** 窗口跨度（分钟） */
+  /** Window span (minutes) */
   windowMinutes: number;
 }
 
-/** 单个供应商的流量切片 */
+/** Traffic slice for a single provider */
 export interface ProviderTraffic {
   id: string;
   credentials: number;
@@ -30,17 +30,17 @@ export interface ProviderTraffic {
   buckets: RecentRequestBucket[];
 }
 
-/** 凭证健康度 */
+/** Credential health */
 export interface CredentialHealth {
   total: number;
   active: number;
   disabled: number;
   unavailable: number;
-  /** 按供应商类型分组的凭证数，按数量降序 */
+  /** Credential counts grouped by provider type, sorted by count descending */
   byType: Array<{ type: string; count: number }>;
 }
 
-/** 顶部计数卡片的原始数值 */
+/** Raw values for the top count cards */
 export interface DashboardCounts {
   managementKeys: number | null;
   providerKeys: number | null;

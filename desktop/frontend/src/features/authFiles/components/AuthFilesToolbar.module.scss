@@ -1,6 +1,6 @@
 @use '../../../styles/mixins' as *;
 
-/* 工作区工具栏：高频操作区，无入场动画，反馈即时 */
+/* Workspace toolbar: high-frequency controls, no entrance animation, instant feedback */
 
 .toolbar {
   display: flex;
@@ -9,14 +9,14 @@
   gap: 8px 10px;
 }
 
-/* ---------- 搜索 ---------- */
+/* ---------- Search ---------- */
 
 .search {
   flex: 1 1 220px;
   min-width: 180px;
   max-width: 340px;
 
-  /* Input 组件外层是 .form-group，去掉其默认下边距 */
+  /* The Input component's outer wrapper is .form-group; remove its default bottom margin */
   :global(.form-group) {
     margin-bottom: 0;
   }
@@ -32,7 +32,7 @@
   color: var(--text-quaternary);
 }
 
-/* ---------- 状态分段控件 ---------- */
+/* ---------- Status segmented control ---------- */
 
 .segmented {
   display: inline-flex;
@@ -98,13 +98,13 @@
     0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
-/* ---------- 排序 ---------- */
+/* ---------- Sort ---------- */
 
 .sort {
   min-width: 120px;
 }
 
-/* ---------- 显示设置 ---------- */
+/* ---------- Display settings ---------- */
 
 .display {
   position: relative;
@@ -206,7 +206,7 @@
   }
 }
 
-/* ---------- 删除筛选结果（工具栏右端的 ghost danger） ---------- */
+/* ---------- Delete filtered results (ghost danger at the toolbar's right end) ---------- */
 
 .deleteAction {
   margin-left: auto;
@@ -250,7 +250,7 @@
   }
 }
 
-/* ---------- 响应式 ---------- */
+/* ---------- Responsive ---------- */
 
 @media (max-width: 900px) {
   .search {

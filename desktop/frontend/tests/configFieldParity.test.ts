@@ -1,8 +1,8 @@
-// 配置项零遗漏守卫：三方对账
-//   ① 搜索索引（searchIndex.ts，唯一的机器可读字段清单）
-//   ② 值键映射（constants.ts FIELD_VALUE_KEYS ↔ VisualConfigValues 叶值键）
-//   ③ 分区 JSX 里实际渲染的 <FieldAnchor fieldId="…"> 锚点（源码扫描）
-// 任何一方增删字段而漏改其余两方，本套件即红。
+// Guard against missing config items: three-way reconciliation of
+//   ① the search index (searchIndex.ts, the only machine-readable field list)
+//   ② the value key map (constants.ts FIELD_VALUE_KEYS ↔ VisualConfigValues leaf value keys)
+//   ③ the <FieldAnchor fieldId="…"> anchors actually rendered in section JSX (source scan)
+// If any side adds or removes a field without updating the other two, this suite fails.
 
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
@@ -25,7 +25,10 @@ import { DEFAULT_VISUAL_VALUES } from '@/types/visualConfig';
 const INDEX_FIELD_IDS = CONFIG_FIELD_SEARCH_INDEX.map((entry) => entry.fieldId);
 const INDEX_FIELD_ID_SET = new Set(INDEX_FIELD_IDS);
 
-/** VisualConfigValues 的叶值键：顶层标量 + streaming 展开为点号叶（= dirtyFields 的键域）。 */
+/**
+ * Leaf value keys of VisualConfigValues: top-level scalars + streaming expanded into dotted
+ * leaves (= the key domain of dirtyFields).
+ */
 const LEAF_VALUE_KEYS = new Set(
   Object.keys(DEFAULT_VISUAL_VALUES).flatMap((key) =>
     key === 'streaming'
@@ -79,7 +82,8 @@ describe('value-key coverage (index ↔ VisualConfigValues)', () => {
 
   test('the union of mapped value keys is exactly the VisualConfigValues leaf keys', () => {
     const mapped = new Set(Object.values(FIELD_VALUE_KEYS).flat());
-    // 双向：漏映射的表单键 / 指向不存在键的映射，都在这里现形
+    // Both directions: form keys missing a mapping / mappings pointing to nonexistent keys both
+    // show up here
     expect(sorted(mapped)).toEqual(sorted(LEAF_VALUE_KEYS));
   });
 });
@@ -106,7 +110,8 @@ describe('JSX anchor parity (source scan)', () => {
     const missingFromJsx = sorted(INDEX_FIELD_IDS).filter((id) => !renderedFieldIds.has(id));
     const unknownInJsx = sorted(renderedFieldIds).filter((id) => !INDEX_FIELD_ID_SET.has(id));
 
-    // 分区 JSX 静默丢字段 → missingFromJsx 非空；新增字段没进索引 → unknownInJsx 非空
+    // Section JSX silently drops a field → missingFromJsx is non-empty; a new field missing from
+    // the index → unknownInJsx is non-empty
     expect(missingFromJsx).toEqual([]);
     expect(unknownInJsx).toEqual([]);
   });
@@ -120,7 +125,7 @@ describe('registry consistency', () => {
   test('every validation field path lives in exactly one section bucket', () => {
     const allPaths = Object.keys(getVisualConfigValidationErrors(DEFAULT_VISUAL_VALUES)).sort();
     const bucketed = Object.values(SECTION_VALIDATION_FIELDS).flat();
-    expect(new Set(bucketed).size).toBe(bucketed.length); // 不允许一个字段进两个桶
+    expect(new Set(bucketed).size).toBe(bucketed.length); // A field may not land in two buckets
     expect(sorted(bucketed)).toEqual(allPaths);
   });
 

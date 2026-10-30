@@ -1,13 +1,14 @@
 /**
- * 手动回调输入 → 提交给后端的 redirect_url。
+ * Manual callback input → the redirect_url submitted to the backend.
  *
- * 只有 xAI 需要拼装：Grok 有时只在页面显示 code，此时用本次登录的 state
- * 拼回固定的回环地址。其余提供商原样提交（Devin 另有严格校验，见 devinOAuth.ts）。
+ * Only xAI needs assembly: Grok sometimes shows only the code on the page, in which case the
+ * fixed loopback address is rebuilt with this sign-in's state. Other providers are submitted
+ * as-is (Devin has its own strict validation; see devinOAuth.ts).
  */
 
 export const XAI_CALLBACK_URL = 'http://127.0.0.1:56121/callback';
 
-// 只认 http(s)：`code: xyz` 这类页面展示文本也能被 URL 解析（`code:` 是合法 scheme）。
+// Accept only http(s): page text like `code: xyz` also parses as a URL (`code:` is a valid scheme).
 const isAbsoluteHttpUrl = (value: string): boolean => {
   try {
     return ['http:', 'https:'].includes(new URL(value).protocol);

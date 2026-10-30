@@ -1,5 +1,5 @@
 /**
- * 通用类型定义
+ * Common type definitions
  */
 
 export type Theme = 'light' | 'white' | 'dark' | 'auto';

@@ -1,6 +1,7 @@
 @use '../../../styles/mixins' as *;
 
-/* 悬浮批量操作条：底部居中的玻璃工具栏（--content-center-x 对齐内容列中心） */
+/* Floating batch action bar: bottom-centered glass toolbar (--content-center-x aligns it to
+   the content column center) */
 
 .container {
   position: fixed;

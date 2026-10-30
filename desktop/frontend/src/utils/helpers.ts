@@ -1,23 +1,23 @@
 /**
- * 辅助工具函数
- * 从原项目 src/utils/array.js, dom.js, html.js 迁移
+ * Helper utility functions
+ * Migrated from the original project's src/utils/array.js, dom.js, html.js
  */
 
 /**
- * 生成唯一 ID
+ * Generate a unique ID
  */
 export function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
 /**
- * 判断是否为普通对象（排除 null 与数组）
+ * Check whether a value is a plain object (excluding null and arrays)
  */
 export const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
 
 /**
- * 从 unknown 错误中提取可读消息
+ * Extract a readable message from an unknown error
  */
 export const getErrorMessage = (error: unknown, fallback = ''): string => {
   if (error instanceof Error) return error.message || fallback;

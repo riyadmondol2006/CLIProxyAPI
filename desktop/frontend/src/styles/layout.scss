@@ -19,8 +19,9 @@
   min-height: 100vh;
   height: 100vh;
   overflow: hidden;
-  // 与 .page-transition__layer 的不透明填充保持同色：外壳一旦用渐变，
-  // main-content 的 padding 圈就会和内容层拼出一道 4~7 级色差的硬边，看着像每页都有边框。
+  // Keep the same color as the opaque fill of .page-transition__layer: once the shell uses a
+  // gradient, the padding ring of main-content and the content layer form a hard edge with a
+  // 4~7 level color difference, which looks like every page has a border.
   background: var(--bg-secondary);
   color: var(--text-primary);
 

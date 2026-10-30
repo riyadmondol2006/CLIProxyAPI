@@ -1,10 +1,10 @@
 /**
- * SCSS 混入
+ * SCSS mixins
  */
 
 @use './variables.scss' as *;
 
-// 响应式断点
+// Responsive breakpoints
 @mixin mobile {
   @media (max-width: #{$breakpoint-mobile}) {
     @content;
@@ -17,14 +17,14 @@
   }
 }
 
-// 文本截断
+// Text truncation
 @mixin text-ellipsis {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-// 多行文本截断
+// Multi-line text truncation
 @mixin text-ellipsis-multiline($lines: 2) {
   display: -webkit-box;
   -webkit-line-clamp: $lines;
@@ -32,7 +32,7 @@
   overflow: hidden;
 }
 
-// 按钮重置
+// Button reset
 @mixin button-reset {
   border: none;
   background: none;

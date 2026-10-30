@@ -1,6 +1,6 @@
 @use '../../../styles/mixins' as *;
 
-/* 全局字段搜索 combobox：入场 160ms 淡入上浮，关闭瞬时 */
+/* Global field search combobox: 160ms fade-and-rise entrance, instant close */
 
 .searchBox {
   position: relative;

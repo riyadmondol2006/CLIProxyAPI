@@ -19,11 +19,14 @@ export type { ExcludedModelCandidate };
 
 export type ExcludedModelsCatalogState = 'ready' | 'loading' | 'unavailable' | 'error';
 
-/** 派生 chip 的上限——超过这个数就只报总数，否则 chip 行会淹没整个字段。 */
+/** Cap on derived chips: beyond this only the total is shown, or the chip row swamps the field. */
 const DERIVED_CHIP_LIMIT = 8;
 
 export interface ExcludedModelsPickerProps {
-  /** 规范的规则列表。调用方内部存文本/Set 都行，在边界上适配一次即可。 */
+  /**
+   * Canonical rule list. Callers may store text or a Set internally; just adapt once at the
+   * boundary.
+   */
   value: readonly string[];
   onChange: (next: string[]) => void;
 
@@ -31,14 +34,20 @@ export interface ExcludedModelsPickerProps {
   catalogState?: ExcludedModelsCatalogState;
   onRetryCatalog?: () => void;
 
-  /** 真实禁用（未连接 / 保存中）。**绝不要**因为目录为空就传 true。 */
+  /**
+   * Truly disabled (not connected / saving). **Never** pass true just because the catalog is
+   * empty.
+   */
   disabled?: boolean;
 
-  /** picker 不得读写、也不许用户输入的规则。provider 表单传 `['*']`。 */
+  /**
+   * Rules the picker must not read or write, and that the user may not enter. Provider forms
+   * pass `['*']`.
+   */
   reservedRules?: readonly string[];
   reservedRuleMessage?: string;
 
-  /** 关掉通配符规则编辑器。 */
+  /** Turn off the wildcard rule editor. */
   showRuleEditor?: boolean;
 
   labelledBy?: string;
@@ -72,8 +81,10 @@ export function ExcludedModelsPicker({
   );
 
   /**
-   * 保留规则在**入口**就被剥掉，因此 picker 内部从不见到它，也就不可能把它写回去。
-   * provider 表单的 `'*'`（= 已停用）由 disabled 开关独占，排除面无权触碰。
+   * Reserved rules are stripped at the **entry**, so the picker never sees them internally and
+   * therefore can never write them back.
+   * The provider form's `'*'` (= disabled) is owned exclusively by the disabled toggle; the
+   * exclusion surface has no right to touch it.
    */
   const rules = useMemo(
     () =>
@@ -90,7 +101,8 @@ export function ExcludedModelsPicker({
 
   const commit = useCallback(
     (next: readonly string[]) => {
-      // 出口再滤一次保留规则：纵深防御，规则编辑器里手打的 `*` 到不了调用方。
+      // Filter reserved rules again on the way out (defense in depth): a `*` typed by hand
+      // in the rule editor never reaches the caller.
       onChange(next.filter((rule) => !reservedKeys.has(rule.trim().toLowerCase())));
     },
     [onChange, reservedKeys]
@@ -98,7 +110,7 @@ export function ExcludedModelsPicker({
 
   const hasCatalog = catalogState === 'ready' && candidates.length > 0;
 
-  /** 通配符派生出的模型（排除掉已显式勾选的，那些走实线 chip）。 */
+  /** Models derived from wildcards (excluding explicitly checked ones, which get solid chips). */
   const derivedModels = useMemo(() => {
     if (!hasCatalog) return [];
     const out: Array<{ id: string; rule: string }> = [];
@@ -119,7 +131,10 @@ export function ExcludedModelsPicker({
 
   const handleSelectAll = () => commit(normalizeExcludedRules([...rules, ...candidateIds]));
 
-  /** 只清精确勾选，通配符规则留给它自己的编辑器——否则一次点击会抹掉用户手写的规则。 */
+  /**
+   * Clear only exact selections and leave wildcard rules to their own editor; otherwise one
+   * click would wipe out rules the user wrote by hand.
+   */
   const handleClear = () => commit(customRules);
 
   const handleRuleEditorChange = (text: string) => {
@@ -144,7 +159,8 @@ export function ExcludedModelsPicker({
         available: stats.available,
       });
     }
-    // 无目录：只能诚实地报规则条数，不能假装知道「还剩几个可用」。
+    // No catalog: we can only honestly report the rule count, not pretend to know
+    // "how many are still available".
     if (rules.length === 0) return t('excluded_models.trigger_empty');
     return t('excluded_models.trigger_summary_rules', { n: rules.length });
   };

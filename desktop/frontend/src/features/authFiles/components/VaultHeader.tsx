@@ -20,8 +20,9 @@ export type VaultHeaderProps = {
 };
 
 /**
- * 凭证库头部：eyebrow（▍游标前缀）+ 标题 + mono 遥测 meta 行 + 动作区。
- * meta 行同时承载 VaultPulse 的文字等价信息（谱条本身 aria-hidden）。
+ * Vault header: eyebrow (▍ cursor prefix) + title + mono telemetry meta row + actions.
+ * The meta row also carries the text equivalent of VaultPulse (the spectrum itself is
+ * aria-hidden).
  */
 export function VaultHeader(props: VaultHeaderProps) {
   const {

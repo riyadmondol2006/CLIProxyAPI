@@ -1,5 +1,5 @@
 /**
- * AI 提供商 Workbench 视图模型(归一化各 brand 的异构 config)
+ * AI provider Workbench view model (normalizes each brand's heterogeneous config)
  */
 
 import type { GeminiKeyConfig, OpenAIProviderConfig, ProviderKeyConfig } from '@/types';
@@ -76,39 +76,39 @@ export interface ProviderResourceFlags {
 }
 
 export interface ProviderResource {
-  /** 稳定 id,用作 React key 与选中态判断 */
+  /** Stable id, used as the React key and for selection checks */
   id: string;
   brand: ProviderBrand;
-  /** 在原数组中的下标 */
+  /** Index in the original array */
   originalIndex: number;
-  /** 表格 key 列显示名(OpenAI=name,其余=null) */
+  /** Display name for the table's key column (OpenAI = name, others = null) */
   name: string | null;
-  /** 备用展示文字(API 密钥脱敏或 fallback) */
+  /** Fallback display text (masked API key or fallback) */
   identifier: string;
-  /** apiKey 脱敏预览,展示用 */
+  /** Masked apiKey preview, for display */
   apiKeyPreview: string | null;
-  /** 用于 selector 的真实 apiKey;OpenAI 因为多密钥这里返回 null */
+  /** Real apiKey used for the selector; null for OpenAI because it has multiple keys */
   apiKey: string | null;
   authIndex: string | null;
   baseUrl: string | null;
   proxyUrl: string | null;
   prefix: string | null;
   modelCount: number;
-  /** 去重后的模型名, 供筛选/搜索用 */
+  /** Deduplicated model names, for filtering/search */
   models: string[];
-  /** 排序用优先级,未配置时为 0 */
+  /** Priority used for sorting; 0 when not configured */
   priority: number;
   headerCount: number;
   excludedModelCount: number;
-  /** 仅 OpenAI 有意义,其它 brand 该字段不展示但保留 */
+  /** Only meaningful for OpenAI; other brands don't display this field but keep it */
   apiKeyEntryCount: number;
-  /** 是否被禁用(各 brand 判定规则不同) */
+  /** Whether it's disabled (each brand has its own rules for this) */
   disabled: boolean;
-  /** 额外能力旗标 */
+  /** Extra capability flags */
   flags: ProviderResourceFlags;
-  /** 删除/更新使用的 selector */
+  /** Selector used for delete/update */
   selector: ProviderResourceSelector;
-  /** 原始 raw config,Sheet 表单初始化用 */
+  /** Original raw config, used to initialize the Sheet form */
   raw: unknown;
 }
 
@@ -130,8 +130,9 @@ export interface SponsorProviderRaw {
 }
 
 /**
- * 通用 Sheet 表单值。
- * Gemini/Codex/Claude/Vertex/OpenAI 共用基础字段,各自启用 advanced 区。
+ * Shared Sheet form values.
+ * Gemini/Codex/Claude/Vertex/OpenAI share the base fields, and each enables its own advanced
+ * section.
  */
 export interface ModelEntryInput extends ModelOptionsInput {
   /** Only used by the OAuth alias editor. */
@@ -181,9 +182,9 @@ export interface CloakInput {
 }
 
 export interface ProviderEntryFormInput extends ProviderBehaviorOptions {
-  /** OpenAI 创建时只在 apiKeyEntries 中传 */
+  /** For OpenAI, only passed via apiKeyEntries on create */
   apiKey: string;
-  /** OpenAI 必填,其余 brand 不展示 */
+  /** Required for OpenAI; not shown for other brands */
   name: string;
   baseUrl: string;
   proxyUrl: string;
@@ -194,14 +195,14 @@ export interface ProviderEntryFormInput extends ProviderBehaviorOptions {
   priority?: number;
   weight?: number;
 
-  /** 高级折叠区 */
+  /** Advanced collapsible section */
   models: ModelEntryInput[];
   headers: Array<{ key: string; value: string }>;
   excludedModelsText: string;
 
-  /** Codex 专属 */
+  /** Codex only */
   websockets?: boolean;
-  /** Claude 专属 */
+  /** Claude only */
   cloak?: CloakInput;
   fingerprintProfile?: string;
   /** Temporary selection for connectivity tests only; never persisted in backend config. */

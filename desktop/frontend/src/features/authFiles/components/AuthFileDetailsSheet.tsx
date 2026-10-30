@@ -23,7 +23,10 @@ import { AuthFilePolicyFields } from './AuthFilePolicyFields';
 import { credentialPolicyError, readCredentialPolicy } from '../credentialPolicy';
 import styles from './AuthFileDetailsSheet.module.scss';
 
-/** API 边界归一化补写的派生字段——INFO 视图里只展示后端原始形状，避免重复噪音。 */
+/**
+ * Derived fields backfilled by API-boundary normalization — the INFO view shows only the backend's
+ * raw shape, to avoid duplicate noise.
+ */
 const DERIVED_INFO_KEYS = [
   'successCount',
   'failureCount',
@@ -32,7 +35,8 @@ const DERIVED_INFO_KEYS = [
   'authIndex',
   'statusMessage',
   'modified',
-  // 'email' 不在此列：后端原始键名与 camelCase 同形，删掉会藏起真实数据。
+  // 'email' is not in this list: the backend's raw key name is identical to its camelCase form,
+  // so removing it would hide real data.
   'projectId',
 ];
 
@@ -48,8 +52,9 @@ export type AuthFileDetailsSheetProps = {
 };
 
 /**
- * 凭证详情/编辑抽屉：替代旧的居中 Modal，与提供商工作台的 Sheet 模式一致。
- * 脏状态下关闭（Escape/遮罩/×/取消）先走确认对话框。
+ * Credential details/edit drawer: replaces the old centered Modal, consistent with the Sheet
+ * pattern of the provider workbench. Closing while dirty (Escape/backdrop/×/Cancel) goes through
+ * a confirmation dialog first.
  */
 export function AuthFileDetailsSheet(props: AuthFileDetailsSheetProps) {
   const { t } = useTranslation();
@@ -114,7 +119,7 @@ export function AuthFileDetailsSheet(props: AuthFileDetailsSheetProps) {
         return JSON.stringify(record, null, 2);
       }
     } catch {
-      /* 非 JSON 原样展示 */
+      /* Non-JSON is shown as-is */
     }
     return fileInfoText;
   }, [fileInfoText]);

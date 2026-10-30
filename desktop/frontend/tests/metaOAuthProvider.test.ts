@@ -85,7 +85,7 @@ describe('Muse (Meta) provider and device OAuth', () => {
       'userCode: res.user_code'
     );
 
-    // 设备码步骤真实渲染：码本身 + 复制按钮，且没有回调步骤
+    // The device code step really renders: the code itself + a copy button, and no callback step
     const markup = renderToStaticMarkup(
       createElement(
         I18nextProvider,

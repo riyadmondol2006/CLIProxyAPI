@@ -1,6 +1,7 @@
 @use '../../../styles/mixins' as *;
 
-/* 凭证库头部：与仪表盘同语汇（▍eyebrow / 紧排标题 / mono 遥测 / 墨色药丸） */
+/* Vault header: same vocabulary as the dashboard
+   (▍eyebrow / tight title / mono telemetry / ink pill) */
 
 .header {
   display: flex;
@@ -39,7 +40,8 @@
   letter-spacing: 0.02em;
   color: var(--text-secondary);
 
-  /* 终端游标承接 eyebrow 退场后的结构记号，与下方谱条的绿色竖条同语汇 */
+  /* A terminal cursor takes over as the structural mark once the eyebrow is gone,
+     echoing the green vertical bar of the spectrum strip below */
   &::before {
     content: '▍';
     color: var(--viz-success);
@@ -71,7 +73,7 @@
   color: var(--viz-failure);
 }
 
-/* ---------- 动作区 ---------- */
+/* ---------- Actions ---------- */
 
 .actions {
   display: flex;
@@ -80,7 +82,7 @@
   flex-shrink: 0;
 }
 
-/* 墨色药丸主按钮（深色主题下自动反相：text-primary on bg-secondary） */
+/* Ink pill primary button (auto-inverted in the dark theme: text-primary on bg-secondary) */
 .primaryAction {
   display: inline-flex;
   align-items: center;
@@ -122,7 +124,7 @@
   }
 }
 
-/* 次按钮：安静的文字链接 */
+/* Secondary button: a quiet text link */
 .ghostAction {
   display: inline-flex;
   align-items: center;

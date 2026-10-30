@@ -71,8 +71,8 @@
   border-top: 1px solid var(--border-color);
 }
 
-/* 展开时内容 160ms 淡入。只做透明度、不做高度动画 ——
-   与程序化 details.open = true（搜索跳转强制展开）不会互相打架。 */
+/* On expand, content fades in over 160ms. Opacity only, no height animation,
+   so it never fights programmatic details.open = true (forced expand on search jump). */
 .root[open] > .content,
 .root[open] > .contentFlush {
   animation: collapsible-content-in var(--dur-press, 160ms) var(--ease-out-strong, ease-out);

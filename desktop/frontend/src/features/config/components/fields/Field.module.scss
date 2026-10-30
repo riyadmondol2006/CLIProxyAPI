@@ -1,9 +1,10 @@
 @use '../../../../styles/mixins' as *;
 
-/* 字段原语：设置行（开关 / 输入 / 下拉 / 区块编辑器共用一副骨架）+ 区块编辑器的 scoped 覆盖。
-   交互反馈一律引用全局动效 tokens（--dur-* / --ease-out-strong）。 */
+/* Field primitives: setting rows (toggle / input / select / block editor share one skeleton) +
+   scoped overrides for block editors. Interaction feedback always uses the global motion tokens
+   (--dur-* / --ease-out-strong). */
 
-/* ---------- 表单控件宿主（区块编辑器内 :global 控件的统一几何） ---------- */
+/* ---------- Form control host (shared geometry for block editor :global controls) ---------- */
 
 .fieldsRoot {
   :global(.form-group) {
@@ -18,7 +19,8 @@
     letter-spacing: 0.02em;
   }
 
-  /* 设置行与区块编辑器里的输入框同一副几何：36px 高、8px 圆角、纸色底。 */
+  /* Inputs in setting rows and block editors share one geometry: 36px tall, 8px radius, paper
+     background. */
   :global(.input) {
     min-height: 36px;
     padding: 7px 11px;
@@ -63,10 +65,11 @@
   }
 }
 
-/* ---------- 设置组：组标题 + 圆角列表容器 ---------- */
+/* ---------- Setting group: group title + rounded list container ---------- */
 
-/* 组本身是容器查询的宿主：列数与行内堆叠都看「这一组有多宽」，
-   而不是视口——侧栏收起、折叠组缩进都会自然生效。 */
+/* The group itself hosts the container query: column count and in-row stacking depend on how
+   wide this group is, not the viewport, so a collapsed sidebar or nested-group indent just
+   works. */
 .group {
   container: setting-list / inline-size;
   display: flex;
@@ -105,7 +108,7 @@
   border: 1px solid var(--border-color);
   border-radius: 12px;
   background: color-mix(in srgb, var(--bg-secondary) 55%, transparent);
-  /* 裁掉分隔线越界的部分 + 圆角；下拉菜单走 portal，不受影响。 */
+  /* Clip divider overflow + round corners; dropdown menus render in a portal and are unaffected. */
   overflow: hidden;
 }
 
@@ -115,7 +118,7 @@
   }
 }
 
-/* ---------- 设置行 ---------- */
+/* ---------- Setting row ---------- */
 
 .row {
   --setting-control: auto;
@@ -128,14 +131,16 @@
   min-height: 64px;
   padding: 14px 18px;
   box-sizing: border-box;
-  /* 发丝分隔线：向右、向下各投 1px，越出列表的部分被 overflow 裁掉，只剩行间与列间的线。 */
+  /* Hairline dividers: cast 1px to the right and below; the part outside the list is clipped by
+     overflow, leaving only the lines between rows and columns. */
   box-shadow:
     1px 0 0 var(--border-color),
     0 1px 0 var(--border-color);
   scroll-margin-top: calc(var(--header-height, 64px) + 16px);
 }
 
-/* 控件槽宽度分三档；百分比兜底保证标题列永远有一半以上的位置。 */
+/* Control slot width has three sizes; a percentage fallback guarantees the title column always
+   keeps more than half the space. */
 .size_sm {
   --setting-control: min(136px, 42%);
 }
@@ -152,14 +157,14 @@
   grid-column: 1 / -1;
 }
 
-/* 区块编辑器行：标题区在上，编辑器独占下方整行。 */
+/* Block editor row: title area on top, editor takes the full row below. */
 .rowBlock {
   grid-template-columns: minmax(0, 1fr);
   align-items: start;
   gap: 12px;
 }
 
-/* 自带标题区的区块单元格（API 密钥等）。 */
+/* Block cell with its own title area (API keys, etc.). */
 .rowCell {
   display: block;
   padding: 16px 18px;
@@ -180,7 +185,7 @@
   overflow-wrap: anywhere;
 }
 
-/* 开关行的标题同样是 <label htmlFor>：点标题即切换。 */
+/* A toggle row's title is also a <label htmlFor>: clicking the title toggles it. */
 .rowToggle .rowLabel {
   cursor: pointer;
 }
@@ -216,7 +221,7 @@
   display: block;
 }
 
-/* 下拉触发器对齐输入框几何（Select 自带 40px + 投影，这里收成同一套）。 */
+/* Select trigger matches input geometry (Select ships with 40px + shadow; unify it here). */
 .selectControl > button[aria-haspopup='listbox'] {
   height: 36px;
   padding: 0 11px;
@@ -242,7 +247,7 @@
   }
 }
 
-/* 输入框内右侧的状态标记（keepalive「已禁用」）。 */
+/* Status marker on the right inside the input (keepalive "disabled"). */
 .rowControl > :global(.input).inputWithAdornment {
   padding-right: 64px;
 }
@@ -266,7 +271,8 @@
   pointer-events: none;
 }
 
-/* 窄组（手机、深层折叠）：输入行改为上下堆叠，开关始终留在右侧。 */
+/* Narrow groups (phones, deep nesting): input rows stack vertically; toggles always stay on
+   the right. */
 @container setting-list (max-width: 520px) {
   .row {
     padding: 12px 14px;
@@ -282,9 +288,10 @@
   }
 }
 
-/* ---------- 代理 URL 的赞助跳转（作为行说明渲染） ---------- */
+/* ---------- Sponsor link for the proxy URL (rendered as the row description) ---------- */
 
-/* 与正文融为一体的高亮链接：同字号，复用全站金色（amber）badge 配方，hover 底色加深。 */
+/* Highlighted link that blends into body text: same font size, reuses the site-wide gold
+   (amber) badge recipe, background darkens on hover. */
 .fieldSponsorLink {
   display: inline-flex;
   align-items: center;
@@ -316,7 +323,7 @@
   height: 13px;
 }
 
-/* ---------- 搜索锚点与脉冲高亮 ---------- */
+/* ---------- Search anchors and pulse highlight ---------- */
 
 .fieldAnchor {
   display: block;
@@ -325,8 +332,9 @@
   scroll-margin-top: calc(var(--header-height, 64px) + 16px);
 }
 
-/* 内描边 + 淡底色：行位于 overflow:hidden 的列表里，外扩的 box-shadow 会被裁掉，
-   且行的分隔线本身就是 box-shadow，所以脉冲改走 outline（向内偏移）。 */
+/* Inner outline + faint background: rows live in an overflow:hidden list, so an outward
+   box-shadow would be clipped, and the row dividers are themselves box-shadows, so the pulse
+   uses outline (offset inward) instead. */
 .fieldHighlightActive {
   animation: config-field-highlight 1.8s var(--ease-out-strong, ease-out);
 }
@@ -349,7 +357,7 @@
   }
 }
 
-/* ---------- 区块编辑器内部布局原语 ---------- */
+/* ---------- Block editor internal layout primitives ---------- */
 
 .fieldGrid {
   display: grid;
@@ -387,7 +395,7 @@
   line-height: 1.55;
 }
 
-/* ---------- 无障碍 ---------- */
+/* ---------- Accessibility ---------- */
 
 @media (prefers-reduced-motion: reduce) {
   .fieldsRoot :global(.input),

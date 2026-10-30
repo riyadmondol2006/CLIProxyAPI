@@ -46,7 +46,10 @@ import { SectionPayload } from './components/sections/SectionPayload';
 import { SectionStreaming } from './components/sections/SectionStreaming';
 import styles from './ConfigPage.module.scss';
 
-/** 首载入场预算：卡片延迟 0.28s + 0.45s 动画，之后关闭 animateIn，切 tab 不再重播。 */
+/**
+ * First-load entrance budget: 0.28s card delay + 0.45s animation; after that animateIn is turned
+ * off so switching tabs doesn't replay it.
+ */
 const ENTRANCE_BUDGET_MS = 800;
 
 export function ConfigPage() {
@@ -87,14 +90,15 @@ export function ConfigPage() {
       readSavedSection(localStorage.getItem(CONFIG_SECTION_STORAGE_KEY))
   );
   const handledRequestedFieldRef = useRef<string | null>(null);
-  // 首载入场：挂载后一个预算周期内为 true；此后切 tab 新挂载的卡片不再播入场。
+  // First-load entrance: true for one budget period after mount; cards mounted later by tab
+  // switches don't play the entrance.
   const [animateCards, setAnimateCards] = useState(true);
   useEffect(() => {
     const timer = window.setTimeout(() => setAnimateCards(false), ENTRANCE_BUDGET_MS);
     return () => window.clearTimeout(timer);
   }, []);
 
-  // 旧「简单/完整」双模式已退役，清掉遗留的持久化键。
+  // The old "simple/full" dual mode is retired; clear its leftover persisted key.
   useEffect(() => {
     localStorage.removeItem(LEGACY_EDITOR_MODE_STORAGE_KEY);
   }, []);
@@ -131,7 +135,7 @@ export function ConfigPage() {
     dialog: unsavedChangesDialog,
   });
 
-  // YAML 解析失败：切换到源码模式；修复后仍可重试进入可视化模式。
+  // YAML parse failed: switch to source mode; after fixing, entering visual mode can be retried.
   useEffect(() => {
     if (mode !== 'visual' || !visualParseError) return;
 
@@ -143,9 +147,11 @@ export function ConfigPage() {
     );
   }, [mode, showNotification, t, visualParseError]);
 
-  // 可视化 ↔ 源码切换的 dirty 交接：
-  // → 源码：物化可视化脏字段供查看，但不把同步动作记作用户源码编辑；
-  // → 可视化：源码草稿必须先保存或放弃；纯查看源码往返保留字段级 dirty。
+  // Dirty-state handoff when switching visual ↔ source:
+  // → source: materialize dirty visual fields for viewing, but don't record the sync as a user
+  //   source edit;
+  // → visual: a source draft must be saved or discarded first; a view-only round trip through
+  //   source keeps field-level dirty state.
   const handleModeChange = useCallback(
     (nextMode: ConfigEditorMode) => {
       if (nextMode === mode) return;
