@@ -376,6 +376,7 @@ describe('api usage page', () => {
     loading: false,
     error: null,
     updatedAt: Date.UTC(2026, 9, 30, 12, 0),
+    live: false,
     period: '30d',
     groupBy: 'account',
     onPeriodChange: () => undefined,
@@ -480,6 +481,16 @@ describe('api usage page', () => {
     expect(markup).toContain('<svg');
     expect(markup).toContain('Oct 30');
     expect(markup.match(/<g( class="[^"]*")?><path/g)?.length ?? 0).toBe(1);
+  });
+
+  test('shows the live badge only while the numbers refresh by themselves', async () => {
+    const still = await render('en', createElement(ApiUsageView, baseProps));
+    const live = await render('en', createElement(ApiUsageView, { ...baseProps, live: true }));
+    const badge = `>${live.i18n.t('common.live')}</span>`;
+    expect(still.markup).not.toContain(badge);
+    expect(live.markup).toContain(badge);
+    // The updated time stays next to it.
+    expect(live.markup).toContain(live.html(live.i18n.t('api_usage.updated', { time: '' })));
   });
 
   test('the routed page renders before any data arrives', async () => {

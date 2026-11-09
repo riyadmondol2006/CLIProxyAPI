@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { LiveBadge } from '@/components/ui/LiveBadge';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { DailyBarChart } from '@/features/claudeUsage/components/DailyBarChart';
@@ -11,6 +12,7 @@ import chartStyles from '@/features/claudeUsage/components/charts.module.scss';
 import { formatTokens } from '@/features/claudeUsage/logic';
 import { providerLabel } from '@/features/dashboard/utils';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
+import { useLiveRefresh } from '@/hooks/useLiveRefresh';
 import type { TokenUsage } from '@/services/api/tokenUsage';
 import { useAuthStore } from '@/stores';
 import { isDesktopApp } from '@/utils/desktop';
@@ -43,8 +45,10 @@ export function ApiUsagePage() {
 
 function ApiUsageScreen() {
   const connected = useAuthStore((state) => state.connectionStatus === 'connected');
-  const { usage, loading, error, updatedAt, reload } = useTokenUsage(connected);
+  const { usage, loading, error, updatedAt, reload, refresh } = useTokenUsage(connected);
   useHeaderRefresh(reload, connected);
+  const live = connected && usage !== null && error === null;
+  useLiveRefresh(refresh, live);
   const [period, setPeriod] = useState<UsagePeriod>(DEFAULT_PERIOD);
   const [groupBy, setGroupBy] = useState<GroupBy>(DEFAULT_GROUP_BY);
 
@@ -54,6 +58,7 @@ function ApiUsageScreen() {
       loading={loading}
       error={error}
       updatedAt={updatedAt}
+      live={live}
       period={period}
       groupBy={groupBy}
       onPeriodChange={setPeriod}
@@ -70,6 +75,8 @@ export interface ApiUsageViewProps {
   /** Null when the last load worked; otherwise the server's message, possibly empty. */
   error: string | null;
   updatedAt: number | null;
+  /** The numbers refresh by themselves. */
+  live: boolean;
   period: UsagePeriod;
   groupBy: GroupBy;
   onPeriodChange: (period: UsagePeriod) => void;
@@ -85,6 +92,7 @@ export function ApiUsageView({
   loading,
   error,
   updatedAt,
+  live,
   period,
   groupBy,
   onPeriodChange,
@@ -395,6 +403,7 @@ export function ApiUsageView({
                 {t('api_usage.updated', { time: updated })}
               </>
             ) : null}
+            {live ? <LiveBadge className={styles.metaLive} /> : null}
           </p>
           <p className={styles.lede}>{t('api_usage.lede')}</p>
         </div>

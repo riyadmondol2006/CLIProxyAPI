@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { LiveBadge } from '@/components/ui/LiveBadge';
 import { Modal } from '@/components/ui/Modal';
 import { Select } from '@/components/ui/Select';
 import { IconPlus, IconRefreshCw } from '@/components/ui/icons';
@@ -9,6 +10,7 @@ import { CopyButton } from '@/features/oauth/components/CopyButton';
 import { maskApiKey } from '@/features/setup/snippets';
 import { resolveProxyAddresses } from '@/features/setup/useProxyAddresses';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
+import { useLiveRefresh } from '@/hooks/useLiveRefresh';
 import { useAuthStore, useConfigStore, useNotificationStore } from '@/stores';
 import { apiKeysApi } from '@/services/api/apiKeys';
 import {
@@ -63,10 +65,13 @@ export function AccessKeysPage() {
   const [editor, setEditor] = useState<Editor | null>(null);
   const [created, setCreated] = useState<string | null>(null);
   const [restarting, setRestarting] = useState(false);
+  // Usage comes from both the full load and the live refresh; only the latest request may set it.
+  const usageRequest = useRef(0);
 
   const load = useCallback(async () => {
     if (!connected) return;
     setLoadError('');
+    const request = ++usageRequest.current;
     try {
       const [nextKeys, nextLimits, nextUsage, nextNetwork, nextHistory] = await Promise.all([
         apiKeysApi.list(),
@@ -77,9 +82,11 @@ export function AccessKeysPage() {
       ]);
       setKeys(nextKeys);
       setLimits(nextLimits);
-      setUsage(nextUsage);
       setNetwork(nextNetwork);
-      setHistory(nextHistory);
+      if (request === usageRequest.current) {
+        setUsage(nextUsage);
+        setHistory(nextHistory);
+      }
     } catch (error) {
       setLoadError(getErrorMessage(error, t('access_keys.load_failed')));
     } finally {
@@ -91,6 +98,20 @@ export function AccessKeysPage() {
     void load();
   }, [load]);
   useHeaderRefresh(load, connected);
+
+  /** Live view: refreshes only the usage numbers, quietly, keeping the last ones on failure. */
+  const refreshUsage = useCallback(async () => {
+    const request = ++usageRequest.current;
+    const [nextUsage, nextHistory] = await Promise.allSettled([
+      accessKeysApi.listUsage(),
+      accessKeysApi.usageHistory(),
+    ]);
+    if (request !== usageRequest.current) return;
+    if (nextUsage.status === 'fulfilled') setUsage(nextUsage.value);
+    if (nextHistory.status === 'fulfilled') setHistory(nextHistory.value);
+  }, []);
+  const live = connected && !loading && !loadError;
+  useLiveRefresh(refreshUsage, live);
 
   const rows = useMemo(() => buildRows(keys, limits, usage), [keys, limits, usage]);
   const keyHistory = useMemo(
@@ -321,6 +342,7 @@ export function AccessKeysPage() {
           <h1 className={styles.title}>{t('access_keys.title')}</h1>
           <p className={styles.meta}>
             {t('access_keys.meta', { count: rows.length, limited: limitedCount })}
+            {live ? <LiveBadge className={styles.metaLive} /> : null}
           </p>
           <p className={styles.lede}>{t('access_keys.lede')}</p>
         </div>

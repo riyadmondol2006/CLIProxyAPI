@@ -1,5 +1,6 @@
 {
   "common": {
+    "live": "Live",
     "login": "Login",
     "logout": "Logout",
     "back": "Back",

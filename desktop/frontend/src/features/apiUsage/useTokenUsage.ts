@@ -10,12 +10,15 @@ export interface TokenUsageState {
   /** When the shown data was loaded (ms since the epoch). */
   updatedAt: number | null;
   reload: () => Promise<void>;
+  /** Quiet reload for the live view: no loading state, and a failure keeps the last data. */
+  refresh: () => Promise<void>;
 }
 
 /**
- * Loads the last 90 days of token usage once; periods are sliced on the client. Only the latest
- * request may update the state, and nothing updates it after unmount. Mount it per connection
- * (keyed by the API base) so another connection never sees this one's data.
+ * Loads the last 90 days of token usage; periods are sliced on the client. `reload` shows progress
+ * and errors, `refresh` updates quietly. Only the latest request may update the state, and nothing
+ * updates it after unmount. Mount it per connection (keyed by the API base) so another connection
+ * never sees this one's data.
  */
 export function useTokenUsage(enabled: boolean): TokenUsageState {
   const [usage, setUsage] = useState<TokenUsage | null>(null);
@@ -42,6 +45,22 @@ export function useTokenUsage(enabled: boolean): TokenUsageState {
     }
   }, [enabled]);
 
+  const refresh = useCallback(async () => {
+    if (!enabled) return;
+    const id = ++requestId.current;
+    try {
+      const next = await tokenUsageApi.daily();
+      if (id !== requestId.current) return;
+      setUsage(next);
+      setUpdatedAt(Date.now());
+    } catch {
+      // Keep the last data and leave the error alone; the next tick tries again.
+    } finally {
+      // This request may have replaced a reload that was still loading.
+      if (id === requestId.current) setLoading(false);
+    }
+  }, [enabled]);
+
   useEffect(() => {
     void reload();
   }, [reload]);
@@ -54,5 +73,5 @@ export function useTokenUsage(enabled: boolean): TokenUsageState {
     };
   }, []);
 
-  return { usage, loading, error, updatedAt, reload };
+  return { usage, loading, error, updatedAt, reload, refresh };
 }

@@ -1,5 +1,6 @@
 {
   "common": {
+    "live": "Trực tiếp",
     "login": "Đăng nhập",
     "logout": "Đăng xuất",
     "back": "Quay lại",
