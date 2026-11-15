@@ -1,0 +1,28 @@
+# CLIProxyAPI server configuration (cliproxyapi-server package).
+# Created on first install; package upgrades never overwrite it.
+# The web control panel edits this file. Every option is described in
+# /usr/share/cliproxyapi/config.example.yaml.
+config-version: 8
+
+server:
+  # Listen on all interfaces. Use "127.0.0.1" to allow only this machine.
+  host: ""
+  port: 8317
+
+management:
+  # Allow the web control panel and management API from other machines.
+  allow-remote: true
+  # Management key. A plaintext value is replaced by its hash on startup;
+  # the plaintext stays in /etc/cliproxyapi/management-key (root only).
+  secret-key: "__MANAGEMENT_KEY__"
+  # The panel ships with the package, so never download another one.
+  disable-auto-update-panel: true
+
+# Client API keys. Create them in the web control panel. Until one exists,
+# require-api-key makes the proxy refuse every request instead of serving them openly.
+access:
+  require-api-key: true
+  api-keys: []
+
+oauth:
+  auth-dir: "/var/lib/cliproxyapi/auths"

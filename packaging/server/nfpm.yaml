@@ -38,7 +38,7 @@ contents:
     dst: /usr/share/cliproxyapi/management.html
     file_info: { mode: 0644 }
   # Template for /etc/cliproxyapi/config.yaml, which postinstall creates only if missing.
-  - src: packaging/server/config.yaml
+  - src: packaging/server/config.default.yaml
     dst: /usr/share/cliproxyapi/config.default.yaml
     file_info: { mode: 0644 }
   - src: config.example.yaml
