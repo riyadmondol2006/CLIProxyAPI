@@ -1,29 +1,41 @@
-# Git and GitHub folders
+# Keep the build context small: only the Go sources, desktop/frontend sources,
+# config.example.yaml and docs/ (bundled by the control panel's Docs page) are needed.
+
+# Git and CI
 .git
 .github
-
-# Docker and CI/CD related files
-docker-compose.yml
-.dockerignore
 .gitignore
 .goreleaser.yml
+
+# Docker files themselves
 Dockerfile
+.dockerignore
+docker-compose*.yml
 
-# Documentation and license
-docs
-README.md
-README_CN.md
-LICENSE
+# Build output and dependencies
+**/node_modules
+**/dist
+desktop/build/bin
+bin
+cli-proxy-api
+test-output
+*.deb
+*.rpm
 
-# Runtime data folders (should be mounted as volumes)
+# Runtime data
 auths
 logs
 conv
+temp
+static
 config.yaml
+.env
+**/*.log
 
-# Development/editor
-bin
+# Development and editor folders
+.playwright-mcp
 .vscode
+.idea
 .claude
 .codex
 .codex-worktrees
@@ -33,8 +45,8 @@ bin
 .agents
 .antigravitycli
 .opencode
-.idea
 .junie
+.pi
 .worktrees
 .bmad
 _bmad

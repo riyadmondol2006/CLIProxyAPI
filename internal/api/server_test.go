@@ -1839,6 +1839,35 @@ func TestHomeEnabledHidesManagementEndpointsAndControlPanel(t *testing.T) {
 	})
 }
 
+func TestRootRedirectsBrowsersToControlPanel(t *testing.T) {
+	server := newTestServer(t)
+	get := func(accept string) *httptest.ResponseRecorder {
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		if accept != "" {
+			req.Header.Set("Accept", accept)
+		}
+		rr := httptest.NewRecorder()
+		server.engine.ServeHTTP(rr, req)
+		return rr
+	}
+
+	browser := "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+	if rr := get(browser); rr.Code != http.StatusFound || rr.Header().Get("Location") != "/management.html" {
+		t.Fatalf("browser: status = %d location = %q, want 302 to /management.html", rr.Code, rr.Header().Get("Location"))
+	}
+	for _, accept := range []string{"", "application/json", "*/*"} {
+		rr := get(accept)
+		if rr.Code != http.StatusOK || !strings.Contains(rr.Body.String(), "CLI Proxy API Server") {
+			t.Fatalf("accept %q: status = %d body = %s, want the JSON greeting", accept, rr.Code, rr.Body.String())
+		}
+	}
+
+	server.cfg.RemoteManagement.DisableControlPanel = true
+	if rr := get(browser); rr.Code != http.StatusOK || !strings.Contains(rr.Body.String(), "CLI Proxy API Server") {
+		t.Fatalf("panel disabled: status = %d body = %s, want the JSON greeting", rr.Code, rr.Body.String())
+	}
+}
+
 func TestExampleAPIKeySafeModeShowsWarningAndKeepsManagement(t *testing.T) {
 	t.Setenv("MANAGEMENT_PASSWORD", "test-management-key")
 	staticDir := t.TempDir()

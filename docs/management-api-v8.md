@@ -37,6 +37,7 @@ the corresponding group value. Legacy field names are rejected by v8 writes.
 | Example path | Value or purpose |
 | --- | --- |
 | `/config/access/api-keys` | Client authentication keys, for example `["client-key"]`. |
+| `/config/access/require-api-key` | Boolean, default `false`. When `true` and `access.api-keys` is empty, proxy requests get HTTP 401 instead of being served without authentication. Management routes are unaffected. |
 | `/config/access/key-limits` | Per-client-key labels and token budgets, for example `[{"api-key": "client-key", "name": "Laptop", "token-limit": 500000, "period": "daily"}]`. `period` is `daily`, `weekly`, `monthly` (default), or `total`; `token-limit` `0` means unlimited; `disabled: true` rejects the key. |
 | `/config/api-keys` | All upstream provider groups. |
 | `/config/api-keys/codex` | Codex upstream groups. |

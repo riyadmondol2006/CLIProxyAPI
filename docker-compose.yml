@@ -1,29 +1,25 @@
+# CLIProxyAPI server. Start with:  docker compose up -d
+# The first start prints the management key:  docker compose logs cliproxyapi
+# Then open http://<this-host>:8317/ and log in with it.
 services:
-  cli-proxy-api:
-    image: ${CLI_PROXY_IMAGE:-eceasy/cli-proxy-api:latest}
-    pull_policy: always
+  cliproxyapi:
+    image: ghcr.io/riyadmondol2006/cliproxyapi:latest
+    # To build from this checkout instead: docker compose up -d --build
     build:
       context: .
-      dockerfile: Dockerfile
       args:
         VERSION: ${VERSION:-dev}
         COMMIT: ${COMMIT:-none}
         BUILD_DATE: ${BUILD_DATE:-unknown}
-    container_name: cli-proxy-api
-    # env_file:
-    #   - .env
+    container_name: cliproxyapi
+    # Optional: the management key for the first start (otherwise one is generated).
     environment:
-      DEPLOY: ${DEPLOY:-}
+      CPA_MANAGEMENT_KEY: ${CPA_MANAGEMENT_KEY:-}
     ports:
       - "8317:8317"
-      - "8085:8085"
-      - "1455:1455"
-      - "54545:54545"
-      - "51121:51121"
-      - "11451:11451"
     volumes:
-      - ${CLI_PROXY_CONFIG_PATH:-./config.yaml}:/CLIProxyAPI/config.yaml
-      - ${CLI_PROXY_AUTH_PATH:-./auths}:/root/.cli-proxy-api
-      - ${CLI_PROXY_LOG_PATH:-./logs}:/CLIProxyAPI/logs
-      - ${CLI_PROXY_PLUGIN_PATH:-./plugins}:/CLIProxyAPI/plugins
+      - cliproxyapi-data:/data
     restart: unless-stopped
+
+volumes:
+  cliproxyapi-data:

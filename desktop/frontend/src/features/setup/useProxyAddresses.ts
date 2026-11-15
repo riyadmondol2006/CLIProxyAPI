@@ -4,11 +4,20 @@ import { accessKeysApi, type ServerNetwork } from '@/services/api/accessKeys';
 import { isDesktopApp } from '@/utils/desktop';
 
 export interface ProxyAddresses {
-  /** Base URL (no trailing slash) for apps on this computer, e.g. http://127.0.0.1:8317. */
+  /** Base URL (no trailing slash) apps on the proxy host can use; a remote panel's own address. */
   local: string;
   /** Base URLs other devices on the local network can use; empty when LAN access is off. */
   lan: string[];
   lanEnabled: boolean;
+  /**
+   * The browser panel reached the proxy over the network (not localhost), so `local` is the
+   * server's own address and the desktop-style LAN switch doesn't apply.
+   */
+  remote: boolean;
+  /** The base URL to hand to other people and devices. */
+  share: string;
+  /** Others can reach `share`: it is a remote address or a LAN URL. */
+  shareReachable: boolean;
   /** A host or port change is saved but waits for a service restart. */
   restartRequired: boolean;
   loaded: boolean;
@@ -17,6 +26,18 @@ export interface ProxyAddresses {
 const DEFAULT_PORT = 8317;
 
 const trimBase = (value: string): string => value.trim().replace(/\/+$/, '');
+
+/** True for localhost, 127.x.x.x and ::1 URLs, which only work on the server itself. */
+export const isLoopbackUrl = (url: string): boolean => {
+  try {
+    const host = new URL(url).hostname.replace(/^\[|\]$/g, '').toLowerCase();
+    return (
+      host === 'localhost' || host.endsWith('.localhost') || host === '::1' || /^127\./.test(host)
+    );
+  } catch {
+    return false;
+  }
+};
 
 /**
  * Works out the proxy's addresses from where the server is actually listening.
@@ -33,10 +54,20 @@ export const resolveProxyAddresses = (
   const usableApiBase = /^https?:\/\//i.test(apiBase) ? trimBase(apiBase) : '';
   const local = desktop || !usableApiBase ? `${scheme}://127.0.0.1:${port}` : usableApiBase;
   const lanEnabled = Boolean(network?.lanEnabled);
+  const remote = !desktop && usableApiBase !== '' && !isLoopbackUrl(usableApiBase);
+  const lan = lanEnabled
+    ? (network?.lanUrls ?? []).map(trimBase).filter((url) => url !== '' && url !== local)
+    : [];
+  // A remote panel's own URL already works for everyone who can open it; LAN URLs of a remote
+  // server are often private addresses the user can't reach.
+  const share = remote ? local : (lan[0] ?? local);
   return {
     local,
-    lan: lanEnabled ? (network?.lanUrls ?? []).map(trimBase).filter(Boolean) : [],
+    lan,
     lanEnabled,
+    remote,
+    share,
+    shareReachable: remote || lan.length > 0,
     restartRequired: Boolean(network?.restartRequired),
     loaded: network !== null,
   };
@@ -61,5 +92,6 @@ export function useProxyAddresses() {
     void refresh();
   }, [refresh]);
 
-  return { ...resolveProxyAddresses(apiBase, network, isDesktopApp()), refresh };
+  const desktop = isDesktopApp();
+  return { ...resolveProxyAddresses(apiBase, network, desktop), desktop, refresh };
 }

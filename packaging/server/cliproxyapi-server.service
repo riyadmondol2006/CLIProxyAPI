@@ -1,0 +1,50 @@
+# CLIProxyAPI as a system service (cliproxyapi-server package).
+#   sudo systemctl status cliproxyapi-server
+#   sudo journalctl -u cliproxyapi-server -f
+# Config: /etc/cliproxyapi/config.yaml. Data, accounts and logs: /var/lib/cliproxyapi.
+[Unit]
+Description=CLIProxyAPI AI gateway
+Documentation=https://github.com/riyadmondol2006/CLIProxyAPI
+Wants=network-online.target
+After=network-online.target
+ConditionPathExists=/etc/cliproxyapi/config.yaml
+
+[Service]
+Type=simple
+User=cliproxyapi
+Group=cliproxyapi
+Environment=WRITABLE_PATH=/var/lib/cliproxyapi
+WorkingDirectory=/var/lib/cliproxyapi
+StateDirectory=cliproxyapi
+StateDirectoryMode=0750
+# Serve the control panel that ships with this package, also when offline.
+ExecStartPre=/usr/bin/install -D -m 0644 /usr/share/cliproxyapi/management.html /var/lib/cliproxyapi/static/management.html
+ExecStart=/usr/bin/cli-proxy-api --config /etc/cliproxyapi/config.yaml
+Restart=on-failure
+RestartSec=3
+UMask=0077
+
+# Hardening. The service writes only its config directory and its data directory.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ReadWritePaths=/etc/cliproxyapi /var/lib/cliproxyapi
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX AF_NETLINK
+SystemCallArchitectures=native
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+[Install]
+WantedBy=multi-user.target

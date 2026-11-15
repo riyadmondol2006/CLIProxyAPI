@@ -933,3 +933,48 @@ func TestV8SecretHashResolvesReferences(t *testing.T) {
 		})
 	}
 }
+
+func TestV8AccessRequireAPIKeyRoundTrip(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.yaml")
+	raw := "config-version: 8\naccess:\n  # keep me\n  api-keys:\n    - client-key\n  require-api-key: true\n"
+	if err := os.WriteFile(path, []byte(raw), 0600); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := LoadConfig(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !cfg.RequireAPIKey || len(cfg.APIKeys) != 1 {
+		t.Fatalf("load: require=%v keys=%v", cfg.RequireAPIKey, cfg.APIKeys)
+	}
+	cfg.APIKeys = nil
+	if err = SaveConfigPreserveComments(path, cfg); err != nil {
+		t.Fatal(err)
+	}
+	if cfg, err = LoadConfig(path); err != nil {
+		t.Fatal(err)
+	}
+	if !cfg.RequireAPIKey || len(cfg.APIKeys) != 0 {
+		t.Fatalf("save/load: require=%v keys=%v", cfg.RequireAPIKey, cfg.APIKeys)
+	}
+	cfg.RequireAPIKey = false
+	if err = SaveConfigPreserveComments(path, cfg); err != nil {
+		t.Fatal(err)
+	}
+	if cfg, err = LoadConfig(path); err != nil {
+		t.Fatal(err)
+	}
+	if cfg.RequireAPIKey {
+		t.Fatal("require-api-key false was not saved")
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(data), "    require-api-key: false") || strings.Contains(string(data), "\nrequire-api-key:") {
+		t.Fatalf("require-api-key not kept under access:\n%s", data)
+	}
+	if def, err := LoadConfigOptional(filepath.Join(t.TempDir(), "missing.yaml"), true); err != nil || def.RequireAPIKey {
+		t.Fatalf("default require-api-key must be false: %v %v", def, err)
+	}
+}

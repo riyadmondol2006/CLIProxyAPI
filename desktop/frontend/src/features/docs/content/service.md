@@ -56,3 +56,5 @@ Install a newer `.rpm` or `.deb` over the old one. The running service keeps usi
 version until it restarts, so the app shows **Update installed** on **Home** with a
 **Restart service** button. Removing the package keeps your config and accounts in your home
 folder.
+
+Running on a headless server instead? See **Run on a server**.

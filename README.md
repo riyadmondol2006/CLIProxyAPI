@@ -162,6 +162,25 @@ manages accounts, providers, access keys with token limits, and LAN sharing. It 
 sessions, projects, and subagents (based on [claude-usage](https://github.com/phuryn/claude-usage), MIT). See
 [`desktop/README.md`](desktop/README.md).
 
+## Run on a server
+
+CLIProxyAPI also runs on a Linux server and is managed from any browser, with the same UI as the
+desktop app. On Debian, Ubuntu, Fedora, or RHEL (amd64 or arm64), as root:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/riyadmondol2006/CLIProxyAPI/main/scripts/install-server.sh | sudo bash
+```
+
+It installs the `cliproxyapi-server` package, starts the service, and prints the web address and
+a generated management key. Open `http://<server-ip>:8317/` and log in with the key. With Docker:
+
+```bash
+docker run -d --name cliproxyapi -p 8317:8317 -v cliproxyapi-data:/data --restart unless-stopped ghcr.io/riyadmondol2006/cliproxyapi:latest
+```
+
+See [`docs/server-deployment.md`](docs/server-deployment.md) for HTTPS, signing in to accounts
+on a remote server, and upgrades.
+
 ## Management API
 
 see [MANAGEMENT_API.md](https://help.router-for.me/management/api)

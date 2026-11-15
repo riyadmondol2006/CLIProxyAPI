@@ -309,9 +309,20 @@ func (s *Server) pluginResourceNoRoute(c *gin.Context) {
 	c.AbortWithStatus(http.StatusNotFound)
 }
 
+// controlPanelEnabled reports whether /management.html is served.
+func (s *Server) controlPanelEnabled() bool {
+	cfg := s.getConfig()
+	return cfg != nil && !cfg.Home.Enabled && !cfg.RemoteManagement.DisableControlPanel
+}
+
+// acceptsHTML reports whether the request comes from a browser asking for a page.
+func acceptsHTML(r *http.Request) bool {
+	return r != nil && strings.Contains(strings.ToLower(r.Header.Get("Accept")), "text/html")
+}
+
 func (s *Server) serveManagementControlPanel(c *gin.Context) {
 	cfg := s.getConfig()
-	if cfg == nil || cfg.Home.Enabled || cfg.RemoteManagement.DisableControlPanel {
+	if !s.controlPanelEnabled() {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}

@@ -127,8 +127,11 @@ export function AccessKeysPage() {
     [i18n.language]
   );
   // The window's own origin (wails://wails in the app) is not an address other apps can use.
-  const addresses = resolveProxyAddresses(apiBase, network, isDesktopApp());
-  const shareUrl = addresses.lan[0] ?? addresses.local;
+  const desktop = isDesktopApp();
+  const addresses = resolveProxyAddresses(apiBase, network, desktop);
+  const shareUrl = addresses.share;
+  // In a browser the proxy is a server, not "this computer".
+  const hereKey = (key: string) => (desktop ? key : `${key}_web`);
 
   /** Runs a config mutation, then reloads the page state and the shared config cache. */
   const mutate = async (action: () => Promise<unknown>, success?: string) => {
@@ -253,7 +256,7 @@ export function AccessKeysPage() {
   const disableLan = () =>
     showConfirmation({
       title: t('access_keys.lan_disable_confirm_title'),
-      message: t('access_keys.lan_disable_confirm_message'),
+      message: t(hereKey('access_keys.lan_disable_confirm_message')),
       confirmText: t('access_keys.lan_disable'),
       cancelText: t('common.cancel'),
       variant: 'danger',
@@ -354,73 +357,96 @@ export function AccessKeysPage() {
 
       {loadError ? <div className="error-box">{loadError}</div> : null}
 
-      {/* ---------- LAN sharing ---------- */}
-      <section className={styles.card} aria-labelledby="access-lan-title">
-        <div className={styles.cardHead}>
-          <h2 id="access-lan-title" className={styles.cardTitle}>
-            {t('access_keys.lan_title')}
-          </h2>
-          {network ? (
-            <span className={styles.pill} data-state={network.lanEnabled ? 'ok' : 'warn'}>
-              {network.lanEnabled ? t('access_keys.lan_on') : t('access_keys.lan_off')}
-            </span>
+      {/* ---------- Server address (browser panel on a remote server) ---------- */}
+      {addresses.remote ? (
+        <section className={styles.card} aria-labelledby="access-server-title">
+          <div className={styles.cardHead}>
+            <h2 id="access-server-title" className={styles.cardTitle}>
+              {t('access_keys.server_title')}
+            </h2>
+          </div>
+          <p className={styles.cardText}>{t('access_keys.server_text')}</p>
+          <div className={styles.urlList}>
+            <div className={styles.urlRow}>
+              <code>{`${shareUrl}/v1`}</code>
+              <CopyButton value={`${shareUrl}/v1`} label={t('access_keys.copy_url')} />
+            </div>
+          </div>
+          {network?.restartRequired ? (
+            <div className={styles.notice}>
+              <span>{t('access_keys.server_restart')}</span>
+            </div>
           ) : null}
-        </div>
-        {network ? (
-          <>
-            {network.lanEnabled ? (
-              <>
-                <p className={styles.cardText}>{t('access_keys.lan_on_text')}</p>
-                {network.lanUrls.length > 0 ? (
-                  <div className={styles.urlList}>
-                    {network.lanUrls.map((url) => (
-                      <div key={url} className={styles.urlRow}>
-                        <code>{`${url}/v1`}</code>
-                        <CopyButton value={`${url}/v1`} label={t('access_keys.copy_url')} />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className={styles.cardText}>{t('access_keys.lan_no_address')}</p>
-                )}
-                <p className={styles.hint}>{t('access_keys.lan_firewall')}</p>
-              </>
-            ) : (
-              <p className={styles.cardText}>
-                {t('access_keys.lan_off_text', { host: network.host || '—' })}
-              </p>
-            )}
-            {network.restartRequired ? (
-              <div className={styles.notice}>
-                <span>
-                  {isDesktopApp()
-                    ? t('access_keys.lan_restart_needed')
-                    : t('access_keys.lan_restart')}
-                </span>
-                {isDesktopApp() ? (
-                  <Button size="sm" onClick={() => void restartService()} loading={restarting}>
-                    {t('access_keys.lan_restart_now')}
-                  </Button>
-                ) : null}
-              </div>
-            ) : (
-              <div>
-                {isLanHost(network.configuredHost) ? (
-                  <Button variant="secondary" size="sm" onClick={disableLan} disabled={busy}>
-                    {t('access_keys.lan_disable')}
-                  </Button>
-                ) : (
-                  <Button variant="secondary" size="sm" onClick={allowLan} disabled={busy}>
-                    {t('access_keys.lan_enable')}
-                  </Button>
-                )}
-              </div>
-            )}
-          </>
-        ) : (
-          <p className={styles.cardText}>{t('access_keys.lan_unknown')}</p>
-        )}
-      </section>
+        </section>
+      ) : null}
+
+      {/* ---------- LAN sharing ---------- */}
+      {addresses.remote ? null : (
+        <section className={styles.card} aria-labelledby="access-lan-title">
+          <div className={styles.cardHead}>
+            <h2 id="access-lan-title" className={styles.cardTitle}>
+              {t('access_keys.lan_title')}
+            </h2>
+            {network ? (
+              <span className={styles.pill} data-state={network.lanEnabled ? 'ok' : 'warn'}>
+                {network.lanEnabled ? t('access_keys.lan_on') : t(hereKey('access_keys.lan_off'))}
+              </span>
+            ) : null}
+          </div>
+          {network ? (
+            <>
+              {network.lanEnabled ? (
+                <>
+                  <p className={styles.cardText}>{t('access_keys.lan_on_text')}</p>
+                  {network.lanUrls.length > 0 ? (
+                    <div className={styles.urlList}>
+                      {network.lanUrls.map((url) => (
+                        <div key={url} className={styles.urlRow}>
+                          <code>{`${url}/v1`}</code>
+                          <CopyButton value={`${url}/v1`} label={t('access_keys.copy_url')} />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className={styles.cardText}>{t(hereKey('access_keys.lan_no_address'))}</p>
+                  )}
+                  <p className={styles.hint}>{t(hereKey('access_keys.lan_firewall'))}</p>
+                </>
+              ) : (
+                <p className={styles.cardText}>
+                  {t(hereKey('access_keys.lan_off_text'), { host: network.host || '—' })}
+                </p>
+              )}
+              {network.restartRequired ? (
+                <div className={styles.notice}>
+                  <span>
+                    {desktop ? t('access_keys.lan_restart_needed') : t('access_keys.lan_restart')}
+                  </span>
+                  {desktop ? (
+                    <Button size="sm" onClick={() => void restartService()} loading={restarting}>
+                      {t('access_keys.lan_restart_now')}
+                    </Button>
+                  ) : null}
+                </div>
+              ) : (
+                <div>
+                  {isLanHost(network.configuredHost) ? (
+                    <Button variant="secondary" size="sm" onClick={disableLan} disabled={busy}>
+                      {t('access_keys.lan_disable')}
+                    </Button>
+                  ) : (
+                    <Button variant="secondary" size="sm" onClick={allowLan} disabled={busy}>
+                      {t('access_keys.lan_enable')}
+                    </Button>
+                  )}
+                </div>
+              )}
+            </>
+          ) : (
+            <p className={styles.cardText}>{t('access_keys.lan_unknown')}</p>
+          )}
+        </section>
+      )}
 
       {/* ---------- Keys ---------- */}
       <section className={styles.keys} aria-label={t('access_keys.list_label')}>
@@ -608,7 +634,7 @@ export function AccessKeysPage() {
               <code>{created}</code>
               <CopyButton value={created} label={t('access_keys.copy_key')} />
             </div>
-            {!network?.lanEnabled ? (
+            {!addresses.remote && !network?.lanEnabled ? (
               <p className={styles.notice}>{t('access_keys.created_lan_off')}</p>
             ) : null}
           </div>

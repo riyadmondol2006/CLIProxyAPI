@@ -483,11 +483,26 @@ func corsAllowHeadersValue(req *http.Request) string {
 // using the configured authentication providers. When no providers are available,
 // it allows all requests (legacy behaviour).
 func AuthMiddleware(manager *sdkaccess.Manager) gin.HandlerFunc {
-	return accessAuthMiddleware(manager, false)
+	return accessAuthMiddleware(manager, false, nil)
 }
 
-func realtimeStandardAuthMiddleware(manager *sdkaccess.Manager) gin.HandlerFunc {
-	return accessAuthMiddleware(manager, true)
+// noClientAPIKeysMessage is returned when access.require-api-key is enabled but no
+// access provider authenticated the request because no client keys are configured.
+const noClientAPIKeysMessage = "No client API keys are configured. Create one under Access keys in the control panel."
+
+// authMiddleware is AuthMiddleware bound to the server's live access.require-api-key setting.
+func (s *Server) authMiddleware() gin.HandlerFunc {
+	return accessAuthMiddleware(s.accessManager, false, s.requireClientAPIKey)
+}
+
+// requireClientAPIKey reports whether the current config forbids unauthenticated proxy access.
+func (s *Server) requireClientAPIKey() bool {
+	cfg := s.getConfig()
+	return cfg != nil && cfg.RequireAPIKey
+}
+
+func realtimeStandardAuthMiddleware(manager *sdkaccess.Manager, requireAPIKey func() bool) gin.HandlerFunc {
+	return accessAuthMiddleware(manager, true, requireAPIKey)
 }
 
 func closeUnconsumedRequestOnAbort(c *gin.Context) {
@@ -500,18 +515,25 @@ func closeUnconsumedRequestOnAbort(c *gin.Context) {
 	}
 }
 
-func accessAuthMiddleware(manager *sdkaccess.Manager, realtimeError bool) gin.HandlerFunc {
+// accessAuthMiddleware authenticates proxy requests. Requests that no access provider
+// authenticated are allowed unless requireAPIKey reports true, in which case they are
+// rejected with 401 like a request without a key.
+func accessAuthMiddleware(manager *sdkaccess.Manager, realtimeError bool, requireAPIKey func() bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if manager == nil {
-			middleware.CaptureAuthenticatedRequestBody(c)
-			if c.IsAborted() {
-				return
-			}
-			c.Next()
-			return
+		var (
+			result *sdkaccess.Result
+			err    *sdkaccess.AuthError
+		)
+		if manager != nil {
+			result, err = manager.Authenticate(c.Request.Context(), c.Request)
 		}
-
-		result, err := manager.Authenticate(c.Request.Context(), c.Request)
+		if err == nil && result == nil && requireAPIKey != nil && requireAPIKey() {
+			err = &sdkaccess.AuthError{
+				Code:       sdkaccess.AuthErrorCodeNoCredentials,
+				Message:    noClientAPIKeysMessage,
+				StatusCode: http.StatusUnauthorized,
+			}
+		}
 		if err == nil {
 			if result != nil {
 				c.Set("userApiKey", result.Principal)
@@ -582,8 +604,8 @@ func enforceAPIKeyLimit(c *gin.Context, principal, provider string) bool {
 	return false
 }
 
-func realtimeAuthMiddleware(manager *sdkaccess.Manager, handler *codexlive.Handler) gin.HandlerFunc {
-	fallback := realtimeStandardAuthMiddleware(manager)
+func realtimeAuthMiddleware(manager *sdkaccess.Manager, handler *codexlive.Handler, requireAPIKey func() bool) gin.HandlerFunc {
+	fallback := realtimeStandardAuthMiddleware(manager, requireAPIKey)
 	return func(c *gin.Context) {
 		authorization, matched, errAuthenticate := handler.AuthenticateClientSecret(c.Request)
 		if !matched {

@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '@/styles/global.scss';
-import { INLINE_LOGO_JPEG } from '@/assets/logoInline';
+import appIcon from '@/assets/appIcon.svg';
 import App from './App.tsx';
 import { useThemeStore } from '@/stores/useThemeStore';
 import { installExternalLinkHandler, isDesktopApp } from '@/utils/desktop';
@@ -18,13 +18,13 @@ document.documentElement.classList.add('notranslate');
 
 const faviconEl = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
 if (faviconEl) {
-  faviconEl.href = INLINE_LOGO_JPEG;
-  faviconEl.type = 'image/jpeg';
+  faviconEl.href = appIcon;
+  faviconEl.type = 'image/svg+xml';
 } else {
   const newFavicon = document.createElement('link');
   newFavicon.rel = 'icon';
-  newFavicon.type = 'image/jpeg';
-  newFavicon.href = INLINE_LOGO_JPEG;
+  newFavicon.type = 'image/svg+xml';
+  newFavicon.href = appIcon;
   document.head.appendChild(newFavicon);
 }
 

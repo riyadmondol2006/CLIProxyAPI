@@ -56,8 +56,12 @@ export function ApiReferencePage() {
     await Promise.allSettled([refreshGuide(), refreshAddresses()]);
   }, guide.connected);
 
+  // A remote server is used at the address the browser reached it at; its LAN doesn't apply.
+  const showLan = !addresses.remote;
+  const lanBases = showLan ? addresses.lan : [];
+  const hereLabel = addresses.desktop ? t('api_docs.this_computer') : t('api_docs.this_server');
   const base =
-    baseChoice !== 'local' && addresses.lan.includes(baseChoice) ? baseChoice : addresses.local;
+    baseChoice !== 'local' && lanBases.includes(baseChoice) ? baseChoice : addresses.local;
   const key = guide.clientKeys[0] ?? '';
   const modelNames = useMemo(() => guide.models.map((item) => item.name), [guide.models]);
   const exampleModel = modelNames.includes(model) ? model : (modelNames[0] ?? PLACEHOLDER_MODEL);
@@ -80,7 +84,9 @@ export function ApiReferencePage() {
       <header className={styles.header}>
         <h1 className={styles.title}>{t('api_docs.title')}</h1>
         <p className={styles.meta}>{t('api_docs.meta', { count: ENDPOINT_COUNT })}</p>
-        <p className={styles.lede}>{t('api_docs.lede')}</p>
+        <p className={styles.lede}>
+          {addresses.desktop ? t('api_docs.lede') : t('api_docs.lede_web')}
+        </p>
       </header>
 
       {/* ---------- Base URLs ---------- */}
@@ -90,7 +96,7 @@ export function ApiReferencePage() {
         </h2>
         <div className={styles.baseGrid}>
           <div className={styles.baseColumn}>
-            <h3 className={styles.baseHeading}>{t('api_docs.this_computer')}</h3>
+            <h3 className={styles.baseHeading}>{hereLabel}</h3>
             <div className={styles.urlRow}>
               <code>{addresses.local}</code>
               <CopyButton value={addresses.local} label={t('api_docs.copy_url')} />
@@ -100,22 +106,24 @@ export function ApiReferencePage() {
               <CopyButton value={`${addresses.local}/v1`} label={t('api_docs.copy_url')} />
             </div>
           </div>
-          <div className={styles.baseColumn}>
-            <h3 className={styles.baseHeading}>{t('api_docs.local_network')}</h3>
-            {addresses.lan.length > 0 ? (
-              addresses.lan.map((lan) => (
-                <div key={lan} className={styles.urlRow}>
-                  <code>{lan}</code>
-                  <CopyButton value={lan} label={t('api_docs.copy_url')} />
-                </div>
-              ))
-            ) : (
-              <p className={styles.note}>
-                {addresses.restartRequired ? t('api_docs.lan_restart') : t('api_docs.lan_off')}{' '}
-                <Link to="/access-keys">{t('api_docs.open_access_keys')}</Link>
-              </p>
-            )}
-          </div>
+          {showLan ? (
+            <div className={styles.baseColumn}>
+              <h3 className={styles.baseHeading}>{t('api_docs.local_network')}</h3>
+              {addresses.lan.length > 0 ? (
+                addresses.lan.map((lan) => (
+                  <div key={lan} className={styles.urlRow}>
+                    <code>{lan}</code>
+                    <CopyButton value={lan} label={t('api_docs.copy_url')} />
+                  </div>
+                ))
+              ) : (
+                <p className={styles.note}>
+                  {addresses.restartRequired ? t('api_docs.lan_restart') : t('api_docs.lan_off')}{' '}
+                  <Link to="/access-keys">{t('api_docs.open_access_keys')}</Link>
+                </p>
+              )}
+            </div>
+          ) : null}
         </div>
         <p className={styles.hint}>{t('api_docs.bases_hint')}</p>
         <div className={styles.controls}>
@@ -125,8 +133,8 @@ export function ApiReferencePage() {
               size="sm"
               value={base === addresses.local ? 'local' : base}
               options={[
-                { value: 'local', label: `${t('api_docs.this_computer')} · ${addresses.local}` },
-                ...addresses.lan.map((lan) => ({
+                { value: 'local', label: `${hereLabel} · ${addresses.local}` },
+                ...lanBases.map((lan) => ({
                   value: lan,
                   label: `${t('api_docs.local_network')} · ${lan}`,
                 })),

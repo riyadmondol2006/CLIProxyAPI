@@ -99,6 +99,10 @@ type SDKConfig struct {
 	// APIKeys is a list of keys for authenticating clients to this proxy server.
 	APIKeys []string `yaml:"api-keys" json:"api-keys"`
 
+	// RequireAPIKey rejects proxy requests while no client API keys are configured.
+	// Default is false, which keeps the open local-use behaviour when api-keys is empty.
+	RequireAPIKey bool `yaml:"require-api-key" json:"require-api-key"`
+
 	// PassthroughHeaders controls whether upstream response headers are forwarded to downstream clients.
 	// Default is false (disabled).
 	PassthroughHeaders bool `yaml:"passthrough-headers" json:"passthrough-headers"`

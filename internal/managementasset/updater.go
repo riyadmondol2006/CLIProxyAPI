@@ -27,8 +27,9 @@ import (
 )
 
 const (
-	defaultManagementReleaseURL  = "https://api.github.com/repos/router-for-me/Cli-Proxy-API-Management-Center/releases/latest"
-	defaultManagementFallbackURL = "https://cpamc.router-for.me/"
+	// Each release of this project publishes its web UI as the management.html asset.
+	defaultManagementReleaseURL  = "https://api.github.com/repos/riyadmondol2006/CLIProxyAPI/releases/latest"
+	defaultManagementFallbackURL = "https://github.com/riyadmondol2006/CLIProxyAPI/releases/latest/download/management.html"
 	managementAssetName          = "management.html"
 	httpUserAgent                = "CLIProxyAPI-management-updater"
 	managementSyncMinInterval    = 30 * time.Second

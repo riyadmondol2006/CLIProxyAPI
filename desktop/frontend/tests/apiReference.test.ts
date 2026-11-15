@@ -12,7 +12,7 @@ import ko from '@/i18n/locales/ko.json';
 import vi from '@/i18n/locales/vi.json';
 import { ApiReferencePage } from '@/features/apiDocs/ApiReferencePage';
 import { ENDPOINT_GROUPS, buildCurl } from '@/features/apiDocs/endpoints';
-import { resolveProxyAddresses } from '@/features/setup/useProxyAddresses';
+import { isLoopbackUrl, resolveProxyAddresses } from '@/features/setup/useProxyAddresses';
 
 const network = {
   host: '',
@@ -43,6 +43,106 @@ describe('proxy addresses', () => {
     const unknown = resolveProxyAddresses('wails://wails', null, true);
     expect(unknown.local).toBe('http://127.0.0.1:8317');
     expect(unknown.loaded).toBe(false);
+  });
+
+  test('a browser panel on a remote server shares the address it was opened with', () => {
+    const remote = resolveProxyAddresses('https://proxy.example.com/', network, false);
+    expect(remote.remote).toBe(true);
+    expect(remote.share).toBe('https://proxy.example.com');
+    expect(remote.shareReachable).toBe(true);
+
+    const byIp = resolveProxyAddresses('http://203.0.113.5:8317', null, false);
+    expect(byIp.share).toBe('http://203.0.113.5:8317');
+    expect(byIp.shareReachable).toBe(true);
+  });
+
+  test('a LAN URL equal to the panel address is not listed twice', () => {
+    const addresses = resolveProxyAddresses('http://192.168.1.20:8317', network, false);
+    expect(addresses.local).toBe('http://192.168.1.20:8317');
+    expect(addresses.lan).toEqual([]);
+    expect(addresses.share).toBe('http://192.168.1.20:8317');
+  });
+
+  test('a browser panel on localhost and the desktop app share the LAN URL', () => {
+    for (const [apiBase, desktop] of [
+      ['http://127.0.0.1:8317', false],
+      ['http://localhost:8317', false],
+      ['wails://wails', true],
+      // The desktop app is never "remote", whatever its window address is.
+      ['http://10.0.0.5:8317', true],
+    ] as const) {
+      const addresses = resolveProxyAddresses(apiBase, network, desktop);
+      expect(addresses.remote).toBe(false);
+      expect(addresses.share).toBe('http://192.168.1.20:8317');
+      expect(addresses.shareReachable).toBe(true);
+    }
+    const lanOff = resolveProxyAddresses(
+      'http://127.0.0.1:8317',
+      { ...network, lanEnabled: false },
+      false
+    );
+    expect(lanOff.share).toBe('http://127.0.0.1:8317');
+    expect(lanOff.shareReachable).toBe(false);
+  });
+
+  test('loopback detection', () => {
+    expect(isLoopbackUrl('http://localhost:8317')).toBe(true);
+    expect(isLoopbackUrl('http://app.localhost')).toBe(true);
+    expect(isLoopbackUrl('http://127.0.0.2:8317')).toBe(true);
+    expect(isLoopbackUrl('http://[::1]:8317')).toBe(true);
+    expect(isLoopbackUrl('http://192.168.1.20:8317')).toBe(false);
+    expect(isLoopbackUrl('https://proxy.example.com')).toBe(false);
+    expect(isLoopbackUrl('not a url')).toBe(false);
+  });
+});
+
+describe('web panel wording', () => {
+  const locales = { en, 'zh-CN': zhCN, 'zh-TW': zhTW, ru, ko, vi } as const;
+  const WEB_KEYS = [
+    'login.heading',
+    'login.lede',
+    'login.server_label',
+    'login.custom_connection_toggle',
+    'login.management_key_hint',
+    'home.base_url_web',
+    'home.tiles.server',
+    'home.tiles.server_hint',
+    'home.tiles.lan_off_hint_web',
+    'home.actions.share_text_web',
+    'home.lan_footnote_web',
+    'setup_guide.lede_web',
+    'setup_guide.this_server',
+    'api_docs.lede_web',
+    'api_docs.this_server',
+    'access_keys.server_title',
+    'access_keys.server_text',
+    'access_keys.server_restart',
+    'access_keys.lan_off_web',
+    'access_keys.lan_no_address_web',
+    'access_keys.lan_firewall_web',
+    'access_keys.lan_off_text_web',
+    'access_keys.lan_disable_confirm_message_web',
+  ];
+  const lookup = (tree: unknown, path: string): unknown =>
+    path
+      .split('.')
+      .reduce<unknown>(
+        (node, part) =>
+          node && typeof node === 'object' ? (node as Record<string, unknown>)[part] : undefined,
+        tree
+      );
+
+  test('every locale has the web strings, and none of them mention this computer', () => {
+    for (const [lng, translation] of Object.entries(locales)) {
+      for (const key of WEB_KEYS) {
+        const value = lookup(translation, key);
+        expect(typeof value === 'string' && value.trim() !== '', `${lng} ${key}`).toBe(true);
+      }
+    }
+    for (const key of WEB_KEYS) {
+      expect(String(lookup(en, key)).toLowerCase()).not.toContain('this computer');
+    }
+    expect(lookup(en, 'access_keys.lan_off_text_web')).toContain('{{host}}');
   });
 });
 

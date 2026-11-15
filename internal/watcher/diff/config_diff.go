@@ -201,6 +201,9 @@ func BuildConfigChangeDetails(oldCfg, newCfg *config.Config) []string {
 		changes = appendPayloadConfigChanges(changes, oldCfg.Payload, newCfg.Payload)
 	}
 
+	if oldCfg.RequireAPIKey != newCfg.RequireAPIKey {
+		changes = append(changes, fmt.Sprintf("require-api-key: %t -> %t", oldCfg.RequireAPIKey, newCfg.RequireAPIKey))
+	}
 	// API keys (redacted) and counts
 	if len(oldCfg.APIKeys) != len(newCfg.APIKeys) {
 		changes = append(changes, fmt.Sprintf("api-keys count: %d -> %d", len(oldCfg.APIKeys), len(newCfg.APIKeys)))

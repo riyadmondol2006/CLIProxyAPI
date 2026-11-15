@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -17,7 +18,7 @@ import { useApiKeysForModels } from '@/hooks/useApiKeysForModels';
 import { formatDateTimeValue } from '@/utils/format';
 import { classifyModels } from '@/utils/models';
 import { STORAGE_KEY_AUTH } from '@/utils/constants';
-import { INLINE_LOGO_JPEG } from '@/assets/logoInline';
+import appIcon from '@/assets/appIcon.svg';
 import iconGemini from '@/assets/icons/gemini.svg';
 import iconClaude from '@/assets/icons/claude.svg';
 import iconMeta from '@/assets/icons/meta.svg';
@@ -34,6 +35,8 @@ import iconGrokDark from '@/assets/icons/grok-dark.svg';
 import iconDeepseek from '@/assets/icons/deepseek.svg';
 import iconMinimax from '@/assets/icons/minimax.svg';
 import styles from './SystemPage.module.scss';
+
+const PROJECT_REPO_URL = 'https://github.com/riyadmondol2006/CLIProxyAPI';
 
 const MODEL_CATEGORY_ICONS: Record<string, string | { light: string; dark: string }> = {
   devin: { light: iconDevinLight, dark: iconDevinDark },
@@ -299,7 +302,7 @@ export function SystemPage() {
       <div className={styles.content}>
         <Card className={styles.aboutCard}>
           <div className={styles.aboutHeader}>
-            <img src={INLINE_LOGO_JPEG} alt="CPAMC" className={styles.aboutLogo} />
+            <img src={appIcon} alt="" className={styles.aboutLogo} />
             <div className={styles.aboutTitle}>{t('system_info.about_title')}</div>
           </div>
 
@@ -351,7 +354,7 @@ export function SystemPage() {
           <p className={styles.sectionDescription}>{t('system_info.quick_links_desc')}</p>
           <div className={styles.quickLinks}>
             <a
-              href="https://github.com/router-for-me/CLIProxyAPI"
+              href={PROJECT_REPO_URL}
               target="_blank"
               rel="noopener noreferrer"
               className={styles.linkCard}
@@ -369,7 +372,7 @@ export function SystemPage() {
             </a>
 
             <a
-              href="https://github.com/router-for-me/Cli-Proxy-API-Management-Center"
+              href={`${PROJECT_REPO_URL}/tree/main/desktop/frontend`}
               target="_blank"
               rel="noopener noreferrer"
               className={styles.linkCard}
@@ -386,23 +389,15 @@ export function SystemPage() {
               </div>
             </a>
 
-            <a
-              href="https://help.router-for.me/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.linkCard}
-            >
+            <Link to="/docs" className={styles.linkCard}>
               <div className={`${styles.linkIcon} ${styles.docs}`}>
                 <IconBookOpen size={22} />
               </div>
               <div className={styles.linkContent}>
-                <div className={styles.linkTitle}>
-                  {t('system_info.link_docs')}
-                  <IconExternalLink size={14} />
-                </div>
+                <div className={styles.linkTitle}>{t('system_info.link_docs')}</div>
                 <div className={styles.linkDesc}>{t('system_info.link_docs_desc')}</div>
               </div>
-            </a>
+            </Link>
           </div>
         </Card>
 

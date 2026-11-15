@@ -1,10 +1,15 @@
 name: packages
 
-# Builds the Linux .deb and .rpm packages (proxy + desktop app + systemd user service)
-# on every push. Packages are attached to the workflow run; each push to main also publishes
-# them as a new release, v<version>, and v* tags attach the packages to that release.
+# Builds the Linux .deb and .rpm packages on every push: the desktop package (proxy + desktop
+# app + systemd user service) and the headless server package cliproxyapi-server (proxy +
+# systemd system service + web control panel). Packages are attached to the workflow run; each
+# push to main also publishes them as a new release, v<version>, and v* tags attach the
+# packages to that release. management.html, the web control panel the proxy downloads from
+# the latest release, goes with them.
 # latest.json, the update feed the desktop app checks, goes with the packages and into the
 # "latest-build" pre-release, the feed URL that installed apps read.
+# The Docker image ghcr.io/<owner>/cliproxyapi is built for main and v* tags; it does not
+# hold up the packages.
 
 on:
   push:
@@ -34,6 +39,8 @@ jobs:
             runner: ubuntu-22.04-arm
     # Ubuntu 22.04 keeps the glibc baseline low enough for older distributions.
     runs-on: ${{ matrix.runner }}
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -115,8 +122,11 @@ jobs:
           NFPM_ARCH: ${{ matrix.arch }}
         run: |
           go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.43.0
-          for packager in deb rpm; do
-            "$(go env GOPATH)/bin/nfpm" pkg --packager "$packager" --config packaging/nfpm.yaml --target dist/
+          # Desktop package (cliproxyapi) and server package (cliproxyapi-server).
+          for config in packaging/nfpm.yaml packaging/server/nfpm.yaml; do
+            for packager in deb rpm; do
+              "$(go env GOPATH)/bin/nfpm" pkg --packager "$packager" --config "$config" --target dist/
+            done
           done
           ls -la dist
 
@@ -127,6 +137,20 @@ jobs:
           path: |
             dist/*.deb
             dist/*.rpm
+          if-no-files-found: error
+
+      # The web control panel, published as management.html: the proxy downloads it from the
+      # latest release by that name. It is the same on every arch, so upload it once.
+      - name: Copy the control panel
+        if: matrix.arch == 'amd64'
+        run: cp desktop/frontend/dist/index.html dist/management.html
+
+      - name: Upload the control panel artifact
+        if: matrix.arch == 'amd64'
+        uses: actions/upload-artifact@v7
+        with:
+          name: cliproxyapi-management-html
+          path: dist/management.html
           if-no-files-found: error
 
   publish:
@@ -147,10 +171,13 @@ jobs:
           # Recent commit subjects become the notes in the update feed.
           fetch-depth: 30
 
+      # Only the packages and the control panel: the docker jobs upload digest artifacts at
+      # the same time, and everything in packages/ is attached to the release.
       - name: Download packages
         uses: actions/download-artifact@v8
         with:
           path: packages
+          pattern: cliproxyapi-*
           merge-multiple: true
 
       # latest.json is the update feed the desktop app checks (desktop/internal/app/update.go).
@@ -164,16 +191,28 @@ jobs:
           repo = os.environ["GITHUB_REPOSITORY"]
           sha = os.environ["GITHUB_SHA"]
           # nfpm file names: cliproxyapi-<version>-<release>.<arch>.rpm, cliproxyapi_<version>-<release>_<arch>.deb
+          # The feed lists only the desktop package (cliproxyapi); the server package
+          # (cliproxyapi-server) is checked separately below.
           patterns = {
-              "rpm": re.compile(r"^cliproxyapi-(?P<version>.+)-(?P<release>[^-]+)\.(?P<arch>x86_64|aarch64)\.rpm$"),
-              "deb": re.compile(r"^cliproxyapi_(?P<version>.+)-(?P<release>[^-]+)_(?P<arch>amd64|arm64)\.deb$"),
+              "rpm": re.compile(r"^cliproxyapi-(?P<version>[0-9].*)-(?P<release>[^-]+)\.(?P<arch>x86_64|aarch64)\.rpm$"),
+              "deb": re.compile(r"^cliproxyapi_(?P<version>[0-9].*)-(?P<release>[^-]+)_(?P<arch>amd64|arm64)\.deb$"),
+          }
+          server_patterns = {
+              "rpm": re.compile(r"^cliproxyapi-server-(?P<version>[0-9].*)-(?P<release>[^-]+)\.(?P<arch>x86_64|aarch64)\.rpm$"),
+              "deb": re.compile(r"^cliproxyapi-server_(?P<version>[0-9].*)-(?P<release>[^-]+)_(?P<arch>amd64|arm64)\.deb$"),
           }
           arches = {"x86_64": "amd64", "aarch64": "arm64", "amd64": "amd64", "arm64": "arm64"}
 
           assets, versions = [], set()
+          server_found, server_versions = [], set()
           for path in sorted(pathlib.Path("packages").iterdir()):
               fmt = path.suffix.lstrip(".")
               if fmt not in patterns:
+                  continue
+              server = server_patterns[fmt].match(path.name)
+              if server:
+                  server_found.append((fmt, arches[server["arch"]]))
+                  server_versions.add(re.sub(r"[~_]", "-", server["version"]))
                   continue
               match = patterns[fmt].match(path.name)
               if not match:
@@ -194,6 +233,12 @@ jobs:
               sys.exit(f"expected one package per format and arch, found {sorted(a['name'] for a in assets)}")
           if len(versions) != 1:
               sys.exit(f"the packages disagree on the version: {sorted(versions)}")
+          if sorted(server_found) != sorted(expected):
+              sys.exit(f"expected one server package per format and arch, found {sorted(server_found)}")
+          if server_versions != versions:
+              sys.exit(f"the server packages disagree on the version: {sorted(server_versions)} vs {sorted(versions)}")
+          if not pathlib.Path("packages/management.html").is_file():
+              sys.exit("management.html (the web control panel) is missing")
           version = versions.pop()
           tag = os.environ["RELEASE_TAG"] or f"v{version}"
           download = f"https://github.com/{repo}/releases/download/{tag}/"
@@ -249,6 +294,24 @@ jobs:
           | ARM (aarch64), e.g. Raspberry Pi | \`cliproxyapi-${VERSION}-1.aarch64.rpm\` | \`cliproxyapi_${VERSION}-1_arm64.deb\` |
 
           Install with \`sudo dnf install ./cliproxyapi-*.rpm\` or \`sudo apt install ./cliproxyapi_*.deb\`. Not sure which you have? Run \`uname -m\`.
+
+          ## Run on a server
+
+          No desktop needed: the server package runs CLIProxyAPI as a system service with its web control panel on port 8317. On Ubuntu, Debian, Fedora or RHEL (x86_64 or ARM):
+
+          \`\`\`sh
+          curl -fsSL https://raw.githubusercontent.com/riyadmondol2006/CLIProxyAPI/main/scripts/install-server.sh | sudo bash
+          \`\`\`
+
+          Or with Docker (the first start prints the management key to \`docker logs cliproxyapi\`):
+
+          \`\`\`sh
+          docker run -d --name cliproxyapi -p 8317:8317 -v cliproxyapi-data:/data --restart unless-stopped ghcr.io/riyadmondol2006/cliproxyapi:latest
+          \`\`\`
+
+          Then open http://<server>:8317 and log in with the management key (\`sudo cat /etc/cliproxyapi/management-key\` shows it again).
+
+          The server packages are \`cliproxyapi-server_${VERSION}-1_amd64.deb\` / \`_arm64.deb\` and \`cliproxyapi-server-${VERSION}-1.x86_64.rpm\` / \`.aarch64.rpm\`; install either these or the desktop package, not both.
           EOF
           if gh release view "$TAG" >/dev/null 2>&1; then
             # A re-run of the same build: replace the files.
@@ -282,3 +345,131 @@ jobs:
           done
           gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --generate-notes
           gh release upload "$GITHUB_REF_NAME" packages/* "$RUNNER_TEMP/latest.json" --clobber
+
+  # Docker image: built natively per arch and pushed by digest, then merged into one
+  # multi-arch tag. Same version string as the packages.
+  docker:
+    name: docker linux-${{ matrix.arch }}
+    needs: build
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+
+      - name: Refresh model catalogs
+        run: bash .github/scripts/refresh-model-catalogs.sh
+
+      - name: Image name
+        id: image
+        run: echo "name=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/cliproxyapi" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build metadata
+        id: meta
+        run: |
+          echo "commit=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          echo "date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push by digest
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/${{ matrix.arch }}
+          build-args: |
+            VERSION=${{ needs.build.outputs.version }}
+            COMMIT=${{ steps.meta.outputs.commit }}
+            BUILD_DATE=${{ steps.meta.outputs.date }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.version=${{ needs.build.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=MIT
+          outputs: type=image,name=${{ steps.image.outputs.name }},push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha,scope=docker-${{ matrix.arch }}
+          cache-to: type=gha,scope=docker-${{ matrix.arch }},mode=max
+
+      - name: Save the digest
+        env:
+          DIGEST: ${{ steps.push.outputs.digest }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/digests"
+          touch "$RUNNER_TEMP/digests/${DIGEST#sha256:}"
+
+      - name: Upload the digest
+        uses: actions/upload-artifact@v7
+        with:
+          name: docker-digest-${{ matrix.arch }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  docker-manifest:
+    name: publish docker image
+    needs: [build, docker]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v8
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: docker-digest-*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push the multi-arch tags
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        working-directory: ${{ runner.temp }}/digests
+        run: |
+          image="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/cliproxyapi"
+          # main gets :latest and :<version>; a v* tag gets :<tag version>.
+          tags=(-t "$image:$VERSION")
+          if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
+            tags+=(-t "$image:latest")
+          fi
+          sources=()
+          for digest in *; do
+            sources+=("$image@sha256:$digest")
+          done
+          [[ ${#sources[@]} -eq 2 ]] || { echo "expected 2 digests, found ${#sources[@]}"; exit 1; }
+          docker buildx imagetools create "${tags[@]}" "${sources[@]}"
+          docker buildx imagetools inspect "$image:$VERSION"

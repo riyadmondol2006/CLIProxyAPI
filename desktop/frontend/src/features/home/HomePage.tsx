@@ -17,6 +17,7 @@ import {
 import { CopyButton } from '@/features/oauth/components/CopyButton';
 import { useSetupGuide } from '@/features/setup/useSetupGuide';
 import { buildEndpoints, maskApiKey } from '@/features/setup/snippets';
+import { resolveProxyAddresses } from '@/features/setup/useProxyAddresses';
 import { useDesktopStatus } from '@/features/desktop/useDesktopStatus';
 import { needsServiceRestart } from '@/features/desktop/version';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
@@ -28,12 +29,22 @@ import styles from './HomePage.module.scss';
 
 const DESKTOP_POLL_MS = 5000;
 
+const hostOf = (url: string): string => {
+  try {
+    return new URL(url).host;
+  } catch {
+    return url;
+  }
+};
+
 interface Tile {
   to: string;
   label: string;
   value: string;
   hint: string;
   tone: 'ok' | 'todo' | 'neutral';
+  /** The value is text (a host name), not a count. */
+  text?: boolean;
 }
 
 interface Action {
@@ -68,11 +79,15 @@ export function HomePage() {
   }, guide.connected);
 
   const endpoints = useMemo(() => buildEndpoints(guide.apiBase), [guide.apiBase]);
-  const localBase = network
-    ? `http://127.0.0.1:${network.port}`
-    : desktopStatus.status
-      ? `http://127.0.0.1:${desktopStatus.status.port}`
-      : endpoints.anthropic;
+  // In a browser the proxy is a server: show the address the browser reached it at.
+  const addresses = resolveProxyAddresses(guide.apiBase, network, desktop);
+  const localBase = !desktop
+    ? addresses.share
+    : network
+      ? `http://127.0.0.1:${network.port}`
+      : desktopStatus.status
+        ? `http://127.0.0.1:${desktopStatus.status.port}`
+        : endpoints.anthropic;
   const clientKey = guide.clientKeys[0] ?? '';
   const accounts = (guide.authFileCount ?? 0) + (guide.providerKeyCount ?? 0);
   const running = desktop ? Boolean(desktopStatus.status?.reachable) : guide.connected;
@@ -101,19 +116,30 @@ export function HomePage() {
       hint: t('home.tiles.keys_hint'),
       tone: guide.clientKeys.length > 0 ? 'ok' : 'todo',
     },
-    {
-      to: '/access-keys',
-      label: t('home.tiles.lan'),
-      value: network
-        ? network.lanEnabled
-          ? t('home.tiles.lan_on')
-          : t('home.tiles.lan_off')
-        : '—',
-      hint: network?.lanEnabled
-        ? (network.lanUrls[0] ?? t('home.tiles.lan_on_hint'))
-        : t('home.tiles.lan_off_hint'),
-      tone: 'neutral',
-    },
+    addresses.remote
+      ? {
+          to: '/access-keys',
+          label: t('home.tiles.server'),
+          value: hostOf(addresses.share),
+          hint: t('home.tiles.server_hint'),
+          tone: 'neutral',
+          text: true,
+        }
+      : {
+          to: '/access-keys',
+          label: t('home.tiles.lan'),
+          value: network
+            ? network.lanEnabled
+              ? t('home.tiles.lan_on')
+              : t('home.tiles.lan_off')
+            : '—',
+          hint: network?.lanEnabled
+            ? (network.lanUrls[0] ?? t('home.tiles.lan_on_hint'))
+            : desktop
+              ? t('home.tiles.lan_off_hint')
+              : t('home.tiles.lan_off_hint_web'),
+          tone: 'neutral',
+        },
   ];
 
   const actions: Action[] = [
@@ -139,7 +165,7 @@ export function HomePage() {
       to: '/access-keys',
       icon: <IconKey size={18} />,
       title: t('home.actions.share'),
-      text: t('home.actions.share_text'),
+      text: desktop ? t('home.actions.share_text') : t('home.actions.share_text_web'),
     },
     {
       to: '/docs',
@@ -259,11 +285,13 @@ export function HomePage() {
         </div>
         <div className={styles.copyGrid}>
           <div className={styles.copyItem}>
-            <span className={styles.copyLabel}>{t('home.base_url')}</span>
+            <span className={styles.copyLabel}>
+              {desktop ? t('home.base_url') : t('home.base_url_web')}
+            </span>
             <code>{`${localBase}/v1`}</code>
             <CopyButton value={`${localBase}/v1`} label={t('home.copy_base_url')} />
           </div>
-          {network?.lanEnabled && network.lanUrls[0] ? (
+          {desktop && network?.lanEnabled && network.lanUrls[0] ? (
             <div className={styles.copyItem}>
               <span className={styles.copyLabel}>{t('home.lan_url')}</span>
               <code>{`${network.lanUrls[0]}/v1`}</code>
@@ -323,7 +351,13 @@ export function HomePage() {
         {tiles.map((tile) => (
           <Link key={tile.label} to={tile.to} className={styles.tile} data-tone={tile.tone}>
             <span className={styles.tileLabel}>{tile.label}</span>
-            <span className={styles.tileValue}>{tile.value}</span>
+            <span
+              className={styles.tileValue}
+              data-text={tile.text || undefined}
+              title={tile.text ? tile.value : undefined}
+            >
+              {tile.value}
+            </span>
             <span className={styles.tileHint}>{tile.hint}</span>
           </Link>
         ))}
@@ -369,9 +403,9 @@ export function HomePage() {
         </div>
       </section>
 
-      {network && !network.lanEnabled ? (
+      {network && !network.lanEnabled && !addresses.remote ? (
         <p className={styles.footnote}>
-          <IconNetwork size={14} /> {t('home.lan_footnote')}
+          <IconNetwork size={14} /> {desktop ? t('home.lan_footnote') : t('home.lan_footnote_web')}
         </p>
       ) : null}
     </div>

@@ -83,3 +83,58 @@ access:
 		t.Fatalf("delete patch: keys=%v limits=%+v", saved.APIKeys, saved.APIKeyLimits)
 	}
 }
+
+func TestConfigV8AccessRequireAPIKeyRoundTrip(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.yaml")
+	raw := "config-version: 8\nserver:\n  port: 8317\naccess:\n  api-keys:\n    - sk-owner\n"
+	if errWrite := os.WriteFile(path, []byte(raw), 0o600); errWrite != nil {
+		t.Fatal(errWrite)
+	}
+	cfg, errLoad := config.LoadConfig(path)
+	if errLoad != nil {
+		t.Fatal(errLoad)
+	}
+	h := &Handler{cfg: cfg, configFilePath: path}
+	router := gin.New()
+	router.GET("/v8/management/config", h.ConfigV8)
+	router.PATCH("/v8/management/config", h.ConfigV8)
+	router.Handle(http.MethodGet, "/v8/management/config/*path", h.ConfigV8)
+	router.Handle(http.MethodPatch, "/v8/management/config/*path", h.ConfigV8)
+	serve := func(method, target, body string) *httptest.ResponseRecorder {
+		t.Helper()
+		recorder := httptest.NewRecorder()
+		router.ServeHTTP(recorder, httptest.NewRequest(method, target, strings.NewReader(body)))
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("%s %s: status=%d body=%s", method, target, recorder.Code, recorder.Body.String())
+		}
+		return recorder
+	}
+	load := func() *config.Config {
+		t.Helper()
+		saved, errLoadSaved := config.LoadConfig(path)
+		if errLoadSaved != nil {
+			t.Fatalf("load saved config: %v", errLoadSaved)
+		}
+		return saved
+	}
+
+	serve(http.MethodPatch, "/v8/management/config", `{"access":{"require-api-key":true}}`)
+	if saved := load(); !saved.RequireAPIKey || !slices.Equal(saved.APIKeys, []string{"sk-owner"}) {
+		t.Fatalf("root patch: require=%v keys=%v", saved.RequireAPIKey, saved.APIKeys)
+	}
+	data, errRead := os.ReadFile(path)
+	if errRead != nil || !strings.Contains(string(data), "access:") || strings.Contains(string(data), "\nrequire-api-key:") {
+		t.Fatalf("require-api-key not saved under access: %v\n%s", errRead, data)
+	}
+	if body := serve(http.MethodGet, "/v8/management/config/access/require-api-key", "").Body.String(); strings.TrimSpace(body) != "true" {
+		t.Fatalf("GET access/require-api-key = %s", body)
+	}
+	if body := serve(http.MethodGet, "/v8/management/config", "").Body.String(); !strings.Contains(body, `"require-api-key":true`) {
+		t.Fatalf("GET config does not expose access.require-api-key: %s", body)
+	}
+
+	serve(http.MethodPatch, "/v8/management/config/access", `{"require-api-key":false}`)
+	if saved := load(); saved.RequireAPIKey || len(saved.APIKeys) != 1 {
+		t.Fatalf("access patch: require=%v keys=%v", saved.RequireAPIKey, saved.APIKeys)
+	}
+}

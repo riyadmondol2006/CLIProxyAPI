@@ -102,8 +102,13 @@ export function SetupGuidePage() {
   const [revealKey, setRevealKey] = useState(false);
   const [model, setModel] = useState('');
 
+  // A remote server is used at the address the browser reached it at; its LAN doesn't apply.
+  const showLan = !addresses.remote;
+  const hereLabel = addresses.desktop
+    ? t('setup_guide.this_computer')
+    : t('setup_guide.this_server');
   const [useLan, setUseLan] = useState(false);
-  const exampleBase = useLan && addresses.lan[0] ? addresses.lan[0] : addresses.local;
+  const exampleBase = showLan && useLan && addresses.lan[0] ? addresses.lan[0] : addresses.local;
   const localEndpoints = useMemo(() => buildEndpoints(addresses.local), [addresses.local]);
   const lanEndpoints = useMemo(
     () => (addresses.lan[0] ? buildEndpoints(addresses.lan[0]) : null),
@@ -167,7 +172,7 @@ export function SetupGuidePage() {
           {t('setup_guide.meta', { done: doneCount, total: 3 })}
         </p>
         <p className={styles.lede} data-reveal>
-          {t('setup_guide.lede')}
+          {addresses.desktop ? t('setup_guide.lede') : t('setup_guide.lede_web')}
         </p>
       </header>
 
@@ -274,7 +279,7 @@ export function SetupGuidePage() {
         <div className={styles.card} data-reveal>
           <p className={styles.cardLede}>{t('setup_guide.connect_lede')}</p>
 
-          <h3 className={styles.addressHeading}>{t('setup_guide.this_computer')}</h3>
+          <h3 className={styles.addressHeading}>{hereLabel}</h3>
           <div className={styles.copyRows}>
             <CopyRow label={t('setup_guide.endpoint_openai')} value={localEndpoints.openai} />
             <CopyRow
@@ -283,26 +288,34 @@ export function SetupGuidePage() {
             />
           </div>
 
-          <h3 className={styles.addressHeading}>{t('setup_guide.local_network')}</h3>
-          {lanEndpoints ? (
-            <div className={styles.copyRows}>
-              <CopyRow label={t('setup_guide.endpoint_openai')} value={lanEndpoints.openai} />
-              <CopyRow
-                label={t('setup_guide.endpoint_anthropic_gemini')}
-                value={lanEndpoints.anthropic}
-              />
-              {addresses.lan.slice(1).map((base) => (
-                <CopyRow key={base} label={t('setup_guide.other_address')} value={`${base}/v1`} />
-              ))}
-            </div>
-          ) : (
-            <p className={styles.addressNote}>
-              {addresses.restartRequired
-                ? t('setup_guide.lan_restart_hint')
-                : t('setup_guide.lan_off_hint')}{' '}
-              <Link to="/access-keys">{t('setup_guide.lan_open_access_keys')}</Link>
-            </p>
-          )}
+          {showLan ? (
+            <>
+              <h3 className={styles.addressHeading}>{t('setup_guide.local_network')}</h3>
+              {lanEndpoints ? (
+                <div className={styles.copyRows}>
+                  <CopyRow label={t('setup_guide.endpoint_openai')} value={lanEndpoints.openai} />
+                  <CopyRow
+                    label={t('setup_guide.endpoint_anthropic_gemini')}
+                    value={lanEndpoints.anthropic}
+                  />
+                  {addresses.lan.slice(1).map((base) => (
+                    <CopyRow
+                      key={base}
+                      label={t('setup_guide.other_address')}
+                      value={`${base}/v1`}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className={styles.addressNote}>
+                  {addresses.restartRequired
+                    ? t('setup_guide.lan_restart_hint')
+                    : t('setup_guide.lan_off_hint')}{' '}
+                  <Link to="/access-keys">{t('setup_guide.lan_open_access_keys')}</Link>
+                </p>
+              )}
+            </>
+          ) : null}
 
           <div className={styles.copyRows}>
             {selectedKey ? (
@@ -320,26 +333,28 @@ export function SetupGuidePage() {
           </div>
 
           <div className={styles.controls}>
-            <div className={styles.control}>
-              <span>{t('setup_guide.examples_use')}</span>
-              <div
-                className={styles.baseSwitch}
-                role="group"
-                aria-label={t('setup_guide.examples_use')}
-              >
-                <button type="button" aria-pressed={!useLan} onClick={() => setUseLan(false)}>
-                  {t('setup_guide.this_computer')}
-                </button>
-                <button
-                  type="button"
-                  aria-pressed={useLan && Boolean(lanEndpoints)}
-                  disabled={!lanEndpoints}
-                  onClick={() => setUseLan(true)}
+            {showLan ? (
+              <div className={styles.control}>
+                <span>{t('setup_guide.examples_use')}</span>
+                <div
+                  className={styles.baseSwitch}
+                  role="group"
+                  aria-label={t('setup_guide.examples_use')}
                 >
-                  {t('setup_guide.local_network')}
-                </button>
+                  <button type="button" aria-pressed={!useLan} onClick={() => setUseLan(false)}>
+                    {hereLabel}
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={useLan && Boolean(lanEndpoints)}
+                    disabled={!lanEndpoints}
+                    onClick={() => setUseLan(true)}
+                  >
+                    {t('setup_guide.local_network')}
+                  </button>
+                </div>
               </div>
-            </div>
+            ) : null}
             {guide.clientKeys.length > 1 ? (
               <label className={styles.control}>
                 <span>{t('setup_guide.key_select')}</span>

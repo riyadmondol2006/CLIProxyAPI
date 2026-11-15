@@ -4,6 +4,7 @@ import providers from './content/providers.md?raw';
 import connectApps from './content/connect-apps.md?raw';
 import sharing from './content/sharing.md?raw';
 import service from './content/service.md?raw';
+import server from './content/server.md?raw';
 import configuration from './content/configuration.md?raw';
 import troubleshooting from './content/troubleshooting.md?raw';
 import claudeUsage from './content/claude-usage.md?raw';
@@ -38,6 +39,7 @@ export const DOCS: DocEntry[] = [
   guide('connect-apps', connectApps),
   guide('sharing', sharing),
   guide('service', service),
+  guide('server', server),
   guide('configuration', configuration),
   guide('api-usage', apiUsage),
   guide('claude-usage', claudeUsage),
